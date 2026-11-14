@@ -134,21 +134,6 @@ try {
   assert.equal(parallel.filter(x => !x.duplicate).length, 1);
   assert.equal(await count('aura_leads'), 3);
 
-  // Prove transaction rollback on a constraint failure. An ephemeral
-  // CHECK constraint avoids requiring the SUPER privilege for triggers.
-  await pool.query("ALTER TABLE aura_notification_outbox ADD CONSTRAINT ci_reject_outbox CHECK (event_type <> 'lead_received')");
-  const beforeRollback = await count('aura_leads');
-  try {
-    await assert.rejects(
-      () => store.receive({ lead: sample('Fictional Rollback'), requestKey: randomUUID() }),
-      /ci_reject_outbox|Check constraint/,
-    );
-  } finally {
-    await pool.query('ALTER TABLE aura_notification_outbox DROP CHECK ci_reject_outbox');
-  }
-  assert.equal(await count('aura_leads'), beforeRollback, 'Lead insert rolled back');
-  assert.equal(await count('aura_notification_outbox'), beforeRollback, 'Outbox insert rolled back');
-
   // Process the previously committed notifications with no actual SMTP.
   const accepted = [];
   const mockMail = { async sendMail(message) {
@@ -165,6 +150,23 @@ try {
   }
   assert.equal(await worker.flush(8), 0, 'SMTP acceptance must not resend accepted notifications');
   assert.equal((await status(initial.requestId)).delivery_status, 'accepted');
+
+  // Prove rollback when the last INSERT in the transaction is rejected.
+  // Existing outbox records have been processed and attempt_count > 0.
+  // A new pending outbox row starts at 0 and violates this test-only CHECK.
+  // No SUPER privileges, triggers, or production data are required.
+  await pool.query('ALTER TABLE aura_notification_outbox ADD CONSTRAINT ci_reject_outbox CHECK (attempt_count > 0)');
+  const beforeRollback = await count('aura_leads');
+  try {
+    await assert.rejects(
+      () => store.receive({ lead: sample('Fictional Rollback'), requestKey: randomUUID() }),
+      /ci_reject_outbox|Check constraint/,
+    );
+  } finally {
+    await pool.query('ALTER TABLE aura_notification_outbox DROP CHECK ci_reject_outbox');
+  }
+  assert.equal(await count('aura_leads'), beforeRollback, 'Lead insert rolled back');
+  assert.equal(await count('aura_notification_outbox'), beforeRollback, 'Outbox insert rolled back');
 
   const willRetry = await store.receive({ lead: sample('Fictional Retry'), requestKey: randomUUID() });
   const rejectOnce = createNotificationWorker({ store, config, transport: {
