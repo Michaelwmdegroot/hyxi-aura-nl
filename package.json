@@ -18,7 +18,8 @@
     "dev:qa": "node tests/preview-dev.mjs",
     "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs --apply",
     "db:check": "node --env-file-if-exists=.env scripts/db-check.mjs",
-    "test:db": "node tests/mysql-integration.mjs"
+    "test:db": "node tests/mysql-integration.mjs && node tests/admin-integration.mjs",
+    "db:admin-migrate": "node --env-file-if-exists=.env scripts/db-admin-migrate.mjs --apply"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
