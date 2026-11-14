@@ -7,6 +7,7 @@ import { createTransport } from './server/mail.mjs';
 import { createLeadPool, assertLeadSchema } from './server/db/pool.mjs';
 import { createMysqlLeadStore } from './server/db/store.mjs';
 import { createNotificationWorker } from './server/db/worker.mjs';
+import { createAdminStore, assertAdminSchema } from './server/auth/store.mjs';
 
 export { createApp } from './server/app.mjs';
 export { loadConfig } from './server/config.mjs';
@@ -48,7 +49,23 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
         console.warn('HYXI AURA database storage selected but configuration is incomplete. Intake disabled.');
       }
     }
-    const app = createApp({ config, transport, leadStore, notificationWorker, distDir });
+    let adminStore = null;
+    if (config.adminEnabled && leadPool && leadStore) {
+      try {
+        await assertAdminSchema(leadPool);
+        adminStore = createAdminStore({
+          pool: leadPool,
+          sessionSecret: config.adminSessionSecret,
+          mfaKey: config.adminMfaKey,
+          leadEncryptionKey: config.encryptionKey,
+        });
+      } catch {
+        // The public site remains available even if the protected dashboard
+        // is unconfigured or the admin schema is not ready. Never log secrets.
+        console.error('HYXI AURA Beheer is not ready; protected routes remain closed.');
+      }
+    }
+    const app = createApp({ config, transport, leadStore, notificationWorker, adminStore, distDir });
     const server = app.listen(config.port, '0.0.0.0', () => {
       console.log(`HYXI AURA listening on port ${config.port}. Lead intake ${config.leadEnabled && (config.storageMode !== 'database' || Boolean(leadStore)) ? 'enabled' : 'disabled'}.`);
       notificationWorker?.start();

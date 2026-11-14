@@ -60,6 +60,15 @@ export function loadConfig(env = process.env) {
     /^[A-Za-z0-9+/]{43}=$/.test(encryptionKey) &&
     Buffer.from(encryptionKey, 'base64').length === 32 &&
     Buffer.byteLength(hashSecret, 'utf8') >= 32;
+  // The admin UI can never be enabled on the SMTP-only website.
+  const adminSessionSecret = String(env.ADMIN_SESSION_SECRET || '');
+  const adminMfaKey = String(env.ADMIN_MFA_KEY || '');
+  const adminConfigured = storageMode === 'database' && dbConfigured &&
+    dbSecretsConfigured && Buffer.byteLength(adminSessionSecret, 'utf8') >= 32 &&
+    /^[A-Za-z0-9+/]{43}=$/.test(adminMfaKey) &&
+    Buffer.from(adminMfaKey, 'base64').length === 32 &&
+    Buffer.from(adminMfaKey, 'base64').toString('base64') === adminMfaKey;
+  const adminEnabled = boolean(env.ADMIN_ENABLED) && adminConfigured;
   const trustProxyValue = String(env.TRUST_PROXY || 'false');
   // A fixed hop count is deliberate: never blindly trust user-supplied X-Forwarded-For.
   if (!['false', '0', '1', 'loopback'].includes(trustProxyValue)) throw new Error('TRUST_PROXY must be false, 0, 1, or loopback.');
@@ -74,6 +83,10 @@ export function loadConfig(env = process.env) {
     dbConfigured,
     encryptionKey,
     hashSecret,
+    adminEnabled,
+    adminConfigured,
+    adminSessionSecret,
+    adminMfaKey,
     leadEnabled: boolean(env.LEAD_ENABLED) && smtpConfigured &&
       (storageMode === 'mail' || (dbConfigured && dbSecretsConfigured)),
     dailyLimit: integer(env.SMTP_DAILY_LIMIT, 100, 1, 1000),

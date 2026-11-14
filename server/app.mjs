@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { CONTACT } from './config.mjs';
 import { buildLeadMail, recipientAccepted, definitelyNotDelivered } from './mail.mjs';
 import { validateLead } from './validation.mjs';
+import { mountAdminRoutes } from './auth/routes.mjs';
 
 const HOUR = 60 * 60 * 1000;
 const CSRF_AGE = 2 * HOUR;
@@ -35,7 +36,7 @@ function cspFor(directory) {
   ].join('; ');
 }
 
-export function createApp({ config, transport = null, leadStore = null, notificationWorker = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {
+export function createApp({ config, transport = null, leadStore = null, notificationWorker = null, adminStore = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {
   if (!config) throw new Error('Server configuration is required.');
   const app = express();
   app.disable('x-powered-by');
@@ -221,6 +222,8 @@ export function createApp({ config, transport = null, leadStore = null, notifica
     await entry.promise;
     return deliveryResponse(res, entry, 201);
   });
+
+  mountAdminRoutes(app, { adminStore, config, now });
 
   app.all('/api/leads', (_req, res) => { res.set('Allow', 'POST'); fail(res, 405, 'METHOD', 'Deze actie is niet beschikbaar.'); });
   app.use('/api', (_req, res) => fail(res, 404, 'NOT_FOUND', 'Deze pagina bestaat niet.'));
