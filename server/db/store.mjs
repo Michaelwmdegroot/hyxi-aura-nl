@@ -69,8 +69,17 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
       // key conflict by checking the winning transaction rather than creating
       // a second lead or exposing an SQL error to the public API.
       if (error?.code === 'ER_DUP_ENTRY' || error?.errno === 1062) {
-        const winner = await lookupSubmission(keyHash, bodyHash);
-        if (winner) return winner;
+        // Use the already-acquired connection, not pool.execute(): several
+        // simultaneous losing transactions can otherwise exhaust the small
+        // pool while all are waiting for another checkout (self-deadlock).
+        const [winners] = await conn.execute(
+          'SELECT s.payload_hash, l.request_id FROM aura_submission_keys s JOIN aura_leads l ON l.id = s.lead_id WHERE s.key_hash = ? LIMIT 1',
+          [keyHash],
+        );
+        if (winners.length) {
+          if (winners[0].payload_hash !== bodyHash) throw new LeadConflictError();
+          return { requestId: winners[0].request_id, duplicate: true };
+        }
       }
       throw error;
     } finally {
