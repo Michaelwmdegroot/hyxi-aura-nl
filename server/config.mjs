@@ -42,6 +42,24 @@ export function loadConfig(env = process.env) {
   };
   const email = /^[^\s<>@\r\n]+@[^\s<>@\r\n]+\.[^\s<>@\r\n]+$/;
   const smtpConfigured = Boolean(smtp.host && smtp.user && smtp.pass && email.test(smtp.from) && email.test(smtp.to));
+  const storageMode = String(env.LEAD_STORAGE_MODE || 'mail').trim();
+  if (!['mail', 'database'].includes(storageMode)) {
+    throw new Error('LEAD_STORAGE_MODE must be mail or database.');
+  }
+  const db = {
+    host: String(env.DB_HOST || '127.0.0.1').trim(),
+    port: integer(env.DB_PORT, 3306, 1, 65535),
+    name: String(env.DB_NAME || '').trim(),
+    user: String(env.DB_USER || '').trim(),
+    password: String(env.DB_PASSWORD || ''),
+  };
+  const dbConfigured = Boolean(db.host && db.name && db.user && db.password);
+  const encryptionKey = String(env.LEAD_ENCRYPTION_KEY || '').trim();
+  const hashSecret = String(env.LEAD_HASH_SECRET || '');
+  const dbSecretsConfigured =
+    /^[A-Za-z0-9+/]{43}=$/.test(encryptionKey) &&
+    Buffer.from(encryptionKey, 'base64').length === 32 &&
+    Buffer.byteLength(hashSecret, 'utf8') >= 32;
   const trustProxyValue = String(env.TRUST_PROXY || 'false');
   // A fixed hop count is deliberate: never blindly trust user-supplied X-Forwarded-For.
   if (!['false', '0', '1', 'loopback'].includes(trustProxyValue)) throw new Error('TRUST_PROXY must be false, 0, 1, or loopback.');
@@ -51,7 +69,13 @@ export function loadConfig(env = process.env) {
     allowedOrigins,
     smtp,
     smtpConfigured,
-    leadEnabled: boolean(env.LEAD_ENABLED) && smtpConfigured,
+    storageMode,
+    db,
+    dbConfigured,
+    encryptionKey,
+    hashSecret,
+    leadEnabled: boolean(env.LEAD_ENABLED) && smtpConfigured &&
+      (storageMode === 'mail' || (dbConfigured && dbSecretsConfigured)),
     dailyLimit: integer(env.SMTP_DAILY_LIMIT, 100, 1, 1000),
     rateLimit: integer(env.LEAD_RATE_LIMIT, 6, 1, 60),
     rateWindowMs: 15 * 60 * 1000,

@@ -59,3 +59,25 @@ Personen- en woninggegevens worden **niet** in losse plattetekstkolommen ontworp
 - [Hostinger: omgevingsvariabelen na deployment wijzigen](https://www.hostinger.com/support/how-to-edit-or-add-environment-variables-after-deployment/)
 - [GitHub issue #2 — MySQL-opslag](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/2)
 - [Technische V2-architectuur](ARCHITECTURE-V2.md)
+
+## Database application feature flag (V2 branch only)
+The app defaults to existing SMTP-only mode. It uses MySQL only when you explicitly
+set \`LEAD_STORAGE_MODE=database\`, provide valid DB credentials and two dedicated
+secrets, have already applied migration 001, and have working SMTP settings.
+In database mode the receipt is issued after a transaction commit; mail is sent
+asynchronously via the durable outbox. If the database is not ready, public pages
+still work but the online form is disabled. It never silently falls back to
+mail-only storage.
+
+Further required keys when enabled:
+
+\`\`\`dotenv
+LEAD_STORAGE_MODE=mail
+LEAD_ENCRYPTION_KEY=GENERATE_32_RANDOM_BYTES_BASE64
+LEAD_HASH_SECRET=GENERATE_AT_LEAST_32_RANDOM_BYTES
+\`\`\`
+
+The encryption key and HMAC key must be independently generated and not shared.
+Do not change either key after storing leads without an explicit rotation/data
+migration procedure; otherwise encrypted records or idempotency lookups could
+become inaccessible.

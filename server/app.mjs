@@ -35,7 +35,7 @@ function cspFor(directory) {
   ].join('; ');
 }
 
-export function createApp({ config, transport = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {
+export function createApp({ config, transport = null, leadStore = null, notificationWorker = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {
   if (!config) throw new Error('Server configuration is required.');
   const app = express();
   app.disable('x-powered-by');
@@ -46,6 +46,10 @@ export function createApp({ config, transport = null, distDir = resolve('dist'),
   const recentDeliveries = new Map();
   let daily = { date: '', attempts: 0 };
   let activeSends = 0;
+  // In DB mode the durable store is the authority. Never silently fall back
+  // to mail-only acknowledgements if the DB is unavailable.
+  const intakeReady = () => config.leadEnabled && Boolean(transport) &&
+    (config.storageMode === 'database' ? Boolean(leadStore) : true);
 
   function deliveryResponse(res, entry, status) {
     if (entry.receipt) return res.status(status).json(entry.receipt);
@@ -109,7 +113,7 @@ export function createApp({ config, transport = null, distDir = resolve('dist'),
   });
 
   app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
-  app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'hyxi-aura', leadEnabled: config.leadEnabled && Boolean(transport) }));
+  app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'hyxi-aura', leadEnabled: intakeReady() }));
   app.get('/api/config', (req, res) => {
     // Reuse a still-valid session token so opening another tab does not break this form.
     const existing = csrfCookie(req);
@@ -118,13 +122,13 @@ export function createApp({ config, transport = null, distDir = resolve('dist'),
     res.cookie('aura_csrf', token, {
       httpOnly: true, secure: config.production || req.secure, sameSite: 'strict', path: '/', maxAge: CSRF_AGE,
     });
-    res.json({ leadEnabled: config.leadEnabled && Boolean(transport), csrfToken: token, contact: CONTACT });
+    res.json({ leadEnabled: intakeReady(), csrfToken: token, contact: CONTACT });
   });
 
   app.post('/api/leads', express.json({ limit: '12kb', type: 'application/json', strict: true }), async (req, res) => {
     if (!req.is('application/json')) return fail(res, 415, 'CONTENT_TYPE', 'De aanvraag kon niet worden gelezen. Vernieuw de pagina en probeer opnieuw.');
     if (!permittedOrigin(req) || !validCsrf(req)) return fail(res, 403, 'SESSION_EXPIRED', 'Je sessie is verlopen. Vernieuw de pagina en probeer opnieuw.');
-    if (!config.leadEnabled || !transport) return fail(res, 503, 'UNAVAILABLE', 'Online aanvragen is tijdelijk niet beschikbaar. Neem rechtstreeks contact op met Thuisbatterij Team.');
+    if (!intakeReady()) return fail(res, 503, 'UNAVAILABLE', 'Online aanvragen is tijdelijk niet beschikbaar. Neem rechtstreeks contact op met Thuisbatterij Team.');
 
     const time = now();
     purge(rates, time); purge(idempotency, time); purge(recentDeliveries, time);
@@ -146,6 +150,29 @@ export function createApp({ config, transport = null, distDir = resolve('dist'),
     }
     const lead = parsed.data;
     if (lead.website) return fail(res, 400, 'INVALID_REQUEST', 'De aanvraag kon niet worden verwerkt. Neem rechtstreeks contact op als dit blijft gebeuren.');
+    if (config.storageMode === 'database') {
+      // Keep the same request-security controls as the existing mail mode.
+      // A committed DB transaction is now the public receipt authority.
+      rate.count++;
+      if (rate.count > config.rateLimit) {
+        res.set('Retry-After', String(Math.ceil((rate.expires - time) / 1000)));
+        return fail(res, 429, 'RATE_LIMITED', 'Je hebt het meerdere keren geprobeerd. Wacht 15 minuten of neem rechtstreeks contact op.');
+      }
+      try {
+        const result = await leadStore.receive({ lead, requestKey: key });
+        if (!result.duplicate) notificationWorker?.wake?.();
+        return res.status(result.duplicate ? 200 : 201).json({
+          ok: true, requestId: result.requestId,
+        });
+      } catch (error) {
+        if (error?.code === 'REQUEST_CHANGED') {
+          return fail(res, 409, 'REQUEST_CHANGED', 'De gegevens zijn gewijzigd. Start een nieuwe aanvraag.');
+        }
+        // Do not log SQL error details or request PII. No false acknowledgement.
+        console.error('HYXI AURA database intake failed; no receipt was issued.');
+        return fail(res, 503, 'STORAGE_UNAVAILABLE', 'Je aanvraag kon niet worden opgeslagen. Neem rechtstreeks contact op met Thuisbatterij Team.');
+      }
+    }
     const fingerprint = config.hash(JSON.stringify(lead));
     const stored = idempotency.get(key);
     if (stored && stored.fingerprint !== fingerprint) return fail(res, 409, 'REQUEST_CHANGED', 'De gegevens zijn gewijzigd. Start een nieuwe aanvraag.');

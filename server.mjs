@@ -4,6 +4,9 @@ import { existsSync } from 'node:fs';
 import { loadConfig } from './server/config.mjs';
 import { createApp } from './server/app.mjs';
 import { createTransport } from './server/mail.mjs';
+import { createLeadPool, assertLeadSchema } from './server/db/pool.mjs';
+import { createMysqlLeadStore } from './server/db/store.mjs';
+import { createNotificationWorker } from './server/db/worker.mjs';
 
 export { createApp } from './server/app.mjs';
 export { loadConfig } from './server/config.mjs';
@@ -20,9 +23,35 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
   try {
     const config = loadConfig();
     const transport = createTransport(config);
-    const app = createApp({ config, transport, distDir });
+    let leadStore = null, notificationWorker = null, leadPool = null;
+    if (config.storageMode === 'database') {
+      if (config.dbConfigured && config.leadEnabled && transport) {
+        try {
+          leadPool = createLeadPool(config);
+          await assertLeadSchema(leadPool);
+          leadStore = createMysqlLeadStore({
+            pool: leadPool,
+            encryptionKey: config.encryptionKey,
+            hashSecret: config.hashSecret,
+          });
+          notificationWorker = createNotificationWorker({
+            store: leadStore, transport, config,
+          });
+        } catch {
+          // A database failure disables the form but NOT the public homepage.
+          // Never revert to SMTP-only: that would silently lose audit/DB records.
+          console.error('HYXI AURA database is not ready. Lead intake is disabled until resolved.');
+          if (leadPool) await leadPool.end().catch(() => {});
+          leadPool = null;
+        }
+      } else {
+        console.warn('HYXI AURA database storage selected but configuration is incomplete. Intake disabled.');
+      }
+    }
+    const app = createApp({ config, transport, leadStore, notificationWorker, distDir });
     const server = app.listen(config.port, '0.0.0.0', () => {
-      console.log(`HYXI AURA listening on port ${config.port}. Lead intake ${config.leadEnabled ? 'enabled' : 'disabled'}.`);
+      console.log(`HYXI AURA listening on port ${config.port}. Lead intake ${config.leadEnabled && (config.storageMode !== 'database' || Boolean(leadStore)) ? 'enabled' : 'disabled'}.`);
+      notificationWorker?.start();
     });
     server.on('error', error => {
       // Avoid dumping the environment or SMTP configuration into logs.
@@ -32,7 +61,8 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
     server.requestTimeout = 30000;
     server.headersTimeout = 15000;
     for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => {
-      server.close(() => { transport?.close?.(); process.exit(0); });
+      notificationWorker?.stop();
+      server.close(async () => { transport?.close?.(); if (leadPool) await leadPool.end().catch(() => {}); process.exit(0); });
       setTimeout(() => process.exit(1), 30000).unref();
     });
   } catch (error) {

@@ -112,3 +112,55 @@ jobs:
 
       - name: Smoke test production entry both ways Hostinger may start it
         run: node scripts/runtime-smoke.mjs
+
+  mysql-integration:
+    name: MySQL 8 transactional lead storage and outbox
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: local-ci-root-only
+          MYSQL_DATABASE: aura_ci
+          MYSQL_USER: aura_ci
+          MYSQL_PASSWORD: local-ci-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -plocal-ci-root-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      NODE_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: aura_ci
+      DB_USER: aura_ci
+      DB_PASSWORD: local-ci-only-password
+      DB_SCHEMA_APPLY: explicit-review-completed
+      LEAD_STORAGE_MODE: database
+      LEAD_ENABLED: "true"
+      LEAD_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      LEAD_HASH_SECRET: local-ci-only-hmac-secret-at-least-thirty-two-bytes
+      SMTP_HOST: smtp.example.test
+      SMTP_USER: sender@example.test
+      SMTP_PASS: local-ci-no-real-smtp
+      SMTP_FROM: sender@example.test
+      LEAD_TO: leads@example.test
+      SITE_URL: https://hyxi-aura.nl
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Integration tests using an isolated MySQL service
+        run: npm run test:db
