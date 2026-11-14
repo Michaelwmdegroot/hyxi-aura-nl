@@ -63,6 +63,9 @@ const app=createApp({
 const server=app.listen(0,'127.0.0.1');
 await once(server,'listening');
 const base='http://127.0.0.1:'+server.address().port;
+// The test runs on a temporary local origin; production remains restricted
+// to SITE_URL and explicit configured origins.
+config.allowedOrigins.add(base);
 let browser;
 async function accessibility(page,label){
   const report=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
