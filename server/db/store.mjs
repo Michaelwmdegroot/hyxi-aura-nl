@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { keyedHash, openLead, parseEncryptionKey, parseHashKey, sealLead } from './crypto.mjs';
 
 const PRIVACY_VERSION = '2026-11-14';
@@ -28,7 +29,7 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
     return { requestId: rows[0].request_id, duplicate: true };
   }
 
-  async function receive({ lead, requestKey }) {
+  async function receiveAttempt({ lead, requestKey }) {
     const keyHash = hmac(requestKey);
     const bodyHash = hmac(JSON.stringify(lead));
     const existing = await lookupSubmission(keyHash, bodyHash);
@@ -41,16 +42,9 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      const [locked] = await conn.execute(
-        'SELECT s.payload_hash, l.request_id FROM aura_submission_keys s JOIN aura_leads l ON l.id = s.lead_id WHERE s.key_hash = ? FOR UPDATE',
-        [keyHash],
-      );
-      if (locked.length > 0) {
-        if (locked[0].payload_hash !== bodyHash) throw new LeadConflictError();
-        await conn.rollback();
-        return { requestId: locked[0].request_id, duplicate: true };
-      }
-
+      // Avoid a locking read on a non-existent unique key: it creates InnoDB
+      // gap locks which deadlock under concurrent identical submissions.
+      // Let the key's UNIQUE constraint choose the single winner instead.
       await conn.execute(
         'INSERT INTO aura_leads (id, request_id, request_type, status, source_domain, encrypted_payload, encryption_key_id, privacy_version, contact_requested_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [leadId, requestId, 'advice', 'new', 'hyxi-aura.nl', encrypted, KEY_ID, PRIVACY_VERSION, timestamp, timestamp, timestamp],
@@ -82,6 +76,24 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
     } finally {
       conn.release();
     }
+  }
+
+  async function receive(payload) {
+    // InnoDB can still deadlock when two writers race to insert the same
+    // unique submission key. A deadlock victim has been rolled back. Retry a
+    // bounded number of times; the eventual winning row is returned, not
+    // inserted twice. Only transient lock errors are retried.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        return await receiveAttempt(payload);
+      } catch (error) {
+        if (!['ER_LOCK_DEADLOCK', 'ER_LOCK_WAIT_TIMEOUT'].includes(error?.code) &&
+            ![1213, 1205].includes(error?.errno)) throw error;
+        if (attempt === 4) throw error;
+        await sleep(20 * (attempt + 1) + randomInt(0, 40));
+      }
+    }
+    throw new Error('MySQL retry limit exhausted.');
   }
 
   async function claimNextNotification() {
