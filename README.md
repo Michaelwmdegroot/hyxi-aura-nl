@@ -19,7 +19,7 @@ Bekijk ook de [interactieve energie-ervaring](docs/screenshots/energy-experience
 
 ## Techniek
 
-**Node.js 24** met Express verzorgt de API en serveert de productiebuild. **Vite** bouwt de HTML-, CSS- en JavaScript-bestanden. **Three.js** laadt voor de interactieve woning; bij ontbrekende WebGL blijft de uitleg beschikbaar. **Nodemailer** verstuurt aanvragen via de ingestelde mailbox. **Zod** valideert de serverinvoer. Manrope en alle gebruikte webbeelden worden lokaal geserveerd.
+**Node.js 24** met Express verzorgt de API en serveert de productiebuild. **Vite** bouwt de HTML-, CSS- en JavaScript-bestanden en staat bewust in `dependencies`: Hostinger installeert bij de productie-deploy geen `devDependencies`. **Three.js** laadt voor de interactieve woning; bij ontbrekende WebGL blijft de uitleg beschikbaar. **Nodemailer** verstuurt aanvragen via de ingestelde mailbox. **Zod** valideert de serverinvoer. Manrope en alle gebruikte webbeelden worden lokaal geserveerd.
 
 Er is geen database, openbare beheeromgeving, nieuwsbrief, advertentiepixel of analysetracker in deze release. SMTP-inloggegevens blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
 
@@ -72,7 +72,7 @@ De browsercontrole vereist een beschikbare Playwright Chromium-browser. Een best
 
 ### Lighthouse-bewijs uit GitHub Actions
 
-De workflow **Build and verify** draait voor wijzigingen op `main`, pull requests naar `main` en handmatig via Actions. Naast de build-, API-, statische en browsertests meet `scripts/audit.mjs` de productiebuild eenmaal als desktop en eenmaal als mobiel. De lokale Express-auditserver heeft mail uitgeschakeld; er worden geen productiecredentials geladen. Het auditscript weigert uitvoering buiten GitHub Actions.
+De workflow **Build and verify** draait voor wijzigingen op `main`, pull requests naar `main` en handmatig via Actions. Naast de volledige teststraat draait een aparte Hostinger-simulatie met `NODE_ENV=production` en `npm ci --omit=dev`, gevolgd door de normale `npm run build` en `npm run check`. Zo faalt GitHub voortaan wanneer een buildtool alleen in development beschikbaar is. Naast de build-, API-, statische en browsertests meet `scripts/audit.mjs` de productiebuild eenmaal als desktop en eenmaal als mobiel. De lokale Express-auditserver heeft mail uitgeschakeld; er worden geen productiecredentials geladen. Het auditscript weigert uitvoering buiten GitHub Actions.
 
 Bij de Actions-run staat een samenvatting en een artifact `lighthouse-<run_id>-<run_attempt>`, zeven dagen beschikbaar. Het bevat `desktop.html`, `desktop.json`, `mobile.html`, `mobile.json`, `summary.md` en `summary.json`, voor zover de meting die bestanden kon maken. De JSON-samenvatting vermeldt de commit, versie, meetinstellingen, cijfers en eventuele fouten.
 

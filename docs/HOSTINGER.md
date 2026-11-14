@@ -25,7 +25,7 @@ Gebruik een Node.js-webapp die `server.mjs` uitvoert. Een uitsluitend statische 
 
 Officiële Hostinger-instructies: [Node.js-webapp toevoegen](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/). Raadpleeg de actuele schermen; Hostinger kan de benamingen veranderen.
 
-**Buildafhankelijkheden:** Vite staat in `devDependencies` en is nodig tijdens het bouwen. Meldt het buildlog `vite: not found`, laat dan installeren met `npm ci --include=dev`. Als Hostinger alleen een buildcommando toont, gebruik daar `npm ci --include=dev && npm run build`. Houd `NODE_ENV=production` voor de draaiende app.
+**Buildafhankelijkheden:** Vite staat bewust in `dependencies`, omdat Hostinger bij `NODE_ENV=production` de development packages weglaat. `npm install` + `npm run build` werkt daardoor zonder handmatige aanpassing aan het buildcommando. De GitHub-workflow test dit apart met `npm ci --omit=dev` en `NODE_ENV=production`. Laat `NODE_ENV=production` voor de draaiende app staan.
 
 ## 2. Stel de omgeving in
 

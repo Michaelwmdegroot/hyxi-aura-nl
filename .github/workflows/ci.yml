@@ -80,3 +80,32 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
           include-hidden-files: false
+
+  production-install:
+    name: Hostinger-style production-only install + build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      NODE_ENV: production
+
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install only production dependencies (same as Hostinger)
+        run: npm ci --omit=dev --no-audit --no-fund
+
+      - name: Build without development dependencies
+        run: |
+          test -x node_modules/.bin/vite
+          npm run build
+          npm run check
