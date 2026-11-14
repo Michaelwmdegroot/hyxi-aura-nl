@@ -1,0 +1,82 @@
+name: Build and verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Production build, API and browser journey
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CI: 'true'
+
+    steps:
+      - name: Check out the tested revision
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build production assets
+        id: build
+        run: npm run build
+
+      - name: Test models and the secured lead API
+        run: npm test
+
+      - name: Check SEO, links, assets and public build contents
+        run: npm run check
+
+      - name: Install Playwright Chromium and system dependencies
+        id: chromium
+        run: npx --no-install playwright install --with-deps chromium
+
+      - name: Verify desktop, mobile and accessible browser journeys
+        timeout-minutes: 10
+        run: npm run test:browser
+
+      - name: Measure Lighthouse on desktop and mobile
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
+        timeout-minutes: 8
+        run: node scripts/audit.mjs
+
+      - name: Upload Lighthouse audit reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/lighthouse/
+          if-no-files-found: ignore
+          retention-days: 7
+          include-hidden-files: false
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: verification-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+          include-hidden-files: false
