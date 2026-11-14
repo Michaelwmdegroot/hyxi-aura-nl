@@ -111,7 +111,21 @@ async function loginAndReview(context,label){
     await expect(page.locator('#statusMessage')).toContainText('bijgewerkt');
     assert.equal(statusChanges,1);
   }
-  await page.locator('#closeDetail').click();
+  const closeGeometry=await page.locator('#closeDetail').evaluate(button=>{
+    const rect=button.getBoundingClientRect();
+    const x=rect.x+rect.width/2,y=rect.y+rect.height/2;
+    const hit=document.elementFromPoint(x,y);
+    const computed=getComputedStyle(button);
+    return {
+      bounds:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
+      hit:hit?.outerHTML.slice(0,160)||'none',
+      position:computed.position,zIndex:computed.zIndex,
+      panelScroll:document.getElementById('detailPane').scrollTop,
+      viewport:{w:innerWidth,h:innerHeight},
+    };
+  });
+  console.log('BEHEER_CLOSE_GEOMETRY '+JSON.stringify(closeGeometry));
+  await page.locator('#closeDetail').click({timeout:5000});
   await page.locator('#logoutButton').click();
   await expect(page.locator('#loginView')).toBeVisible();
   assert.equal(await page.evaluate(async()=> (await fetch('/api/beheer/leads')).status),401);
