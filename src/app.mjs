@@ -42,7 +42,7 @@ function updateScenario() {
   $('#scenario-index').textContent = `SCENARIO ${stories[mode].index} / 03`;
   const title = $('#scenario-title');
   title.replaceChildren();
-  story.title.split('\n').forEach((line, index) => { if (index) title.append(document.createElement('br')); title.append(document.createTextNode(line)); });
+  story.title.split('\n').forEach((line, index) => { if (index) title.append(document.createElement('br'), document.createTextNode(' ')); title.append(document.createTextNode(line)); });
   $('#scenario-description').textContent = story.description;
   story.flows.forEach((flow, index) => $(`#flow-${index + 1}`).textContent = flow);
   $('#scene-caveat').textContent = story.caveat;

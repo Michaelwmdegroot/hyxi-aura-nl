@@ -13,23 +13,23 @@
 
 Dit beschrijft uitgevoerde controles, geen garantie dat iedere combinatie van browser, hulptechnologie en apparaat foutloos is.
 
-## Eerste onafhankelijke CI-meting
+## Vastgelegde onafhankelijke CI-meting
 
-Op commit `64d459a8030c27d464fa02dc6a66119b6b120c04` zijn alle build-, API-, model-, statische en browsercontroles in [GitHub Actions](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43637753466) geslaagd. Ook de privacy- en bronnenpagina zijn op smalle en tabletweergaven met axe gecontroleerd.
+Op commit `279266d8387d8a1bd29b000b7aba959f67ea49bb` zijn alle build-, API-, model-, statische en browsercontroles in [GitHub Actions-run 43638250121](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43638250121) geslaagd: 25 tests en 482 statische controles. Ook de privacy- en bronnenpagina zijn op smalle en tabletweergaven met axe gecontroleerd.
 
 | Lighthouse | Desktop | Mobiel |
 | --- | ---: | ---: |
-| Performance | 100 | 99 |
+| Performance | 100 | 100 |
 | Accessibility | 100 | 100 |
 | Best practices | 100 | 100 |
 | SEO | 100 | 100 |
-| LCP | 0,4 s | 2,1 s |
+| LCP | 0,3 s | 1,5 s |
 | CLS | 0 | 0 |
-| TBT | 0 ms | 20 ms |
+| TBT | 0 ms | 0 ms |
 
-Dit is de eerste meting, vóór de daaropvolgende verbetering van HTTP-compressie. Voor de nieuwste commit zijn de artifacts en samenvatting van de bijbehorende workflow-run leidend. Openbare tekstbestanden worden inmiddels met gzip/Brotli geleverd als de browser daarom vraagt. De integratietest controleert dat de uitgepakte inhoud gelijk blijft en dat API-antwoorden buiten deze compressie blijven.
+Dit is de gemeten productiebuild na de verbetering van HTTP-compressie; de Lighthouse-rapporten bevatten geen runtimewaarschuwingen. Voor de nieuwste commit zijn altijd de artifacts en samenvatting van de bijbehorende workflow-run leidend. Openbare tekstbestanden worden met gzip/Brotli geleverd als de browser daarom vraagt. De integratietest controleert dat de uitgepakte inhoud gelijk blijft en dat API-antwoorden buiten deze compressie blijven.
 
-Visueel bewijs: [startpagina](screenshots/desktop.jpg) en [interactieve avond](screenshots/energy-experience.jpg). Deze screenshots tonen de functionele SVG-weergave in de cloudbrowser. De CI-browserrapporten vermelden afzonderlijk of daar Three.js of de SVG-fallback is gebruikt.
+Visueel bewijs: [startpagina](screenshots/desktop.jpg) en [interactieve avond](screenshots/energy-experience.jpg). Deze screenshots tonen de functionele SVG-weergave in de cloudbrowser. Het browser-artifact van run 43638250121 bevat daarnaast `desktop-experience.png` en `mobile-experience.png`: op beide is een werkelijk gerenderd Three.js-WebGL-canvas bevestigd en de SVG-fallback verborgen. De afzonderlijke no-WebGL-test bevestigt juist de zichtbare, functionele SVG-weergave. De gebruikte renderer en canvasafmetingen staan onder `sceneEvidence` in `report.json`.
 
 ## Herhaalbare controles
 
