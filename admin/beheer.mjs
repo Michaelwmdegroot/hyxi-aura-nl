@@ -8,7 +8,7 @@ const labels = {
   pending:'Wacht op verzending',sending:'Wordt verzonden',accepted:'SMTP geaccepteerd',
   retry_wait:'Wacht op nieuwe poging',failed:'Mislukt',uncertain:'Aflevering onzeker',
 };
-let csrfToken = null, currentPage = 1, currentLead = null, lastItems = [];
+let csrfToken = null, currentPage = 1, currentLead = null, lastItems = [], previousFocus = null;
 let pending = false;
 
 function message(id,text){$(id).textContent=text||'';$(id).hidden=!text;}
@@ -45,6 +45,8 @@ async function session(){
 }
 function showLogin(text=''){
   $('dashboardView').hidden=true;$('loginView').hidden=false;closeDetail();
+  $('leadRows').replaceChildren();lastItems=[];
+  for(const id of ['statTotal','statNew','statQuote','statMail'])$(id).textContent='—';
   message('loginError',text);
 }
 function showDashboard(user){
@@ -108,13 +110,23 @@ function fillDetails(container,rows){
   }
 }
 function openPane(){
+  previousFocus=document.activeElement;
   $('detailPane').hidden=false;$('detailBackdrop').hidden=false;
   document.body.style.overflow='hidden';
+  document.querySelector('.workspace').inert=true;
+  document.querySelector('.sidebar').inert=true;
   $('closeDetail').focus();
 }
 function closeDetail(){
   $('detailPane').hidden=true;$('detailBackdrop').hidden=true;
-  document.body.style.overflow='';currentLead=null;
+  document.body.style.overflow='';
+  document.querySelector('.workspace').inert=false;
+  document.querySelector('.sidebar').inert=false;
+  for(const name of ['contactFields','profileFields','systemFields'])$(name).replaceChildren();
+  $('detailContent').hidden=true;
+  currentLead=null;$('detailTitle').textContent='Aanvraag';
+  const restore=previousFocus;previousFocus=null;
+  if(restore?.isConnected&&!$('dashboardView').hidden)restore.focus();
 }
 async function openDetail(requestId){
   openPane();$('detailContent').hidden=true;$('detailLoading').hidden=false;
@@ -155,10 +167,13 @@ $('loginForm').addEventListener('submit',async event=>{
   finally{setLoading(button,false);}
 });
 $('logoutButton').addEventListener('click',async()=>{
-  try{await api('/logout',{method:'POST',body:'{}'});}
-  catch{}
-  $('password').value='';$('totp').value='';
-  showLogin();try{await session();}catch{}
+  try{
+    await api('/logout',{method:'POST',body:'{}'});
+    $('password').value='';$('totp').value='';
+    showLogin();await session();
+  }catch(error){
+    message('dashboardMessage','Uitloggen is niet bevestigd. Probeer opnieuw of sluit het browservenster.');
+  }
 });
 $('refreshButton').addEventListener('click',refreshAll);
 $('statusFilter').addEventListener('change',()=>{currentPage=1;refreshAll();});
@@ -166,7 +181,16 @@ $('prevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;refr
 $('nextPage').addEventListener('click',()=>{if(lastItems.length===20){currentPage++;refreshAll();}});
 $('closeDetail').addEventListener('click',closeDetail);
 $('detailBackdrop').addEventListener('click',closeDetail);
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('detailPane').hidden)closeDetail();});
+document.addEventListener('keydown',event=>{
+  if($('detailPane').hidden)return;
+  if(event.key==='Escape'){event.preventDefault();closeDetail();return;}
+  if(event.key!=='Tab')return;
+  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled])')].filter(node=>!node.hidden);
+  if(!focusable.length)return;
+  const first=focusable[0],last=focusable.at(-1);
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
 $('statusForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!currentLead)return;
   const button=$('statusForm').querySelector('button[type=submit]');setLoading(button,true);
