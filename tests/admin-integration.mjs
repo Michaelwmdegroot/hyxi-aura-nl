@@ -12,6 +12,7 @@ import { applyAdminMigration } from '../scripts/db-admin-migrate.mjs';
 import { createLeadPool } from '../server/db/pool.mjs';
 import { createMysqlLeadStore } from '../server/db/store.mjs';
 import { createAdminStore, assertAdminSchema } from '../server/auth/store.mjs';
+import { createFirstAdmin } from '../server/auth/bootstrap.mjs';
 import { hashAdminPassword, encryptTotp, newTotpSecret, totpForStep } from '../server/auth/security.mjs';
 
 if (process.env.CI !== 'true' || process.env.DB_NAME !== 'aura_ci' || process.env.NODE_ENV !== 'test') {
@@ -93,7 +94,22 @@ try {
   assert.equal(migration2.applied,true);
   assert.equal((await applyAdminMigration(pool)).applied,false);
   await assertAdminSchema(pool);
-  const admin=await initAccount('owner-admin@example.test','admin');
+  const adminSeed=newTotpSecret();
+  const adminPassword='Fictief&UniekBeheerWachtwoord2026!';
+  const adminResult=await createFirstAdmin({
+    pool,email:'owner-admin@example.test',password:adminPassword,
+    totpSecret:adminSeed,
+    confirmationCode:totpForStep(adminSeed,Math.floor(currentTime/30000)),
+    mfaKey,now:()=>currentTime,
+  });
+  const admin={id:adminResult.id,email:adminResult.email,password:adminPassword,totpSecret:adminSeed,role:'admin'};
+  await assert.rejects(() => createFirstAdmin({
+    pool,email:'second-owner@example.test',password:adminPassword,totpSecret:newTotpSecret(),
+    confirmationCode:'000000',mfaKey,now:()=>currentTime,
+  }));
+  // Owner consumed the enrollment code; a new 30-second step is required
+  // for the first actual login.
+  currentTime+=31000;
   const sales=await initAccount('seller-test@example.test','sales');
   const leadStore=createMysqlLeadStore({pool,encryptionKey:cfg.encryptionKey,hashSecret:cfg.hashSecret});
   const assigned=await leadStore.receive({lead:fictitiousLead('Test Assigned'),requestKey:randomUUID()});
