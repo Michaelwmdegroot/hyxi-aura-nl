@@ -134,17 +134,17 @@ try {
   assert.equal(parallel.filter(x => !x.duplicate).length, 1);
   assert.equal(await count('aura_leads'), 3);
 
-  // Prove the SQL transaction rolls back when outbox insertion fails. This
-  // trigger exists only in the ephemeral CI database and is removed afterward.
-  await pool.query("CREATE TRIGGER ci_reject_outbox BEFORE INSERT ON aura_notification_outbox FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'CI forced rollback'");
+  // Prove transaction rollback on a constraint failure. An ephemeral
+  // CHECK constraint avoids requiring the SUPER privilege for triggers.
+  await pool.query("ALTER TABLE aura_notification_outbox ADD CONSTRAINT ci_reject_outbox CHECK (event_type <> 'lead_received')");
   const beforeRollback = await count('aura_leads');
   try {
     await assert.rejects(
       () => store.receive({ lead: sample('Fictional Rollback'), requestKey: randomUUID() }),
-      /CI forced rollback/,
+      /ci_reject_outbox|Check constraint/,
     );
   } finally {
-    await pool.query('DROP TRIGGER ci_reject_outbox');
+    await pool.query('ALTER TABLE aura_notification_outbox DROP CHECK ci_reject_outbox');
   }
   assert.equal(await count('aura_leads'), beforeRollback, 'Lead insert rolled back');
   assert.equal(await count('aura_notification_outbox'), beforeRollback, 'Outbox insert rolled back');
