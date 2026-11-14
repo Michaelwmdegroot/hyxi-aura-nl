@@ -26,6 +26,7 @@ async function fixture(t, { env, sendMail, now, sendTimeoutMs } = {}) {
   await mkdir(dist);
   await writeFile(join(dist, 'index.html'), '<!doctype html><title>AURA test</title><script type="application/ld+json">{"@type":"Product"}</script><h1>HYXI AURA</h1>');
   await writeFile(join(dist, 'privacy.html'), '<h1>Privacy</h1>');
+  await writeFile(join(dist, 'public-copy.txt'), 'HYXI AURA — energie bewaren voor later.\n'.repeat(100));
   await writeFile(join(root, '.env'), 'NEVER_PUBLIC');
   await writeFile(join(root, 'server.mjs'), 'NEVER_PUBLIC');
   const calls = [];
@@ -183,12 +184,19 @@ test('serves only dist, uses real 404s, and applies security/cache headers', asy
   assert.equal(index.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(index.headers.get('x-robots-tag'), 'noindex, nofollow');
   assert.equal((await fetch(`${f.base}/privacy`)).status, 200);
+  for (const encoding of ['gzip', 'br']) {
+    const compressed = await fetch(`${f.base}/public-copy.txt`, { headers: { 'Accept-Encoding': encoding } });
+    assert.equal(compressed.headers.get('content-encoding'), encoding);
+    assert.match(compressed.headers.get('vary'), /Accept-Encoding/);
+    assert.equal(await compressed.text(), 'HYXI AURA — energie bewaren voor later.\n'.repeat(100));
+  }
   for (const path of ['/.env', '/server.mjs', '/server/config.mjs', '/package.json', '/missing', '/api/missing']) {
     const response = await fetch(`${f.base}${path}`);
     assert.equal(response.status, 404, path);
     assert.doesNotMatch(await response.text(), /NEVER_PUBLIC/);
   }
-  const config = await fetch(`${f.base}/api/config`);
+  const config = await fetch(`${f.base}/api/config`, { headers: { 'Accept-Encoding': 'gzip, br' } });
+  assert.equal(config.headers.get('content-encoding'), null);
   assert.equal(config.headers.get('cache-control'), 'no-store');
   assert.match(config.headers.get('set-cookie'), /HttpOnly/);
   assert.match(config.headers.get('set-cookie'), /SameSite=Strict/);

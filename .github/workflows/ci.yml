@@ -71,12 +71,12 @@ jobs:
           retention-days: 7
           include-hidden-files: false
 
-      - name: Upload failure evidence
-        if: failure()
+      - name: Upload browser verification evidence
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: verification-failure-${{ github.run_id }}-${{ github.run_attempt }}
-          path: test-results/
+          name: browser-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/browser/
           if-no-files-found: ignore
           retention-days: 7
           include-hidden-files: false

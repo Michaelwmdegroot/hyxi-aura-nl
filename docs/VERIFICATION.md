@@ -13,6 +13,24 @@
 
 Dit beschrijft uitgevoerde controles, geen garantie dat iedere combinatie van browser, hulptechnologie en apparaat foutloos is.
 
+## Eerste onafhankelijke CI-meting
+
+Op commit `64d459a8030c27d464fa02dc6a66119b6b120c04` zijn alle build-, API-, model-, statische en browsercontroles in [GitHub Actions](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43637753466) geslaagd. Ook de privacy- en bronnenpagina zijn op smalle en tabletweergaven met axe gecontroleerd.
+
+| Lighthouse | Desktop | Mobiel |
+| --- | ---: | ---: |
+| Performance | 100 | 99 |
+| Accessibility | 100 | 100 |
+| Best practices | 100 | 100 |
+| SEO | 100 | 100 |
+| LCP | 0,4 s | 2,1 s |
+| CLS | 0 | 0 |
+| TBT | 0 ms | 20 ms |
+
+Dit is de eerste meting, vóór de daaropvolgende verbetering van HTTP-compressie. Voor de nieuwste commit zijn de artifacts en samenvatting van de bijbehorende workflow-run leidend. Openbare tekstbestanden worden inmiddels met gzip/Brotli geleverd als de browser daarom vraagt. De integratietest controleert dat de uitgepakte inhoud gelijk blijft en dat API-antwoorden buiten deze compressie blijven.
+
+Visueel bewijs: [startpagina](screenshots/desktop.jpg) en [interactieve avond](screenshots/energy-experience.jpg). Deze screenshots tonen de functionele SVG-weergave in de cloudbrowser. De CI-browserrapporten vermelden afzonderlijk of daar Three.js of de SVG-fallback is gebruikt.
+
 ## Herhaalbare controles
 
 ```sh

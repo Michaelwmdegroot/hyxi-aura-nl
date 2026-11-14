@@ -22,7 +22,7 @@ const resultsDir = resolve(root, 'test-results', 'browser');
 await readFile(resolve(dist, 'index.html')).catch(() => { throw new Error('Build the production site first: npm run build'); });
 await mkdir(resultsDir, { recursive: true });
 
-const report = { startedAt: new Date().toISOString(), transport: 'Injected in-process SMTP stub; no external mail', checks: [], accessibility: [], browserErrors: [] };
+const report = { startedAt: new Date().toISOString(), transport: 'Injected in-process SMTP stub; no external mail', checks: [], accessibility: [], sceneEvidence: [], browserErrors: [] };
 const fixtures = [];
 let browser;
 let currentPage;
@@ -100,6 +100,43 @@ async function accessibility(page, label) {
   const violations = result.violations.map(item => ({ id: item.id, impact: item.impact, description: item.description, helpUrl: item.helpUrl, nodes: item.nodes.map(node => ({ target: node.target, failureSummary: node.failureSummary })) }));
   report.accessibility.push({ label, violations, incompleteRuleIds: result.incomplete.map(item => item.id) });
   assert.deepEqual(violations, [], `${label}: axe WCAG A/AA violations; see test-results/browser/report.json`);
+}
+
+async function captureExperience(page, label) {
+  await page.locator('.scenario-button[data-mode="solar"]').click();
+  const toggle = page.locator('#battery-toggle');
+  if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click();
+  const card = page.locator('#experience-card');
+  await card.scrollIntoViewIfNeeded();
+  const scene = page.locator('#energy-scene');
+  await expect(scene).toHaveAttribute('data-ready', /^(?:true|fallback)$/, { timeout: 15000 });
+  const evidence = await scene.evaluate(element => {
+    const canvas = element.querySelector('canvas[data-energy-canvas]');
+    const bounds = canvas?.getBoundingClientRect();
+    return {
+      ready: element.dataset.ready,
+      canvas: canvas ? {
+        drawingWidth: canvas.width, drawingHeight: canvas.height,
+        displayWidth: bounds.width, displayHeight: bounds.height,
+      } : null,
+    };
+  });
+  evidence.label = label;
+  evidence.scenario = 'solar';
+  evidence.batteryEnabled = true;
+  evidence.renderer = evidence.ready === 'true' ? 'Three.js WebGL canvas' : 'Architectural SVG fallback';
+  evidence.fallbackVisible = await page.locator('#scene-fallback').isVisible();
+  evidence.screenshot = `${label}-experience.png`;
+  if (evidence.ready === 'true') {
+    assert.ok(evidence.canvas?.drawingWidth > 0 && evidence.canvas?.drawingHeight > 0, `${label}: a ready WebGL scene has a non-empty drawing buffer`);
+    await expect(scene.locator('canvas[data-energy-canvas]')).toBeVisible();
+    assert.equal(evidence.fallbackVisible, false);
+  } else await expect(page.locator('#scene-fallback .aura-svg-house')).toBeVisible();
+  // Let the selected solar state reach the next paint without an arbitrary delay.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await card.screenshot({ path: resolve(resultsDir, evidence.screenshot) });
+  report.sceneEvidence.push(evidence);
+  record(`${label}: experience visual captured using ${evidence.renderer}`);
 }
 
 async function scenarios(page, label) {
@@ -272,6 +309,7 @@ try {
     await page.screenshot({ path: resolve(resultsDir, `${viewport.label}-page.png`), fullPage: true });
     record(`${viewport.label}: no horizontal overflow, no broken visible images, initial WCAG A/AA checks`);
     await scenarios(page, viewport.label);
+    await captureExperience(page, viewport.label);
     await configurations(page, viewport.label);
     await contactJourney(page, live, viewport.label, viewport.label === 'desktop' ? 7 : 9, viewport.label === 'desktop' ? 3 : 2);
     await context.close();
@@ -330,6 +368,7 @@ try {
   await expect(fallbackPage.locator('#scene-fallback .aura-svg-house')).toBeVisible();
   await expect(fallbackPage.locator('#energy-scene canvas')).toHaveCount(0);
   await scenarios(fallbackPage, 'no-webgl');
+  await captureExperience(fallbackPage, 'no-webgl');
   await fallbackPage.screenshot({ path: resolve(resultsDir, 'mobile-no-webgl.png') });
   record('WebGL unavailable: architectural SVG and all six scenarios remain functional');
   await fallbackContext.close();

@@ -13,6 +13,10 @@ Een interactieve Nederlandse productervaring voor de HYXI AURA thuisbatterij. Be
 
 De adviesaanvraag is geen bestelling. Prijs, technische geschiktheid en leverbaarheid worden persoonlijk bevestigd.
 
+![HYXI AURA startpagina](docs/screenshots/desktop.jpg)
+
+Bekijk ook de [interactieve energie-ervaring](docs/screenshots/energy-experience.jpg) en het [verificatieoverzicht](docs/VERIFICATION.md).
+
 ## Techniek
 
 **Node.js 24** met Express verzorgt de API en serveert de productiebuild. **Vite** bouwt de HTML-, CSS- en JavaScript-bestanden. **Three.js** laadt voor de interactieve woning; bij ontbrekende WebGL blijft de uitleg beschikbaar. **Nodemailer** verstuurt aanvragen via de ingestelde mailbox. **Zod** valideert de serverinvoer. Manrope en alle gebruikte webbeelden worden lokaal geserveerd.

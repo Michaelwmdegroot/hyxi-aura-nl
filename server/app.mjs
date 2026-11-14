@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import { createHmac, randomBytes, randomUUID, timingSafeEqual, createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -196,6 +197,9 @@ export function createApp({ config, transport = null, distDir = resolve('dist'),
 
   app.all('/api/leads', (_req, res) => { res.set('Allow', 'POST'); fail(res, 405, 'METHOD', 'Deze actie is niet beschikbaar.'); });
   app.use('/api', (_req, res) => fail(res, 404, 'NOT_FOUND', 'Deze pagina bestaat niet.'));
+  // Compress public assets only. API responses and their session tokens have
+  // already been handled above and never pass through this middleware.
+  app.use(compression({ threshold: 1024 }));
   app.use(express.static(distDir, {
     dotfiles: 'deny', index: 'index.html', extensions: ['html'], fallthrough: true,
     setHeaders(res, file) {
