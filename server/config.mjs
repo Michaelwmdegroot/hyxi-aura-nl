@@ -38,7 +38,7 @@ export function loadConfig(env = process.env) {
     user: String(env.SMTP_USER || '').trim(),
     pass: String(env.SMTP_PASS || ''),
     from: String(env.SMTP_FROM || '').trim(),
-    to: String(env.LEAD_TO || CONTACT.email).trim(),
+    to: String(env.LEAD_TO || 'leads@thuisbatterijteam.nl').trim(),
   };
   const email = /^[^\s<>@\r\n]+@[^\s<>@\r\n]+\.[^\s<>@\r\n]+$/;
   const smtpConfigured = Boolean(smtp.host && smtp.user && smtp.pass && email.test(smtp.from) && email.test(smtp.to));

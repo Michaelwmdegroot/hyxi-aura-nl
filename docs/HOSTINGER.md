@@ -44,7 +44,7 @@ Voeg in Hostinger de variabelen uit `.env.example` toe. Gebruik de echte mailbox
 | `SMTP_USER` | Gebruikersnaam van de bestaande mailbox |
 | `SMTP_PASS` | Wachtwoord van die mailbox |
 | `SMTP_FROM` | Geautoriseerd afzenderadres zonder naam of haakjes |
-| `LEAD_TO=info@thuisbatterijteam.nl` | Ontvangstadres van het team; gebruik het werkelijk beheerde adres |
+| `LEAD_TO=leads@thuisbatterijteam.nl` | Ontvangstadres van het team; gebruik het werkelijk beheerde adres |
 | `SMTP_DAILY_LIMIT=100` | Maximaal aantal verzendpogingen per UTC-dag, per serverproces |
 | `LEAD_RATE_LIMIT=6` | Maximaal zes nieuwe aanvragen/pogingen per IP per 15 minuten |
 | `CSRF_SECRET` | Optioneel: willekeurige geheime waarde van minimaal 32 tekens; bij ontbreken ontstaat er één per serverstart |
@@ -53,6 +53,12 @@ Voeg in Hostinger de variabelen uit `.env.example` toe. Gebruik de echte mailbox
 **Proxy en snelheidsbeperking:** standaard wordt `X-Forwarded-For` niet vertrouwd. Achter een proxy kunnen daardoor meerdere bezoekers hetzelfde IP-budget delen. Zet `TRUST_PROXY=1` alleen wanneer Hostinger bevestigt dat er één vertrouwde proxy voor de app staat en dat deze de inkomende `X-Forwarded-For`-header overschrijft. De app accepteert bewust geen onbeperkte `trust proxy=true`.
 
 Sla de variabelen op en laat de app opnieuw starten/deployen. Alleen wijzigen in een invulveld zonder opslaan heeft geen effect. Controleer vervolgens `/api/health`: `leadEnabled: true` betekent dat de configuratie aanwezig is; het is **geen bewijs van SMTP-connectiviteit**.
+
+### Een geslaagde build maar toch 503?
+
+Een groene build bevestigt niet dat het Express-proces ook luistert. De productie-entry `server.mjs` start bewust de HTTP-server bij rechtstreeks uitvoeren én wanneer een Node.js hosting-runner de module importeert. De CI-test `node scripts/runtime-smoke.mjs` simuleert beide varianten na installatie met alléén productie-afhankelijkheden en verifieert `/`, `/api/health`, `/api/config` en de inhoudspagina's.
+
+Controleer bij een 503 eerst de **Runtime logs** in de Hostinger-websitebeheeromgeving en, indien nodig, `domains/hyxi-aura.nl/hbuilds/current/nodejs/stderr.log`. Zoek naar `HYXI AURA listening on port 3000` of `HYXI AURA startup failed`, `EADDRINUSE`, `MODULE_NOT_FOUND` en poortfouten. Controleer het actieve proces via de knop **Running** en kies **Restart**. Een 503 kan ook van het NPROC- of geheugengebruik van het hostingpakket komen; Hostinger noemt dit als veelvoorkomende oorzaak. De exacte oorzaak vereist de runtime-logregel of hostingmeting. Controleer of `PORT=3000`, `NODE_ENV=production` en `TRUST_PROXY=false` zijn ingesteld. Een `TRUST_PROXY=true` is bewust ongeldig: de code accepteert alleen `false`, `0`, `1` of `loopback` om vervalste forwarding-headers te weren.
 
 ## 3. Rond de live controle af
 

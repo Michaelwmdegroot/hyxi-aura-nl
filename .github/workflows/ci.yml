@@ -109,3 +109,6 @@ jobs:
           test -x node_modules/.bin/vite
           npm run build
           npm run check
+
+      - name: Smoke test production entry both ways Hostinger may start it
+        run: node scripts/runtime-smoke.mjs
