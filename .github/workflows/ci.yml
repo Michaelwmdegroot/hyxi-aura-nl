@@ -56,6 +56,10 @@ jobs:
         timeout-minutes: 10
         run: npm run test:browser
 
+      - name: Validate Beheer login and workbench in Chromium
+        timeout-minutes: 5
+        run: node tests/beheer-browser.mjs
+
       - name: Measure Lighthouse on desktop and mobile
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
         timeout-minutes: 8
