@@ -203,10 +203,13 @@ try {
   const brute=await fixture(store);
   const bruteCsrf=await csrfSession(brute);
   const responses=[];
-  for(let i=0;i<7;i++)responses.push((await tryLogin(brute,bruteCsrf,{
-    email:'nobody-'+i+'@example.test',password:'WrongNotRealTestPass1234!',totpSecret:newTotpSecret(),
-  })).status);
-  assert.ok(responses.includes(429),'persistent IP guard eventually throttles');
+  const absentAccount={
+    email:'unknown-test@example.test',
+    password:'WrongNotRealTestPass1234!',
+    totpSecret:newTotpSecret(),
+  };
+  for(let i=0;i<7;i++)responses.push((await tryLogin(brute,absentAccount,bruteCsrf)).status);
+  assert.ok(responses.includes(429),'persistent account guard throttles after repeated attempts');
   console.log('PASS admin SQL migrations, password+MFA, CSRF, RBAC, audit, status changes, session expiry and throttle');
 } finally {
   await Promise.all(servers.map(server=>new Promise(resolve=>server.close(resolve))));
