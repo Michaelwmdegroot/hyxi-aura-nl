@@ -23,6 +23,17 @@ Bekijk ook de [interactieve energie-ervaring](docs/screenshots/energy-experience
 
 Er is geen database, openbare beheeromgeving, nieuwsbrief, advertentiepixel of analysetracker in deze release. SMTP-inloggegevens blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
 
+## HYXI AURA 2.0 — volgende ontwikkelfase
+
+De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal geaccepteerd (visueel 7/10). V2 wordt een zelfstandig leadplatform met betrouwbare e-mail, duurzame MySQL-opslag, een beveiligd dashboard, aparte offerteaanvragen en SEO/analytics. Dit is een **plan**, geen claim dat deze modules al in productie staan.
+
+- [Master-issue #10 en werkpakketten](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10)
+- [Projectplan en roadmap](docs/PROJECT-PLAN-V2-2026-11-14.md)
+- [Technische architectuur](docs/ARCHITECTURE-V2.md)
+- [Livegangchecklist](docs/GO-LIVE-CHECKLIST-V2.md)
+
+De eerste openstaande controle is de echte SMTP-inboxontvangst in leads@thuisbatterijteam.nl, zie [issue #1](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/1). De V1-ervaring blijft het werkende productiepad totdat nieuwe onderdelen getest zijn.
+
 ## Lokaal starten
 
 Gebruik Node.js 24. Voor ontwikkeling zijn één terminal en één opdracht na installatie voldoende:
