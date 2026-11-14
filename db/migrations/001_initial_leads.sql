@@ -3,7 +3,7 @@
 -- create a backup/restore point and apply on isolated staging FIRST.
 -- This is STRUCTURE only: no historical lead data are backfilled.
 -- Schema is designed for ENCRYPTED lead payloads; the application-side
--- encryption, repository and transactional outbox will be a separate PR.
+-- application encryption and outbox have been developed in the same draft PR.
 -- Do not run automatically on production startup.
 
 CREATE TABLE IF NOT EXISTS aura_schema_migrations (
@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS aura_leads (
   status VARCHAR(32) NOT NULL DEFAULT 'new',
   source_domain VARCHAR(100) NOT NULL DEFAULT 'hyxi-aura.nl',
   -- Contains encrypted JSON (name/email/phone/postcode/profile/attribution).
-  -- Never insert plaintext: implement AES-256-GCM + key rotation BEFORE use.
+  -- Never insert plaintext; AES-256-GCM is feature-flagged and key rotation
+  -- requires a separately tested procedure before production activation.
   encrypted_payload MEDIUMBLOB NOT NULL,
   encryption_key_id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   privacy_version VARCHAR(32) NOT NULL,
