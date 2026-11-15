@@ -19,6 +19,7 @@ const salesId='33333333-1111-4111-8111-222222222222';
 const token='a'.repeat(43);
 let signedIn=false, leadStatus='new', statusChanges=0;
 let role='admin', assignedTo=null, assignmentChanges=0, notificationChanges=0, clockOffset=0;
+let followupUpdates=0,followUp={nextAction:'',dueDate:null,notes:[]};
 let forceNotificationConflict=false;
 let deferredDetail=null, releaseDetail=null, deferredList=null, releaseList=null;
 let waitingDetails=0,waitingLists=0;
@@ -46,7 +47,8 @@ const fakeAdmin={
     {id:leadData.id,requestId,status:leadStatus,requestType:'advice',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:'accepted'},
     {id:'2c000000-1111-4111-8111-222222222222',requestId:secondId,status:'quote_requested',requestType:'quote',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:notification.status},
   ]};},
-  async getLead(_user,id){assert.equal(id,requestId);if(deferredDetail){waitingDetails++;await deferredDetail;}return {...leadData,status:leadStatus,assignedTo};},
+  async getLead(_user,id){assert.equal(id,requestId);if(deferredDetail){waitingDetails++;await deferredDetail;}return {...leadData,status:leadStatus,assignedTo,followUp};},
+  async updateFollowup(_user,id,input){assert.equal(id,requestId);followupUpdates++;followUp={nextAction:input.nextAction,dueDate:input.dueDate,notes:input.note?[...followUp.notes,{text:input.note,createdAt:now,authorId:'1'}]:followUp.notes};return {requestId:id,changed:true,followUp};},
   async changeStatus(_user,id,status){assert.equal(id,requestId);leadStatus=status;statusChanges++;return {requestId:id,status,changed:true};},
   async listAssignees(actor){assert.equal(actor.role,'admin');return {items:[{id:salesId,email:'sales@example.test',role:'sales'}]};},
   async assignLead(actor,id,userId){assert.equal(actor.role,'admin');assert.equal(id,requestId);assignedTo=userId;assignmentChanges++;return {requestId:id,assignedTo,changed:true};},
@@ -128,6 +130,15 @@ async function loginAndReview(context,label){
   await accessibility(page,label+'/detail');
   await layout(page,label+'/detail');
   await page.screenshot({path:resolve(output,'beheer-'+label+'-detail.png')});
+  if(label==='desktop'){
+    await page.locator('#nextAction').fill('Klant terugbellen');
+    await page.locator('#followupDate').fill('2026-11-24');
+    await page.locator('#followupNote').fill('Vraag naar beschikbare installatieplek');
+    await page.locator('#followupForm button[type=submit]').click();
+    await expect(page.locator('#followupMessage')).toContainText('opgeslagen');
+    await expect(page.locator('#followupNotes')).toContainText('Vraag naar beschikbare installatieplek');
+    assert.equal(followupUpdates,1);
+  }
   if(label==='desktop'){
     // Prove a normal authenticated session can mutate after the 15-minute
     // CSRF token expiry without asking the operator to reload or log in again.
