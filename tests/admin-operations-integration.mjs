@@ -10,27 +10,27 @@ import { createMysqlLeadStore } from '../server/db/store.mjs';
 import { createAdminStore } from '../server/auth/store.mjs';
 import { createApp } from '../server/app.mjs';
 import { loadConfig } from '../server/config.mjs';
-import { hashAdminPassword, newTotpSecret, encryptTotp, totpForStep } from '../server/auth/security.mjs';
+import { hashAdminPassword } from '../server/auth/security.mjs';
 import { applyAccountMigration } from '../scripts/db-account-migrate.mjs';
 
 if (process.env.CI !== 'true' || process.env.DB_NAME !== 'aura_ci' || process.env.NODE_ENV !== 'test') {
   throw new Error('Use only the disposable aura_ci test database.');
 }
-const env = { ...process.env, ADMIN_ENABLED: 'true', ADMIN_SESSION_SECRET: randomBytes(32).toString('hex'), ADMIN_MFA_KEY: randomBytes(32).toString('base64') };
+const env = { ...process.env, ADMIN_ENABLED: 'true', ADMIN_SESSION_SECRET: randomBytes(32).toString('hex') };
 const config = loadConfig(env);
 const pool = createLeadPool(config);
-const store = createAdminStore({ pool, sessionSecret: config.adminSessionSecret, mfaKey: config.adminMfaKey, leadEncryptionKey: config.encryptionKey });
+const store = createAdminStore({ pool, sessionSecret: config.adminSessionSecret, leadEncryptionKey: config.encryptionKey });
 const leadStore = createMysqlLeadStore({ pool, encryptionKey: config.encryptionKey, hashSecret: config.hashSecret });
 let server, child;
 
 async function account(role) {
-  const id = randomUUID(), email = id + '@example.test', totpSecret = newTotpSecret();
+  const id = randomUUID(), email = id + '@example.test';
   const password = 'Fictional-Operations-Password-Only-2026!';
   await pool.execute(
     'INSERT INTO aura_admin_users (id,login_email,role,password_hash,mfa_secret_encrypted) VALUES (?,?,?,?,?)',
-    [id, email, role, await hashAdminPassword(password), encryptTotp(totpSecret, id, config.adminMfaKey)],
+    [id, email, role, await hashAdminPassword(password), Buffer.alloc(0)],
   );
-  return { id, email, role, password, totpSecret };
+  return { id, email, role, password };
 }
 async function newLead() {
   const received = await leadStore.receive({ requestKey: randomUUID(), lead: {
@@ -51,7 +51,7 @@ async function login(base, actor) {
   const csrfCookie = session.headers.get('set-cookie').split(';')[0];
   const response = await fetch(base + '/api/beheer/login', {
     method: 'POST', headers: { Origin: config.siteUrl, 'Content-Type': 'application/json', 'X-Aura-CSRF': csrfToken, Cookie: csrfCookie },
-    body: JSON.stringify({ email: actor.email, password: actor.password, code: totpForStep(actor.totpSecret, Math.floor(Date.now() / 30000)) }),
+    body: JSON.stringify({ email: actor.email, password: actor.password }),
   });
   assert.equal(response.status, 200);
   return { Origin: config.siteUrl, 'Content-Type': 'application/json', 'X-Aura-CSRF': csrfToken, Cookie: csrfCookie + '; ' + response.headers.get('set-cookie').split(';')[0] };

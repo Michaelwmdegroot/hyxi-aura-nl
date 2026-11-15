@@ -13,7 +13,7 @@ import { createLeadPool } from '../server/db/pool.mjs';
 import { createMysqlLeadStore } from '../server/db/store.mjs';
 import { createAdminStore, assertAdminSchema } from '../server/auth/store.mjs';
 import { createFirstAdmin } from '../server/auth/bootstrap.mjs';
-import { hashAdminPassword, encryptTotp, newTotpSecret, totpForStep } from '../server/auth/security.mjs';
+import { hashAdminPassword } from '../server/auth/security.mjs';
 
 if (process.env.CI !== 'true' || process.env.DB_NAME !== 'aura_ci' || process.env.NODE_ENV !== 'test') {
   throw new Error('Run only in disposable GitHub Actions MySQL service.');
@@ -21,8 +21,7 @@ if (process.env.CI !== 'true' || process.env.DB_NAME !== 'aura_ci' || process.en
 const now = Date.now();
 let currentTime = now;
 const secret = randomBytes(32).toString('hex');
-const mfaKey = randomBytes(32).toString('base64');
-const env = {...process.env,ADMIN_ENABLED:'true',ADMIN_SESSION_SECRET:secret,ADMIN_MFA_KEY:mfaKey};
+const env = {...process.env,ADMIN_ENABLED:'true',ADMIN_SESSION_SECRET:secret};
 const cfg = loadConfig(env);
 assert.equal(cfg.adminEnabled,true,'Admin is gated on DB + secrets + explicit flag');
 const pool = createLeadPool(cfg);
@@ -38,13 +37,12 @@ function fictitiousLead(name) {
 }
 async function initAccount(email,role) {
   const id = randomUUID();
-  const totpSecret = newTotpSecret();
   const password = 'Fictief&UniekBeheerWachtwoord2026!';
   await pool.execute(
     'INSERT INTO aura_admin_users (id,login_email,password_hash,role,mfa_secret_encrypted) VALUES (?,?,?,?,?)',
-    [id,email,await hashAdminPassword(password),role,encryptTotp(totpSecret,id,mfaKey)],
+    [id,email,await hashAdminPassword(password),role,Buffer.alloc(0)],
   );
-  return {id,email,password,totpSecret,role};
+  return {id,email,password,role};
 }
 async function fixture(adminStore, config=cfg) {
   const app = createApp({
@@ -70,7 +68,7 @@ async function csrfSession(f) {
   assert.equal(data.authenticated,false);
   return {token:data.csrfToken,cookie:response.headers.get('set-cookie').split(';')[0]};
 }
-async function tryLogin(f,auth,session,{code,password,email,extra={}}={}) {
+async function tryLogin(f,auth,session,{password,email,extra={}}={}) {
   const r=await f.request('/api/beheer/login',{
     method:'POST',headers:{
       'Content-Type':'application/json',
@@ -78,7 +76,7 @@ async function tryLogin(f,auth,session,{code,password,email,extra={}}={}) {
       'X-Aura-CSRF':session.token,
       'Cookie':session.cookie,...extra,
     },
-    body:JSON.stringify({email:email||auth.email,password:password||auth.password,code:code||totpForStep(auth.totpSecret,Math.floor(currentTime/30000))}),
+    body:JSON.stringify({email:email||auth.email,password:password||auth.password}),
   });
   return r;
 }
@@ -94,29 +92,21 @@ try {
   assert.equal(migration2.applied,true);
   assert.equal((await applyAdminMigration(pool)).applied,false);
   await assertAdminSchema(pool);
-  const adminSeed=newTotpSecret();
   const adminPassword='Fictief&UniekBeheerWachtwoord2026!';
   const adminResult=await createFirstAdmin({
     pool,email:'owner-admin@example.test',password:adminPassword,
-    totpSecret:adminSeed,
-    confirmationCode:totpForStep(adminSeed,Math.floor(currentTime/30000)),
-    mfaKey,now:()=>currentTime,
   });
-  const admin={id:adminResult.id,email:adminResult.email,password:adminPassword,totpSecret:adminSeed,role:'admin'};
+  const admin={id:adminResult.id,email:adminResult.email,password:adminPassword,role:'admin'};
   await assert.rejects(() => createFirstAdmin({
-    pool,email:'second-owner@example.test',password:adminPassword,totpSecret:newTotpSecret(),
-    confirmationCode:'000000',mfaKey,now:()=>currentTime,
+    pool,email:'second-owner@example.test',password:adminPassword,
   }));
-  // Owner consumed the enrollment code; a new 30-second step is required
-  // for the first actual login.
-  currentTime+=31000;
   const sales=await initAccount('seller-test@example.test','sales');
   const leadStore=createMysqlLeadStore({pool,encryptionKey:cfg.encryptionKey,hashSecret:cfg.hashSecret});
   const assigned=await leadStore.receive({lead:fictitiousLead('Test Assigned'),requestKey:randomUUID()});
   const unassigned=await leadStore.receive({lead:fictitiousLead('Test Unassigned'),requestKey:randomUUID()});
   await pool.execute('UPDATE aura_leads SET assigned_user_id=? WHERE request_id=?',[sales.id,assigned.requestId]);
   const store=createAdminStore({
-    pool,sessionSecret:secret,mfaKey,leadEncryptionKey:cfg.encryptionKey,now:()=>currentTime,
+    pool,sessionSecret:secret,leadEncryptionKey:cfg.encryptionKey,
   });
 
   // Routes remain completely absent unless every required DB/security gate is ready.
@@ -144,7 +134,7 @@ try {
   const badCsrf=await tryLogin(f,admin,session,{extra:{'X-Aura-CSRF':'bad'}});
   assert.equal(badCsrf.status,403);
   assert.equal((await tryLogin(f,admin,session,{password:'wrong-password'})).status,401);
-  assert.equal((await tryLogin(f,admin,session,{code:'00000a'})).status,401);
+  assert.equal((await tryLogin(f,admin,session,{password:'invalid'})).status,401);
   const good=await tryLogin(f,admin,session);
   assert.equal(good.status,200);
   const setCookie=good.headers.get('set-cookie');
@@ -198,10 +188,8 @@ try {
   assert.equal(logout.status,200);
   assert.equal((await secured(f,'/api/beheer/leads',adminSession)).status,401);
 
-  // MFA cannot be reused even when a new browser initiates another login.
+  // No authenticator code: another browser can login with the same password.
   const fresh=await csrfSession(f);
-  assert.equal((await tryLogin(f,admin,fresh)).status,401);
-  currentTime += 31000;
   const renewed=await tryLogin(f,admin,fresh);
   assert.equal(renewed.status,200);
 
@@ -229,7 +217,7 @@ try {
   };
   for(let i=0;i<7;i++)responses.push((await tryLogin(brute,absentAccount,bruteCsrf)).status);
   assert.ok(responses.includes(429),'persistent account guard throttles after repeated attempts');
-  console.log('PASS admin SQL migrations, password+MFA, CSRF, RBAC, audit, status changes, session expiry and throttle');
+  console.log('PASS admin SQL migrations, password-only login, CSRF, RBAC, audit, status changes, session expiry and throttle');
 } finally {
   await Promise.all(servers.map(server=>new Promise(resolve=>server.close(resolve))));
   await pool.end();
