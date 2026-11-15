@@ -26,10 +26,11 @@ export function createTransport(config) {
 
 export function buildLeadMail(config, lead, requestId, now) {
   const p = lead.profile;
+  const quote = lead.intent === 'quote';
   const nominal = (p.moduleType === 7 ? 7.03 : 9.04) * p.moduleCount;
   const usable = (p.moduleType === 7 ? 6.7 : 8.6) * p.moduleCount;
   const lines = [
-    'Nieuwe HYXI AURA adviesaanvraag',
+    quote ? 'Nieuwe HYXI AURA offerteaanvraag' : 'Nieuwe HYXI AURA adviesaanvraag',
     '',
     `Aanvraagnummer: ${requestId}`,
     `Ontvangen: ${new Date(now).toISOString()}`,
@@ -50,6 +51,7 @@ export function buildLeadMail(config, lead, requestId, now) {
     `Nominale capaciteit: ${nominal.toFixed(2)} kWh`,
     `Bruikbare capaciteit volgens voorlopige datasheet: ${usable.toFixed(1)} kWh`,
     'Dit is de keuze van de bezoeker, geen technisch installatieadvies of definitieve offerte.',
+    ...(quote && lead.projectDetails ? ['', 'Aanvullende wensen (door de aanvrager aangeleverd)', lead.projectDetails] : []),
     '',
     'De bezoeker heeft expliciet verzocht om contact over deze aanvraag.',
     'Privacyversie: 2026-11-15. Geen toestemming voor nieuwsbrieven of andere marketing gevraagd.',
@@ -62,7 +64,7 @@ export function buildLeadMail(config, lead, requestId, now) {
     from: { name: 'HYXI AURA · Thuisbatterij Team', address: config.smtp.from },
     to: config.smtp.to,
     replyTo: { name: lead.fullName, address: lead.email },
-    subject: `[HYXI AURA] Nieuwe adviesaanvraag ${requestId}`,
+    subject: `[HYXI AURA] Nieuwe ${quote ? 'offerteaanvraag' : 'adviesaanvraag'} ${requestId}`,
     messageId: `<${requestId}@hyxi-aura.nl>`,
     text: lines.join('\n'),
     disableFileAccess: true,
