@@ -177,6 +177,7 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
       notification:{status:r.delivery_status||'unknown',attempts:Number(r.attempt_count||0),errorCode:r.last_error_code||null},
       contact:{fullName:lead.fullName,email:lead.email,phone:lead.phone,postcode:lead.postcode},
       profile:lead.profile,attribution:lead.attribution||{},
+      projectDetails:typeof lead.projectDetails==='string'?lead.projectDetails:'',
       followUp:normalizeFollowup(lead.followUp),
     };
   }
