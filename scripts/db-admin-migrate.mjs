@@ -4,6 +4,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from '../server/config.mjs';
 import { createLeadPool, assertLeadSchema } from '../server/db/pool.mjs';
+import { assertAdminStructure, withMigrationLock } from '../server/db/schema-check.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const filename = resolve(root, 'db/migrations/002_admin_auth.sql');
@@ -21,17 +22,18 @@ export async function applyAdminMigration(pool) {
   if (statements.length !== expected.length || statements.some((s,i) => !s.startsWith('CREATE TABLE IF NOT EXISTS ' + expected[i] + ' ('))) {
     throw new Error('Unexpected admin migration structure. Manual schema review required.');
   }
-  const [existing] = await pool.execute('SELECT checksum FROM aura_schema_migrations WHERE version = ? LIMIT 1', [version]);
-  if (existing.length) {
-    if (existing[0].checksum !== checksum) throw new Error('Admin migration checksum does not match the applied version.');
-    return { version, applied: false };
-  }
-  for (const statement of statements) await pool.query(statement);
-  await pool.execute(
-    'INSERT INTO aura_schema_migrations (version, checksum, applied_at) VALUES (?, ?, UTC_TIMESTAMP(3))',
-    [version, checksum],
-  );
-  return { version, applied: true };
+  return withMigrationLock(pool,async conn=>{
+    const [existing] = await conn.execute('SELECT checksum FROM aura_schema_migrations WHERE version=? LIMIT 1',[version]);
+    if (existing.length) {
+      if (existing[0].checksum !== checksum) throw new Error('Admin migration checksum does not match the applied version.');
+      await assertAdminStructure(conn);
+      return { version, applied: false };
+    }
+    for (const statement of statements) await conn.query(statement);
+    await assertAdminStructure(conn);
+    await conn.execute('INSERT INTO aura_schema_migrations (version,checksum,applied_at) VALUES (?,?,UTC_TIMESTAMP(3))',[version,checksum]);
+    return { version, applied: true };
+  });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

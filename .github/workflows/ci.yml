@@ -167,4 +167,6 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Integration tests using an isolated MySQL service
-        run: npm run test:db
+        run: |
+          npm run build
+          npm run test:db

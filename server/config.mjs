@@ -81,6 +81,7 @@ export function loadConfig(env = process.env) {
     storageMode,
     db,
     dbConfigured,
+    dbSecretsConfigured,
     encryptionKey,
     hashSecret,
     adminEnabled,

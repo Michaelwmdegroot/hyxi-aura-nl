@@ -1,6 +1,8 @@
 import { createHmac } from 'node:crypto';
 import { verifyAdminPassword, hashAdminPassword, newSessionToken, hashSessionToken, decryptTotp, verifyTotp } from './security.mjs';
 import { openLead, parseEncryptionKey } from '../db/crypto.mjs';
+import { assertAdminStructure, assertMigrationChecksum } from '../db/schema-check.mjs';
+import { createAdminOperations } from './operations.mjs';
 
 const STATUSES = new Set(['new','contact_planned','in_progress','quote_requested','quote_sent','won','lost','not_suitable']);
 const VALID_ID = /^AURA-[a-f0-9-]{36}$/;
@@ -21,11 +23,8 @@ export class AdminNotFoundError extends Error { constructor() { super('Resource 
 export class AdminInputError extends Error { constructor() { super('Invalid status.'); this.code='BAD_STATUS'; } }
 
 export async function assertAdminSchema(pool) {
-  for (const table of ['aura_admin_users','aura_admin_sessions','aura_admin_login_guards','aura_admin_audit']) {
-    await pool.query('SELECT 1 FROM ' + table + ' LIMIT 0');
-  }
-  const [rows] = await pool.execute('SELECT version FROM aura_schema_migrations WHERE version=? LIMIT 1', ['002_admin_auth']);
-  if (rows.length !== 1) throw new Error('Admin schema 002 is not applied.');
+  await assertAdminStructure(pool);
+  await assertMigrationChecksum(pool,'002_admin_auth');
 }
 
 export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKey, now = Date.now }) {
@@ -44,8 +43,9 @@ export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKe
   async function countAttempts(email, address) {
     // Separate HMAC counters per login identifier and source address. The DB
     // serializes increments; counters survive restarts and never contain PII.
-    for (const item of [{ key: 'email:' + (email || '-'), cap: 6 },
-                        { key: 'ip:' + (address || '-'), cap: 25 }]) {
+    // Reject a blocked source before it can create new identifier counters.
+    for (const item of [{ key: 'ip:' + (address || '-'), cap: 25 },
+                        { key: 'email:' + (email || '-'), cap: 6 }]) {
       const hash = guardHash(item.key);
       await pool.execute(
         'UPDATE aura_admin_login_guards SET failures=0,window_started_at=UTC_TIMESTAMP(3) WHERE guard_hash=? AND window_started_at < DATE_SUB(UTC_TIMESTAMP(3),INTERVAL 15 MINUTE)',
@@ -64,7 +64,7 @@ export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKe
     const normalized = normalizeEmail(email);
     await countAttempts(normalized, address);
     const [rows] = normalized
-      ? await pool.execute('SELECT id,login_email,password_hash,role,mfa_secret_encrypted,mfa_last_accepted_step,disabled_at FROM aura_admin_users WHERE login_email=? LIMIT 1', [normalized])
+      ? await pool.execute('SELECT id,login_email,password_hash,role,mfa_secret_encrypted,mfa_last_accepted_step,disabled_at FROM aura_admin_users WHERE login_email=? AND BINARY login_email=BINARY ? LIMIT 1', [normalized,normalized])
       : [[]];
     const user = rows[0] || null;
     if (!dummyHashPromise) dummyHashPromise = hashAdminPassword(DUMMY_PASSWORD);
@@ -81,8 +81,8 @@ export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKe
     try {
       await conn.beginTransaction();
       const [updated] = await conn.execute(
-        'UPDATE aura_admin_users SET mfa_last_accepted_step=? WHERE id=? AND mfa_last_accepted_step < ? AND disabled_at IS NULL',
-        [step,user.id,step],
+        'UPDATE aura_admin_users SET mfa_last_accepted_step=? WHERE id=? AND mfa_last_accepted_step < ? AND disabled_at IS NULL AND password_hash=? AND mfa_secret_encrypted=?',
+        [step,user.id,step,user.password_hash,user.mfa_secret_encrypted],
       );
       if (updated.affectedRows !== 1) {
         await conn.rollback();
@@ -213,5 +213,5 @@ export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKe
     } finally {conn.release();}
   }
 
-  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus};
+  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus,...createAdminOperations({pool})};
 }

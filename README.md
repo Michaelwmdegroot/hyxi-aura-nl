@@ -21,11 +21,11 @@ Bekijk ook de [interactieve energie-ervaring](docs/screenshots/energy-experience
 
 **Node.js 24** met Express verzorgt de API en serveert de productiebuild. **Vite** bouwt de HTML-, CSS- en JavaScript-bestanden en staat bewust in `dependencies`: Hostinger installeert bij de productie-deploy geen `devDependencies`. **Three.js** laadt voor de interactieve woning; bij ontbrekende WebGL blijft de uitleg beschikbaar. **Nodemailer** verstuurt aanvragen via de ingestelde mailbox. **Zod** valideert de serverinvoer. Manrope en alle gebruikte webbeelden worden lokaal geserveerd.
 
-Er is geen database, openbare beheeromgeving, nieuwsbrief, advertentiepixel of analysetracker in deze release. SMTP-inloggegevens blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
+De standaard blijft SMTP-mailmodus. Optionele versleutelde MySQL-opslag en een beveiligde beheeromgeving zijn beschikbaar achter expliciete instellingen; ze worden niet door een build of merge geactiveerd. Er is geen publieke registratie, nieuwsbrief, advertentiepixel of analysetracker. Geheimen blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
 
 ## HYXI AURA 2.0 — volgende ontwikkelfase
 
-De eerste optionele MySQL-code met versleutelde opslag en notifier staat in [draft-PR #11](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/11). Dit is niet geactiveerd op de live website. De bestaande e-mailroute blijft de standaard; voor database-activering gelden de controles in [Hostinger MySQL-handleiding](docs/DATABASE-HOSTINGER-V2.md).
+De database-, auth- en beheerontwikkeling is samengebracht in [PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13). De eerdere PR's #11/#12 zijn tussenstappen. De [overdracht van 15 november](docs/BEHEER-RELEASE-2026-11-15.md) bevat de gevonden problemen, oplossingen, testaanpak en actuele hostinggrens. Voor activering: [Hostinger MySQL-handleiding](docs/DATABASE-HOSTINGER-V2.md).
 
 
 De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal geaccepteerd (visueel 7/10). V2 wordt een zelfstandig leadplatform met betrouwbare e-mail, duurzame MySQL-opslag, een beveiligd dashboard, aparte offerteaanvragen en SEO/analytics. Dit is een **plan**, geen claim dat deze modules al in productie staan.
@@ -37,9 +37,9 @@ De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal
 
 De eerste openstaande controle is de echte SMTP-inboxontvangst in leads@thuisbatterijteam.nl, zie [issue #1](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/1). De V1-ervaring blijft het werkende productiepad totdat nieuwe onderdelen getest zijn.
 
-### Beheer-MVP in ontwikkeling
+### Beheer-MVP en hostinginrichting
 
-Een beveiligde beheerwerkbank is voorbereid in [draft-PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13), gebaseerd op de MySQL- en auth-conceptbranches. Op `main` is deze **niet actief**. De branch bevat een login met verplichte TOTP, rolgecontroleerde dossier-API, een responsive aanvragenlijst en audit van statuswijzigingen, plus real-MySQL en Chromium-regressietests. Alle nieuwe endpoints blijven standaard gesloten bij `ADMIN_ENABLED=false`. De werkelijke Hostinger-DB, geheimen, migraties, owner-MFA en herstel/incidentproces moeten afzonderlijk worden gevalideerd. Zie [BEHEER-MVP.md](docs/BEHEER-MVP.md).
+De beheerwerkbank bevat TOTP-login, rolgecontroleerde dossiers, statussen, toewijzing, mailincidenten, audit en veilig terminalaccountbeheer. Nieuwe endpoints blijven gesloten bij `ADMIN_ENABLED=false`. Database-migraties en eigenaar/MFA kunnen worden voorbereid terwijl de bestaande site in mailmodus blijft. Zie [BEHEER-MVP.md](docs/BEHEER-MVP.md) en het aanvullende [env-sjabloon](config/beheer.env.example). De live-healthcheck op 15 november vóór deze wijzigingen gaf `leadEnabled:false`; echte inboxontvangst en de private Hostinger-inrichting zijn nog afzonderlijk te bevestigen.
 
 ## Lokaal starten
 

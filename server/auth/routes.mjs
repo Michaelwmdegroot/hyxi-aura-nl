@@ -83,6 +83,11 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
   function backendError(res,error) {
     if(error?.code==='NOT_FOUND')return fail(res,404,'NOT_FOUND','Deze aanvraag is niet beschikbaar.');
     if(error?.code==='BAD_STATUS')return fail(res,422,'BAD_STATUS','Kies een geldige status.');
+    if(error?.code==='FORBIDDEN')return fail(res,403,'FORBIDDEN','Deze actie is alleen beschikbaar voor beheerders.');
+    if(error?.code==='BAD_ASSIGNEE')return fail(res,422,'BAD_ASSIGNEE','Kies een actieve medewerker.');
+    if(error?.code==='BAD_FILTER')return fail(res,422,'BAD_FILTER','Kies geldige filters.');
+    if(error?.code==='BAD_NOTIFICATION_ACTION')return fail(res,422,'BAD_NOTIFICATION_ACTION','Controleer de ontvangst en bevestig je keuze.');
+    if(error?.code==='STATE_CHANGED')return fail(res,409,'STATE_CHANGED','Deze melding is inmiddels gewijzigd. Vernieuw het overzicht.');
     // Never disclose database error text or personal data.
     console.error('HYXI AURA Beheer database operation failed.');
     return fail(res,503,'BACKEND_UNAVAILABLE','Deze actie is tijdelijk niet beschikbaar.');
@@ -145,6 +150,30 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
     try {res.json({ok:true,...await adminStore.summary(req.beheerUser)});}
     catch(error){backendError(res,error);}
   });
+  function administrator(req,res,next) {
+    if(req.beheerUser?.role!=='admin')return fail(res,403,'FORBIDDEN','Deze actie is alleen beschikbaar voor beheerders.');
+    next();
+  }
+  app.get(prefix+'/assignees',authenticated,administrator,async(req,res)=>{
+    try{res.json({ok:true,...await adminStore.listAssignees(req.beheerUser)});}
+    catch(error){backendError(res,error);}
+  });
+  app.get(prefix+'/outbox',authenticated,administrator,async(req,res)=>{
+    const page=Number(req.query.page||1);
+    if(!Number.isSafeInteger(page)||page<1||page>1000)return fail(res,422,'BAD_FILTER','Ongeldige pagina.');
+    try{res.json({ok:true,...await adminStore.listNotifications(req.beheerUser,{page})});}
+    catch(error){backendError(res,error);}
+  });
+  app.post(prefix+'/outbox/:id/resolve',authenticated,administrator,json,bodyOk,async(req,res)=>{
+    const body=req.body;
+    if(!body||Object.keys(body).length!==4||!['retry','confirm_received'].includes(body.action)||
+       !['failed','uncertain'].includes(body.expectedStatus)||body.confirmed!==true||
+       !Number.isSafeInteger(body.expectedAttempt)||body.expectedAttempt<1){
+      return fail(res,422,'BAD_NOTIFICATION_ACTION','Controleer de ontvangst en bevestig je keuze.');
+    }
+    try{res.json({ok:true,...await adminStore.resolveNotification(req.beheerUser,req.params.id,body)});}
+    catch(error){backendError(res,error);}
+  });
   app.get(prefix+'/leads',authenticated,async(req,res)=>{
     const page=Number(req.query.page||1),status=String(req.query.status||'');
     if(!Number.isSafeInteger(page)||page<1||page>100||status.length>40)return fail(res,422,'BAD_FILTER','Ongeldige filters.');
@@ -160,6 +189,15 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
       return fail(res,422,'BAD_STATUS','Kies een geldige status.');
     }
     try{res.json({ok:true,...await adminStore.changeStatus(req.beheerUser,req.params.requestId,req.body.status)});}
+    catch(error){backendError(res,error);}
+  });
+  app.patch(prefix+'/leads/:requestId/assignee',authenticated,administrator,json,bodyOk,async(req,res)=>{
+    const body=req.body;
+    if(!body||Object.keys(body).length!==1||!Object.hasOwn(body,'userId')||
+       (body.userId!==null&&typeof body.userId!=='string')){
+      return fail(res,422,'BAD_ASSIGNEE','Kies een actieve medewerker.');
+    }
+    try{res.json({ok:true,...await adminStore.assignLead(req.beheerUser,req.params.requestId,body.userId)});}
     catch(error){backendError(res,error);}
   });
   app.all(prefix+'/*splat',(_req,res)=>fail(res,404,'NOT_FOUND','Niet gevonden.'));

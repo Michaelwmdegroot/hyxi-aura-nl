@@ -1,25 +1,33 @@
 # HYXI AURA Beheer — beveiligingsmodel
 
-Status: **geïmplementeerd en nog niet geactiveerd in concept-PR #13**. Dit document beschrijft de ontwikkelbranch, niet een live of onafhankelijk volledig geaudite securitygarantie.
+Bijgewerkt 15 november 2026. Dit beschrijft de code en gecontroleerde testscenario's, geen algemene securitygarantie of bewijs van actieve productie-inrichting.
 
-## Kern
-- Geen openbare signup. De eerste eigenaar kan alleen via een handmatig, geautoriseerd, interactief TTY-script met een bevestigde TOTP-code worden aangemaakt. Dubbele initialisatie wordt via een DB-lock geweigerd.
-- Salted memory-hard scrypt-wachtwoordhashes (N=32768,r=8,p=1), minimaal 14 bytes en 12 niet-lege tekens; geen wachtwoorden in log of browseropslag.
-- MFA met TOTP en anti-replay-stap op de gebruiker; TOTP-seeds zijn AES-256-GCM versleuteld met accountgebonden authenticatie en aparte MFA-sleutel.
-- Cryptografisch willekeurige 256-bit sessietokens, uitsluitend HMAC-hash in DB. HttpOnly/SameSite=Strict/Secure cookies op productie. Auth-sessie 8 uur.
-- CSRF-token plus toegestane Origin voor mutaties. `admin` en `sales` worden uitsluitend op de server gecontroleerd. Sales ziet alleen leads die aan het account zijn toegewezen.
-- Loginlimieten per gehashte accountidentificatie en bron-IP via MySQL; geen plaintext in rate-limit tabel.
-- Dossierinzage en statuswijziging komen in een audittrail. Gegevens worden server-side ontsleuteld na autorisatie, niet in statische HTML of lokale opslag.
-- Gesloten standaard: zonder `ADMIN_ENABLED=true` en volledig geteste DB-configuratie geeft beheer 404.
+## Accounts en toegang
+
+- Geen publieke signup of herstelroute. Eerste eigenaar en vervolgbeheer via een vertrouwde interactieve terminal, met bevestiging van een verse authenticatorcode.
+- Salted scrypt-wachtwoordhashes, N=32768/r=8/p=1; minimaal 14 bytes en 12 niet-lege tekens. Geheime invoer zonder echo.
+- TOTP voor admin én sales, begrensde klokafwijking en anti-replay. Seeds worden accountgebonden met AES-256-GCM versleuteld.
+- Willekeurige 256-bit sessietokens, alleen HMAC-hash in DB, acht uur geldig. HttpOnly/SameSite=Strict/Secure cookies in productie. Server-side sessie- en rolcontrole per aanvraag.
+- Persistente limieten per gehashte bron-IP en account. Bron-IP wordt eerst begrensd zodat een geblokkeerde bron geen onbeperkte nieuwe accountcounters maakt. Login matcht het genormaliseerde e-mailadres exact.
+- Herstel vervangt wachtwoord en MFA, trekt sessies in en wist alleen de accountguard. Credentialvergelijking binnen de logintransactie voorkomt een nieuwe sessie met inmiddels ingetrokken credentials.
+- Accountmutaties delen de bootstrap-lock en schrijven een transactionele audit. De laatste actieve admin kan niet worden uitgeschakeld. Herstel heft een uitschakeling niet op.
+- Audit target_user_id onderscheidt doelaccount en actor. Terminalacties hebben actor NULL en een vaste actiecode; geen wachtwoorden, MFA-seeds, contactgegevens of vrije tekst in auditregels.
+
+## Dossiers en mail
+
+- Admin ziet alle dossiers; sales alleen toegewezen dossiers. Toewijzing en mailcontrole zijn admin-only, ook bij rechtstreeks API-gebruik.
+- Geen persoonsgegevens in statische HTML, URL's, analytics of localStorage. Payload wordt na autorisatie ontsleuteld. Inzage en mutaties worden geaudit.
+- CSRF-token én toegestane Origin voor wijzigingen. Frontend ververst de 15-minuten-CSRF voor mutaties. Afmelden/sessieverval wist de weergave en onderbreekt oude requests.
+- Databaseontvangst betekent een geslaagde commit. SMTP-acceptatie en menselijke inboxbevestiging hebben afzonderlijke statussen.
+- Outboxclaim en UTC-dagbudget worden samen gereserveerd. Herstart/gelijklopende workers herstellen geen budget. Completion vereist dezelfde verzendpoging.
+- Onzekere verzendingen worden nooit automatisch herhaald. De beheerder bevestigt mailboxcontrole en neemt expliciet een beslissing; status én poging worden vergeleken met de bekeken melding.
+
+## Defaults, schema en herstel
+
+LEAD_STORAGE_MODE=mail en ADMIN_ENABLED=false blijven de defaults. De productie-entry past geen SQL toe. Schema-readiness controleert InnoDB, kolommen, kritieke types, unieke sleutels, foreign keys en checksums. Beheer vereist account-auditmigratie 003; verzending vereist budgetmigratie 004. Database en werkbank starten onafhankelijk van de aanvraagknop en SMTP-configuratie.
+
+Voor activering: daadwerkelijke Hostinger-verbinding/schema, backup/restore, privacy/retentieafspraak, operationele mailboxcontrole en eigenaar/MFA. Vier afzonderlijke geheimen blijven buiten Git, chat en logs: LEAD_ENCRYPTION_KEY, LEAD_HASH_SECRET, ADMIN_SESSION_SECRET en ADMIN_MFA_KEY. Bewaar herstelkopieën veilig. Sleutelverlies kan gegevens of MFA onherstelbaar maken; sleutelrotatie is een aparte beheerhandeling.
 
 ## Tests
-De CI-controle `npm run test:db` gebruikt een disposable MySQL 8-service en fictieve accounts. Ze controleert eenmalige owner-bootstrap, TOTP replay, password, sessie-invalidering, ontbrekende CSRF, salesisolatie, disabled accounts, rate-limits en status-audit. De Chromium-browsertest controleert de volledige interface (login, overzicht, dossier, status, logout) op desktop en mobiel, inclusief axe-toegankelijkheidscontrole.
 
-## Beperkingen voor activering
-Nog geen productiegebruikers, geen veilig account-herstel of salesuitnodigingen, geen privacy-/back-up-/restoreproef, geen goedgekeurde DB-migratie op Hostinger en geen operationele outbox-incidentenwerkbank. Zie [Beheer-MVP-uitrolplan](BEHEER-MVP.md) en [database-instructies](DATABASE-HOSTINGER-V2.md).
-
-## Benodigde geheime variabelen pas bij activering
-- `ADMIN_ENABLED=false` zolang er geen goedgekeurde stagingcontrole is.
-- `ADMIN_SESSION_SECRET`: onafhankelijk, sterk, geheim van minimaal 32 bytes.
-- `ADMIN_MFA_KEY`: onafhankelijke canonical base64-sleutel van 32 bytes.
-- Beide uitsluitend in de beveiligde Hostinger-omgeving/kluis; nooit in GitHub, chat of testlogs.
+Disposable MySQL 8 controleert auth/RBAC/CSRF, MFA replay, sessieverval, recovery/credentialrace, last-admin bescherming, auditrollback, toewijzing, mailbeslissingen, outboxlease/dagbudget en schema-invarianten. Chromium/axe controleert desktop en mobiel. Alle accounts/aanvragen zijn fictief en mailtransporten zijn geïnjecteerde testvervangers. Zie [Beheer-MVP](BEHEER-MVP.md) voor commando's en actuele productgrenzen.

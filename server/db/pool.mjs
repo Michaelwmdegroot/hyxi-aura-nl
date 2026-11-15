@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import { assertLeadStructure, assertMigrationChecksum } from './schema-check.mjs';
 
 export function createLeadPool(config) {
   if (!config?.db?.host || !config?.db?.name || !config?.db?.user || !config?.db?.password) {
@@ -24,19 +25,6 @@ export function createLeadPool(config) {
 }
 
 export async function assertLeadSchema(pool) {
-  for (const table of [
-    'aura_schema_migrations',
-    'aura_leads',
-    'aura_submission_keys',
-    'aura_lead_events',
-    'aura_notification_outbox',
-  ]) {
-    // Fixed identifiers, not derived from user input.
-    await pool.query('SELECT 1 FROM ' + table + ' LIMIT 0');
-  }
-  const [rows] = await pool.execute(
-    'SELECT version FROM aura_schema_migrations WHERE version = ? LIMIT 1',
-    ['001_initial_leads'],
-  );
-  if (rows.length !== 1) throw new Error('HYXI database migration 001 is not applied.');
+  await assertLeadStructure(pool);
+  await assertMigrationChecksum(pool,'001_initial_leads');
 }

@@ -4,6 +4,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from '../server/config.mjs';
 import { createLeadPool } from '../server/db/pool.mjs';
+import { assertLeadStructure, withMigrationLock } from '../server/db/schema-check.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const migrationFile = resolve(root, 'db/migrations/001_initial_leads.sql');
@@ -20,21 +21,19 @@ export async function applyInitialMigration(pool) {
   if (statements.length !== 5 || statements.some(s => !s.startsWith('CREATE TABLE IF NOT EXISTS aura_'))) {
     throw new Error('Unexpected migration structure: manual review required.');
   }
-  await pool.query(statements[0]);
-  const [recorded] = await pool.execute(
-    'SELECT checksum FROM aura_schema_migrations WHERE version = ? LIMIT 1',
-    [version],
-  );
-  if (recorded.length) {
-    if (recorded[0].checksum !== checksum) throw new Error('Existing migration checksum differs: aborting.');
-    return { applied: false, version };
-  }
-  for (const statement of statements.slice(1)) await pool.query(statement);
-  await pool.execute(
-    'INSERT INTO aura_schema_migrations (version, checksum, applied_at) VALUES (?, ?, UTC_TIMESTAMP(3))',
-    [version, checksum],
-  );
-  return { applied: true, version };
+  return withMigrationLock(pool,async conn=>{
+    await conn.query(statements[0]);
+    const [recorded] = await conn.execute('SELECT checksum FROM aura_schema_migrations WHERE version=? LIMIT 1',[version]);
+    if (recorded.length) {
+      if (recorded[0].checksum !== checksum) throw new Error('Existing migration checksum differs: aborting.');
+      await assertLeadStructure(conn);
+      return { applied: false, version };
+    }
+    for (const statement of statements.slice(1)) await conn.query(statement);
+    await assertLeadStructure(conn);
+    await conn.execute('INSERT INTO aura_schema_migrations (version,checksum,applied_at) VALUES (?,?,UTC_TIMESTAMP(3))',[version,checksum]);
+    return { applied: true, version };
+  });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

@@ -14,7 +14,7 @@ export function createNotificationWorker({ store, transport, config, sendTimeout
     const recovered = await store.recoverStaleClaims();
     if (recovered) console.warn('HYXI AURA outbox has interrupted deliveries requiring review:', recovered);
     while (handled < maxItems) {
-      const row = await store.claimNextNotification();
+      const row = await store.claimNextNotification({ dailyLimit: config.dailyLimit });
       if (!row) break;
       handled++;
       try {
@@ -31,16 +31,17 @@ export function createNotificationWorker({ store, transport, config, sendTimeout
           error.code = 'EENVELOPE';
           throw error;
         }
-        await store.completeNotification(row.id, 'accepted');
+        await store.completeNotification(row.id, 'accepted', null, 0, { expectedAttempt: Number(row.attempt_count) });
       } catch (error) {
+        if (error?.code === 'STALE_NOTIFICATION_CLAIM') throw error;
         const reason = /^[A-Z0-9_]{1,64}$/.test(String(error?.code || ''))
           ? String(error.code) : 'SMTP_UNCERTAIN';
         if (!definitelyNotDelivered(error)) {
-          await store.completeNotification(row.id, 'uncertain', reason);
+          await store.completeNotification(row.id, 'uncertain', reason, 0, { expectedAttempt: Number(row.attempt_count) });
         } else if (reason === 'EAUTH' || reason === 'EENVELOPE' || row.attempt_count >= 4) {
-          await store.completeNotification(row.id, 'failed', reason);
+          await store.completeNotification(row.id, 'failed', reason, 0, { expectedAttempt: Number(row.attempt_count) });
         } else {
-          await store.completeNotification(row.id, 'retry_wait', reason, DELAY_SECONDS[Math.min(3, row.attempt_count - 1)]);
+          await store.completeNotification(row.id, 'retry_wait', reason, DELAY_SECONDS[Math.min(3, row.attempt_count - 1)], { expectedAttempt: Number(row.attempt_count) });
         }
       }
     }

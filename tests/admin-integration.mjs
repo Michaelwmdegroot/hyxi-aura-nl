@@ -188,6 +188,9 @@ try {
   );
   assert.equal(Number(events[0].total),1);
 
+  await pool.execute('UPDATE aura_admin_sessions SET expires_at=DATE_SUB(UTC_TIMESTAMP(3),INTERVAL 1 SECOND) WHERE user_id=?',[admin.id]);
+  assert.equal((await secured(f,'/api/beheer/leads',adminSession)).status,401,'An expired session cannot access lead records');
+
   const logout=await secured(f,'/api/beheer/logout',adminSession,{
     method:'POST',headers:{'Content-Type':'application/json',Origin:cfg.siteUrl,'X-Aura-CSRF':session.token},
     body:'{}',

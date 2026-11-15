@@ -25,7 +25,7 @@
         </div>
         <form id="loginForm" autocomplete="on">
           <div class="field"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="username" inputmode="email" required maxlength="254" placeholder="naam@bedrijf.nl"></div>
-          <div class="field"><label for="password">Wachtwoord</label><input id="password" name="password" type="password" autocomplete="current-password" required minlength="14" placeholder="Jouw wachtwoord"></div>
+          <div class="field"><label for="password">Wachtwoord</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024" placeholder="Jouw wachtwoord"></div>
           <div class="field"><label for="totp">Code uit authenticator</label><input id="totp" name="totp" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="6-cijferige code"></div>
           <p class="form-message" id="loginError" role="alert" hidden></p>
           <button class="primary wide" type="submit" id="loginButton">Veilig inloggen <span aria-hidden="true">→</span></button>
@@ -57,7 +57,11 @@
           <article class="metric"><span>Offerte gevraagd</span><strong id="statQuote">—</strong><small>Open offertewensen</small></article>
           <article class="metric warning"><span>Mail ter controle</span><strong id="statMail">—</strong><small>Onzeker of mislukt</small></article>
         </div>
-        <section class="list-panel" aria-labelledby="listTitle">
+        <nav class="view-switch" id="workbenchViews" aria-label="Werkoverzicht" hidden>
+          <button class="view-button" id="leadsTab" type="button" aria-pressed="true">Aanvragen</button>
+          <button class="view-button" id="outboxTab" type="button" aria-pressed="false">Mailcontrole <span id="mailCount">0</span></button>
+        </nav>
+        <section class="list-panel" id="leadsPanel" aria-labelledby="listTitle">
           <div class="panel-heading">
             <div><h2 id="listTitle">Werkvoorraad</h2><p>Open een aanvraag voor de details en opvolging.</p></div>
             <div class="panel-actions"><label for="statusFilter" class="sr-only">Filter op status</label><select id="statusFilter"><option value="">Alle statussen</option><option value="new">Nieuw</option><option value="contact_planned">Contact gepland</option><option value="in_progress">In behandeling</option><option value="quote_requested">Offerte gevraagd</option><option value="quote_sent">Offerte verstuurd</option><option value="won">Gewonnen</option><option value="lost">Verloren</option><option value="not_suitable">Niet passend</option></select></div>
@@ -66,8 +70,15 @@
           <div class="table-scroll"><table><thead><tr><th scope="col">Aanvraagnummer</th><th scope="col">Ontvangen</th><th scope="col">Status</th><th scope="col">Notificatie</th><th scope="col"><span class="sr-only">Actie</span></th></tr></thead><tbody id="leadRows"></tbody></table></div>
           <div class="pagination"><span id="pageLabel">Pagina 1</span><div><button type="button" id="prevPage" class="secondary small">Vorige</button><button type="button" id="nextPage" class="secondary small">Volgende</button></div></div>
         </section>
+        <section class="list-panel" id="outboxPanel" aria-labelledby="outboxTitle" hidden>
+          <div class="panel-heading"><div><h2 id="outboxTitle">Mailcontrole</h2><p>Je aanvragen zijn opgeslagen. Controleer hier de meldingen die aandacht vragen.</p></div><span class="admin-label">Beheerders</span></div>
+          <p class="outbox-explanation">Controleer bij een onzekere aflevering eerst de ontvangende mailbox. Bevestig daarna de ontvangst of bied de melding bewust opnieuw aan.</p>
+          <div id="outboxMessage" class="list-message" role="status"></div>
+          <div id="outboxItems" class="outbox-items"></div>
+          <div class="pagination"><span id="outboxPageLabel">Pagina 1</span><div><button type="button" id="outboxPrev" class="secondary small">Vorige</button><button type="button" id="outboxNext" class="secondary small">Volgende</button></div></div>
+        </section>
         <p id="dashboardMessage" class="dashboard-message" role="status" aria-live="polite"></p>
-        <footer class="workspace-footer">Alleen bevoegde gebruikers · Persoonsgegevens worden niet in deze pagina opgeslagen.</footer>
+        <footer class="workspace-footer">Alleen bevoegde gebruikers · Klantgegevens zijn alleen zichtbaar na inloggen.</footer>
       </div>
       <div class="detail-backdrop" id="detailBackdrop" hidden></div>
       <aside class="detail-pane" id="detailPane" role="dialog" aria-modal="true" aria-labelledby="detailTitle" hidden>
@@ -77,10 +88,23 @@
           <div class="detail-section"><h3>Contactgegevens</h3><dl id="contactFields"></dl></div>
           <div class="detail-section"><h3>Batterij & woning</h3><dl id="profileFields"></dl></div>
           <div class="detail-section"><h3>Verwerking</h3><dl id="systemFields"></dl></div>
+          <form class="detail-section" id="assignmentForm" hidden><h3>Verantwoordelijke</h3><label for="assignee">Toegewezen medewerker</label><select id="assignee"></select><button class="secondary" type="submit">Toewijzing opslaan</button><p id="assignmentMessage" class="form-message" role="status" aria-live="polite"></p></form>
           <form class="detail-section" id="statusForm"><h3>Opvolging</h3><label for="editStatus">Huidige status</label><select id="editStatus"><option value="new">Nieuw</option><option value="contact_planned">Contact gepland</option><option value="in_progress">In behandeling</option><option value="quote_requested">Offerte gevraagd</option><option value="quote_sent">Offerte verstuurd</option><option value="won">Gewonnen</option><option value="lost">Verloren</option><option value="not_suitable">Niet passend</option></select><button class="primary" type="submit">Status opslaan</button><p id="statusMessage" class="form-message" role="status" aria-live="polite"></p></form>
         </div>
       </aside>
     </section>
+    <dialog id="mailDialog" class="mail-dialog" aria-labelledby="mailDialogTitle" aria-describedby="mailReviewIntro">
+      <div class="mail-dialog-heading"><div><span class="eyebrow">MAILCONTROLE</span><h2 id="mailDialogTitle">Leg de uitkomst vast</h2></div><button id="closeMailDialog" class="dialog-close" type="button" aria-label="Sluit mailcontrole">×</button></div>
+      <p id="mailReviewIntro">Zoek in de ontvangende mailbox op het aanvraagnummer of bericht-ID voordat je verdergaat.</p>
+      <dl id="mailReviewFields" class="mail-review-fields"></dl>
+      <form id="mailReviewForm">
+        <div class="field"><label for="resolveAction">Wat is de uitkomst?</label><select id="resolveAction" required><option value="">Kies een uitkomst</option><option value="confirm_received">De notificatie is ontvangen</option><option value="retry">Niet ontvangen, opnieuw aanbieden</option></select></div>
+        <label class="confirmation-field"><input id="resolveConfirmed" type="checkbox" required><span id="resolveConfirmationText">Ik heb de ontvangende mailbox gecontroleerd.</span></label>
+        <p id="retryExplanation" class="mail-help" hidden>De melding gaat terug naar de verzendwachtrij. Dit kan een nieuwe e-mail versturen.</p>
+        <p id="mailReviewMessage" class="form-message" role="status" aria-live="polite"></p>
+        <button id="resolveButton" class="primary wide" type="submit">Uitkomst vastleggen <span aria-hidden="true">→</span></button>
+      </form>
+    </dialog>
   </main>
 </body>
 </html>

@@ -1,53 +1,69 @@
-# HYXI AURA Beheer — MVP-uitvoering, testbewijs en activatievoorwaarden
+# HYXI AURA Beheer — uitvoering en activering
 
-**Status:** concept-PR #13 op branch `feat/beheer-mvp`. **Niet beschikbaar op de live website**; `main` blijft de bestaande SMTP-mailroute gebruiken. Dit werk bouwt bovenop PR #11 (database) en PR #12 (beveiligingsprimitieven).
+Bijgewerkt 15 november 2026. De implementatie is samengebracht in [PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13), inclusief de eerdere database- en authenticatiebranches. Een build of merge schakelt databaseopslag en beheer niet automatisch in.
 
-## Werkende onderdelen in de featurebranch
-- Responsive beheerinterface op `/beheer` met loginscherm, werkvoorraad, statusfilter, detailvenster, notificatiestatus en volgacties.
-- Express-API achter `/api/beheer/*`; geen publieke registratie, geen persoonsgegevens in statische HTML of localStorage.
-- Inlogcontrole met memory-hard scrypt, verplichte TOTP/MFA inclusief anti-replay, persistente loginlimieten, veilige sessiecookies en CSRF/Origin-controle.
-- MySQL-afgeschermd toegangspad: admin ziet alle dossiers; sales ziet uitsluitend toegewezen dossiers. Onbekende of niet-toegewezen leads geven 404.
-- Enkelvoudige statuswijziging schrijft een audit-event in dezelfde transactie. Geen statuswijziging op basis van alleen frontendcontrole.
-- Nieuw schema 002 met gebruikers, sessies, loginlimieten en audit; manual-only migratie met checksums.
-- Eenmalige owner-bootstrap via een expliciet bevestigde interactieve terminal, met wachtwoord zonder echo en gecontroleerde authenticatorcode.
+## Werkende onderdelen
 
-## Veiligheidsgrenzen / featureflags
-- De standaard is `LEAD_STORAGE_MODE=mail` en `ADMIN_ENABLED=false`; in deze toestand geeft `/beheer` en `/api/beheer/*` 404.
-- Beheer wordt uitsluitend voorbereid als database mode, DB-gegevens, twee lead-cryptosleutels, ADMIN_SESSION_SECRET, ADMIN_MFA_KEY, SMTP-gegevens en migratie 001 + 002 beschikbaar zijn.
-- Iedere mislukte startup/readiness laat de publieke productpagina bereikbaar; beheer blijft gesloten. Er is geen stilzwijgende fallback naar onbeveiligde leesroutes.
-- Backendroutes controleren de sessie en bevoegdheden bij iedere aanvraag. HTTPS is verplicht in productie voor Secure cookies. De sessieduur is acht uur.
-- Alle tests gebruiken fictieve contactgegevens en een aparte disposable MySQL 8-service. Echte Hostinger-gebruikers, DB of mailbox worden niet benaderd.
+- Responsive beheerinterface op /beheer met login, overzichtscijfers, statusfilter, paginering, dossierdetails en opvolgstatus.
+- Wachtwoord + verplichte authenticatorcode, acht uur geldige sessie, persistente loginlimieten, server-side rechten en CSRF/Origin-beveiliging.
+- Admin ziet alle dossiers; sales uitsluitend toegewezen dossiers. Admin kan toewijzen aan actieve medewerkers en toewijzingen verwijderen.
+- Mailcontrole voor mislukte/onzekere teamnotificaties. De beheerder controleert eerst de ontvangende mailbox en kiest dan expliciet tussen ontvangst bevestigen en opnieuw klaarzetten.
+- 'accepted' betekent SMTP-acceptatie; 'confirmed' betekent door een beheerder bevestigde inboxontvangst. Het zijn verschillende statussen.
+- Statuswijzigingen, toewijzingen, dossierinzage en mailbeslissingen worden geaudit. Verouderde mailbeslissingen worden op zowel status als verzendpoging afgewezen.
+- Eerste eigenaar, vervolgaccounts, herstel van wachtwoord én MFA, uitschakelen en sessies intrekken via de vertrouwde interactieve terminal. Geen publieke registratie of herstelmail.
+- Herstel trekt sessies atomisch in en sluit de race met een al gestarte login met oude credentials. De laatste actieve admin blijft beschermd.
+- SMTP_DAILY_LIMIT wordt in database-modus gedeeld door alle workers en blijft behouden na een herstart. Ook mislukte en herhaalde pogingen tellen mee.
+- Beheer blijft bereikbaar als de publieke aanvraaginname uitstaat of SMTP-configuratie ontbreekt, mits database en authenticatie kloppen.
+- Het frontend ververst CSRF voor mutaties en afmelden. Verlopen sessies en late netwerkantwoorden kunnen gewiste dossiergegevens niet opnieuw plaatsen.
 
-## Handmatige test- en releasevolgorde
-1. Bevestig en documenteer één echte SMTP-ontvangst op `leads@thuisbatterijteam.nl` voor de bestaande site; wijs mailboxbeheer aan.
-2. Valideer de daadwerkelijke Hostinger MySQL/MariaDB-versie en toegang. Maak eerst een afzonderlijke, afgeschermde testdatabase en test een backup/restore.
-3. Voer DB-migratie 001 en 002 uit in die testomgeving met fictieve aanvragen; controleer het migratieledger en herhaling.
-4. Maak in veilige omgeving onafhankelijke cryptosleutels en een admin-sessionsecret, bewaar ze in een beveiligde kluis. Gebruik geen wachtwoorden in Git, screenshots of chat.
-5. Test `npm run db:check`, daarna de expliciete migratietools `npm run db:migrate` en `npm run db:admin-migrate` alleen in de goedgekeurde omgeving met DB_SCHEMA_APPLY-vlag.
-6. Gebruik het interactieve bootstrap-commando alleen via een vertrouwde SSH/TTY-omgeving, en voltooi MFA-uitgifte. Maak nooit een testaccount met herbruikbare credentials in productie.
-7. Controleer persoonlijk: inloggen, uitloggen, MFA-klokafwijking, sessieherstel, onbevoegde toegang, afwijzing van onbekende dossiers, mobiele UX en audit.
-8. Documenteer privacyverwerking, bewaartermijn, verwijdering, monitoring en herstel van SMTP-uitval/`uncertain`-notificaties. Pas dan kan productie-DB-modus worden geactiveerd.
-9. Voer een beperkte productieproef uit met expliciete eigenaarstoestemming en controleer dat de lead in de database staat en de ontvanger de notificatie krijgt.
-10. Controleer bij elke stap terugval zonder verlies van nieuwe MySQL-leads; wissel niet blind van database naar SMTP-only als er nog onverwerkte leads bestaan.
+## Voorbereiden
 
-## Commando's en tests
-- `npm ci && npm run build && npm test && npm run check` voor bestaande checks.
-- `npm run test:db` voert alleen in de geïsoleerde CI-omgeving MySQL-migratie-, lead-, auth- en autorisatietests uit.
-- `node tests/beheer-browser.mjs` voert browsercontrole met een fake admin-store uit; maakt screenshots onder `test-results/browser/beheer-*.png` en raakt geen database.
-- `DB_SCHEMA_APPLY=explicit-review-completed npm run db:admin-migrate` is bedoeld voor een **handmatig** goedgekeurde migratie in de juiste omgeving; geen startup-hooks voor SQL.
-- `ADMIN_BOOTSTRAP=interactive-confirmed npm run admin:create` start de eenmalige CLI-procedure; alleen voor de veilige, interactieve beheerterminal.
+Laat LEAD_STORAGE_MODE=mail en ADMIN_ENABLED=false staan. Gebruik [config/beheer.env.example](../config/beheer.env.example) als aanvulling op de bestaande Hostinger-omgeving. Vul DB-gegevens en vier onafhankelijke cryptosleutels uitsluitend privé in; behoud de werkende SMTP-, ontvanger-, domein- en CSRF-instellingen.
 
-## Nog expliciet niet af
-- Geen echte Hostinger DB-verbinding of restoreproef aangetoond.
-- Geen dashboard in productie vrijgegeven; geen owneraccount op Hostinger aangemaakt.
-- Geen gebruiker-uitnodiging, veilig accountherstel, beheerder-MFA-reset, admin-rolbeheer of admin-limietenmonitor.
-- Geen e-mailincidentenwerkbank voor handmatige behandeling van `uncertain` SMTP-overdracht.
-- Geen geautomatiseerde AVG-retentie/erasure voor leads én mailbox.
-- Geen offertegenerator, volledige auditexport of NIVO Portal-koppeling.
+Vanuit de Node-appmap, met Node.js 24 en de juiste private omgeving:
 
-## Gerelateerde bronnen
-- [PR #13 — Beheer-MVP](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13)
-- [PR #12 — authfundament](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/12)
-- [PR #11 — duurzame MySQL-opslag](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/11)
-- [Database/Hostinger-handleiding](DATABASE-HOSTINGER-V2.md)
-- [Projectplan](PROJECT-PLAN-V2-2026-11-14.md)
+```sh
+npm run db:check -- --connection
+DB_SCHEMA_APPLY=explicit-review-completed npm run db:prepare
+npm run db:check
+ADMIN_BOOTSTRAP=interactive-confirmed npm run admin:create
+```
+
+db:prepare voert migraties 001–004 expliciet en in volgorde uit, met checksums en controle van de werkelijke tabellen. Het verandert geen featureflag, maakt geen account aan en verstuurt geen mail. Voer de inrichting eerst met fictieve gegevens op de geïsoleerde testdatabase uit en controleer backup/restore voordat de productiedatabase wordt ingericht. DDL draait nooit tijdens build, deployment of startup.
+
+Het eigenaarsscript werkt al in mailmodus terwijl beheer gesloten is. Het toont de authenticatorinstelling alleen in de vertrouwde terminal. Wacht na bevestiging op een nieuwe code voordat je inlogt: de instelcode mag niet worden hergebruikt.
+
+Vervolgbeheer:
+
+```sh
+ADMIN_OPERATIONS=interactive-confirmed npm run admin:manage
+```
+
+Acties: list, create, reset, disable en revoke. Controleer de identiteit van de accounthouder rechtstreeks vóór herstel. Een uitgeschakeld account blijft ook na herstel uitgeschakeld.
+
+## Activeren en controleren
+
+Na schema-inrichting, herstelproef, eigenaar/MFA, privacy/retentieafspraak en operationele mailboxcontrole:
+
+```dotenv
+LEAD_STORAGE_MODE=database
+ADMIN_ENABLED=true
+LEAD_ENABLED=true
+```
+
+LEAD_ENABLED=true vereist daarnaast complete SMTP-instellingen. Controleer na herstart /api/health, afgeschermde toegang zonder login, eigenaarlogin, één herkenbare testaanvraag, ontvangstnummer in beheer en echte ontvangst in leads@thuisbatterijteam.nl. Geautomatiseerde tests voeren die echte mailboxproef nooit uit.
+
+## Verificatie en grens
+
+- De overgenomen commit b834828 had twee geslaagde volledige CI-rondes. De nieuwe exacte commit en bijbehorende testrun staan in PR #13.
+- npm test: modellen, mail-API, cryptografie en terminalgrenzen. npm run check: publieke pagina's, assets, SEO en buildgrenzen.
+- npm run test:db: echte disposable MySQL 8 met fictieve accounts/aanvragen en fake mailtransporten. Auth, rollen, MFA, sessieverval, recovery/races, auditrollback, toewijzing, mailbeslissingen, budgetconcurrency en schema-afwijkingen.
+- npm run test:beheer: Chromium en axe voor desktop en 390px mobiel, inclusief CSRF-verversing, late antwoorden, rollen, toewijzing en mailcontrole. Publieke browserreis en Lighthouse blijven aparte CI-stappen.
+- De live-read vóór deze wijzigingen op 15 november gaf leadEnabled:false. Online aanvraaginname stond toen uit. Dit bewijst niet welke variabele ontbreekt of dat SMTP werkt.
+- Echte Hostinger-DB, backup/restore, eigenaaraccount en inboxontvangst zijn vanuit deze ontwikkelomgeving niet geverifieerd. Productie-activering blijft een aparte hostinghandeling.
+
+## Afzonderlijk vervolgwerk
+
+Interne notities, vervolgdatum/taken, zoeken, auditexport, automatische retentie/verwijdering, uitnodigingen per e-mail, offertegenerator en NIVO Portal-koppeling blijven aparte producttaken. Issues #2–#4 blijven open voor de resterende product- en operationele scope.
+
+Zie [Hostinger-stappen](DATABASE-HOSTINGER-V2.md), [beveiliging](BEHEER-SECURITY.md) en [overdracht 15 november](BEHEER-RELEASE-2026-11-15.md).

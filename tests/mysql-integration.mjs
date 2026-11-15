@@ -9,6 +9,7 @@ import { once } from 'node:events';
 import { createApp } from '../server/app.mjs';
 import { loadConfig } from '../server/config.mjs';
 import { applyInitialMigration } from '../scripts/db-migrate.mjs';
+import { applyNotificationMigration } from '../scripts/db-notification-migrate.mjs';
 import { createLeadPool, assertLeadSchema } from '../server/db/pool.mjs';
 import { createMysqlLeadStore, LeadConflictError } from '../server/db/store.mjs';
 import { createNotificationWorker } from '../server/db/worker.mjs';
@@ -87,6 +88,7 @@ try {
   await assertLeadSchema(pool);
   const second = await applyInitialMigration(pool);
   assert.equal(second.applied, false, 'Applying the same migration must be idempotent');
+  await applyNotificationMigration(pool);
   assert.equal(await count('aura_leads'), 0);
 
   const key = parseEncryptionKey(config.encryptionKey);

@@ -7,13 +7,26 @@ const labels = {
   won:'Gewonnen',lost:'Verloren',not_suitable:'Niet passend',
   pending:'Wacht op verzending',sending:'Wordt verzonden',accepted:'SMTP geaccepteerd',
   retry_wait:'Wacht op nieuwe poging',failed:'Mislukt',uncertain:'Aflevering onzeker',
+  confirmed:'Ontvangst bevestigd',
 };
 let csrfToken = null, currentPage = 1, currentLead = null, lastItems = [], previousFocus = null;
-let pending = false;
+let currentUser = null, viewVersion = 0, detailVersion = 0, refreshVersion = 0;
+let outboxPage = 1, currentNotification = null, activeView = 'leads';
+const requests = new Set();
+
+function interrupted(){return new DOMException('Dit verzoek is niet meer actueel.','AbortError');}
+function isInterrupted(error){return error?.name==='AbortError';}
+function clearRequests(){
+  viewVersion++;
+  refreshVersion++;
+  for(const controller of requests)controller.abort();
+  requests.clear();
+}
 
 function message(id,text){$(id).textContent=text||'';$(id).hidden=!text;}
 function textOr(value){return value===null||value===undefined||value===''?'—':String(value);}
 function formatDate(value){
+  if(!value)return '—';
   const date = new Date(value);
   return Number.isNaN(date.getTime())?'—':new Intl.DateTimeFormat('nl-NL',{dateStyle:'medium',timeStyle:'short'}).format(date);
 }
@@ -22,37 +35,83 @@ function setLoading(button, loading){
   button.setAttribute('aria-busy',loading?'true':'false');
 }
 async function api(path,opts={}){
+  const version=viewVersion;
+  // Sessions last eight hours, while the CSRF cookie is valid for fifteen
+  // minutes. Refresh before a mutation, including login and logout.
+  if(opts.method&&opts.method!=='GET'){
+    const state=await session();
+    if(version!==viewVersion)throw interrupted();
+    if(path!=='/login'&&path!=='/logout'&&!state.authenticated){
+      showLogin('Je sessie is verlopen. Log opnieuw in.');
+      throw interrupted();
+    }
+  }
   const init={credentials:'same-origin',headers:{'Accept':'application/json'},...opts};
   if(opts.method&&opts.method!=='GET'){
     init.headers={...init.headers,'Content-Type':'application/json','X-Aura-CSRF':csrfToken};
   }
-  const response=await fetch('/api/beheer'+path,init);
-  let result;
-  try{result=await response.json();}catch{throw new Error('De server reageert tijdelijk niet.');}
+  const {response,result}=await request('/api/beheer'+path,init,version);
   if(!response.ok||!result.ok){
-    if(response.status===401&&path!=='/login')showLogin('Je sessie is verlopen. Log opnieuw in.');
-    throw new Error(result.message||'Er is iets misgegaan.');
+    if(response.status===401&&path!=='/login'){
+      showLogin('Je sessie is verlopen. Log opnieuw in.');
+      throw interrupted();
+    }
+    const error=new Error(result.message||'Er is iets misgegaan.');
+    error.code=result.code;throw error;
   }
   return result;
 }
+async function request(path,init={},version=viewVersion){
+  const controller=new AbortController();requests.add(controller);
+  try{
+    const response=await fetch(path,{credentials:'same-origin',cache:'no-store',...init,signal:controller.signal});
+    let result;
+    try{result=await response.json();}catch(error){
+      if(isInterrupted(error))throw error;
+      throw new Error('De server reageert tijdelijk niet.');
+    }
+    if(version!==viewVersion)throw interrupted();
+    return {response,result};
+  }finally{requests.delete(controller);}
+}
 async function session(){
-  const response=await fetch('/api/beheer/session',{credentials:'same-origin',headers:{Accept:'application/json'}});
+  const {response,result:data}=await request('/api/beheer/session',{headers:{Accept:'application/json'}});
   if(!response.ok)throw new Error('Beheer is nog niet beschikbaar.');
-  const data=await response.json();
   if(!data.ok)throw new Error('Beheer is niet beschikbaar.');
   csrfToken=data.csrfToken;
   return data;
 }
 function showLogin(text=''){
+  clearRequests();csrfToken=null;currentUser=null;currentPage=1;
   $('dashboardView').hidden=true;$('loginView').hidden=false;closeDetail();
+  closeMailReview();outboxPage=1;setView('leads');
   $('leadRows').replaceChildren();lastItems=[];
+  $('outboxItems').replaceChildren();$('mailCount').textContent='0';
+  $('workbenchViews').hidden=true;
+  $('currentUser').textContent='Beheerder';$('currentRole').textContent='Beheer';
+  $('password').value='';$('totp').value='';$('statusFilter').value='';
+  $('pageLabel').textContent='Pagina 1';
+  $('outboxPageLabel').textContent='Pagina 1';
+  message('dashboardMessage','');message('listMessage','');
+  message('outboxMessage','');setLoading($('refreshButton'),false);
   for(const id of ['statTotal','statNew','statQuote','statMail'])$(id).textContent='—';
   message('loginError',text);
+  if(text)$('email').focus();
 }
 function showDashboard(user){
+  currentUser=user;
   $('loginView').hidden=true;$('dashboardView').hidden=false;
   $('currentUser').textContent=user.email||'Beheerder';
   $('currentRole').textContent=user.role==='admin'?'Beheerder':'Sales';
+  $('workbenchViews').hidden=user.role!=='admin';
+  if(user.role!=='admin')setView('leads');
+}
+function setView(name){
+  activeView=name==='outbox'&&currentUser?.role==='admin'?'outbox':'leads';
+  $('leadsPanel').hidden=activeView!=='leads';$('outboxPanel').hidden=activeView!=='outbox';
+  $('leadsTab').setAttribute('aria-pressed',String(activeView==='leads'));
+  $('outboxTab').setAttribute('aria-pressed',String(activeView==='outbox'));
+  $('dashboardTitle').textContent=activeView==='outbox'?'Mailcontrole':'Aanvragen';
 }
 async function enterDashboard(user){
   showDashboard(user);
@@ -68,22 +127,27 @@ function makeBadge(value){
   return el;
 }
 async function refreshAll(){
-  if(pending)return;
-  pending=true;
+  const version=++refreshVersion;
+  setLoading($('refreshButton'),true);
   try{
-    const data=await Promise.all([api('/summary'),loadLeads()]);
+    const data=await Promise.all([api('/summary'),loadLeads(version),
+      currentUser?.role==='admin'?loadNotifications(version):Promise.resolve(),
+    ]);
+    if(version!==refreshVersion||!currentUser)return;
     const s=data[0];$('statTotal').textContent=String(s.total);
     $('statNew').textContent=String(s.statuses?.new||0);
     $('statQuote').textContent=String(s.statuses?.quote_requested||0);
     $('statMail').textContent=String((s.notifications?.failed||0)+(s.notifications?.uncertain||0));
     message('dashboardMessage','');
-  }catch(error){message('dashboardMessage',error.message);}finally{pending=false;}
+  }catch(error){if(!isInterrupted(error)&&version===refreshVersion)message('dashboardMessage',error.message);}
+  finally{if(version===refreshVersion)setLoading($('refreshButton'),false);}
 }
-async function loadLeads(){
+async function loadLeads(version=refreshVersion){
   message('listMessage','Aanvragen laden…');
   const params=new URLSearchParams({page:String(currentPage)});
   if($('statusFilter').value)params.set('status',$('statusFilter').value);
   const data=await api('/leads?'+params.toString());
+  if(version!==refreshVersion||!currentUser)return data;
   lastItems=data.items;
   const rows=$('leadRows');rows.replaceChildren();
   for(const lead of lastItems){
@@ -91,7 +155,7 @@ async function loadLeads(){
     tr.append(makeCell(lead.requestId),makeCell(formatDate(lead.createdAt)));
     const status=makeCell('');status.textContent='';status.append(makeBadge(lead.status));tr.append(status);
     const delivery=makeCell('');delivery.textContent='';delivery.append(makeBadge(lead.deliveryStatus));tr.append(delivery);
-    const act=makeCell('');const btn=document.createElement('button');
+    const act=makeCell('');act.textContent='';const btn=document.createElement('button');
     btn.type='button';btn.className='open-lead';btn.textContent='Bekijk →';
     btn.setAttribute('aria-label','Bekijk aanvraag '+lead.requestId);
     btn.addEventListener('click',()=>openDetail(lead.requestId));
@@ -101,6 +165,46 @@ async function loadLeads(){
   $('pageLabel').textContent='Pagina '+currentPage;
   $('prevPage').disabled=currentPage===1;$('nextPage').disabled=lastItems.length<20;
   return data;
+}
+async function loadNotifications(version=refreshVersion){
+  message('outboxMessage','Mailnotificaties laden…');
+  const data=await api('/outbox?page='+outboxPage);
+  if(version!==refreshVersion||currentUser?.role!=='admin')return;
+  $('outboxItems').replaceChildren();
+  $('mailCount').textContent=String(data.total);
+  for(const item of data.items){
+    const card=document.createElement('article');card.className='outbox-item';
+    const text=document.createElement('div'),heading=document.createElement('h3');
+    heading.textContent=item.requestId;
+    const state=document.createElement('div');state.className='outbox-state';
+    const attempts=document.createElement('small');attempts.textContent=String(item.attempts)+' verzendpoging(en)';
+    state.append(makeBadge(item.status),attempts);
+    const time=document.createElement('p');time.textContent='Bijgewerkt '+formatDate(item.updatedAt);
+    if(item.errorCode)time.textContent+=' · '+item.errorCode;
+    text.append(heading,state,time);
+    const button=document.createElement('button');button.type='button';button.className='secondary small review-mail';
+    button.textContent='Controleer melding →';button.setAttribute('aria-label','Controleer mail voor '+item.requestId);
+    button.addEventListener('click',()=>openMailReview(item));
+    card.append(text,button);$('outboxItems').append(card);
+  }
+  message('outboxMessage',data.items.length?'':'Er staan geen mailnotificaties klaar voor controle.');
+  $('outboxPageLabel').textContent='Pagina '+outboxPage+' · '+data.total+' melding(en)';
+  $('outboxPrev').disabled=outboxPage===1;$('outboxNext').disabled=outboxPage*20>=data.total;
+}
+function openMailReview(item){
+  currentNotification=item;$('mailReviewForm').reset();
+  message('mailReviewMessage','');$('retryExplanation').hidden=true;
+  $('resolveConfirmationText').textContent='Ik heb de ontvangende mailbox gecontroleerd.';
+  setLoading($('resolveButton'),false);
+  fillDetails('mailReviewFields',[
+    ['Aanvraag',item.requestId],['Status',labels[item.status]],['Bericht-ID',item.mailMessageId],
+  ]);
+  $('mailDialog').showModal();$('closeMailDialog').focus();
+}
+function closeMailReview(){
+  if($('mailDialog').open)$('mailDialog').close();
+  currentNotification=null;$('mailReviewFields').replaceChildren();
+  $('mailReviewForm').reset();message('mailReviewMessage','');
 }
 function fillDetails(container,rows){
   const dl=$(container);dl.replaceChildren();
@@ -112,28 +216,41 @@ function fillDetails(container,rows){
 function openPane(){
   previousFocus=document.activeElement;
   $('detailPane').hidden=false;$('detailBackdrop').hidden=false;
+  $('detailPane').scrollTop=0;
   document.body.style.overflow='hidden';
   document.querySelector('.workspace').inert=true;
   document.querySelector('.sidebar').inert=true;
   $('closeDetail').focus();
 }
 function closeDetail(){
+  detailVersion++;
   $('detailPane').hidden=true;$('detailBackdrop').hidden=true;
   document.body.style.overflow='';
   document.querySelector('.workspace').inert=false;
   document.querySelector('.sidebar').inert=false;
   for(const name of ['contactFields','profileFields','systemFields'])$(name).replaceChildren();
   $('detailContent').hidden=true;
+  $('detailLoading').textContent='';message('statusMessage','');
+  $('assignmentForm').hidden=true;$('assignee').replaceChildren();message('assignmentMessage','');
+  $('editStatus').value='new';
   currentLead=null;$('detailTitle').textContent='Aanvraag';
   const restore=previousFocus;previousFocus=null;
-  if(restore?.isConnected&&!$('dashboardView').hidden)restore.focus();
+  if(!$('dashboardView').hidden){
+    if(restore?.isConnected)restore.focus();
+    else (document.querySelector('.open-lead')||$('refreshButton')).focus();
+  }
 }
 async function openDetail(requestId){
+  const version=++detailVersion;
   openPane();$('detailContent').hidden=true;$('detailLoading').hidden=false;
   $('detailLoading').textContent='Aanvraag ophalen…';
   $('detailTitle').textContent=requestId;message('statusMessage','');
   try{
-    const data=await api('/leads/'+encodeURIComponent(requestId));
+    const [data,assignees]=await Promise.all([
+      api('/leads/'+encodeURIComponent(requestId)),
+      currentUser?.role==='admin'?api('/assignees'):Promise.resolve(null),
+    ]);
+    if(version!==detailVersion||$('detailPane').hidden||!currentUser)return;
     currentLead=data.lead;
     const r=currentLead,p=r.profile||{},c=r.contact||{},n=r.notification||{};
     fillDetails('contactFields',[
@@ -151,8 +268,22 @@ async function openDetail(requestId){
       ['Pogingen',n.attempts],['Foutcode',n.errorCode],
     ]);
     $('editStatus').value=r.status;
+    $('assignmentForm').hidden=!assignees;
+    $('assignee').replaceChildren();message('assignmentMessage','');
+    if(assignees){
+      const nobody=document.createElement('option');nobody.value='';nobody.textContent='Nog niet toegewezen';$('assignee').append(nobody);
+      for(const user of assignees.items){
+        const option=document.createElement('option');option.value=user.id;
+        option.textContent=user.email+' · '+(user.role==='admin'?'Beheerder':'Sales');$('assignee').append(option);
+      }
+      if(r.assignedTo&&!assignees.items.some(user=>user.id===r.assignedTo)){
+        const inactive=document.createElement('option');inactive.value=r.assignedTo;
+        inactive.textContent='Huidige medewerker (niet actief)';inactive.disabled=true;$('assignee').append(inactive);
+      }
+      $('assignee').value=r.assignedTo||'';
+    }
     $('detailLoading').hidden=true;$('detailContent').hidden=false;
-  }catch(error){$('detailLoading').textContent=error.message;}
+  }catch(error){if(!isInterrupted(error)&&version===detailVersion)$('detailLoading').textContent=error.message;}
 }
 $('loginForm').addEventListener('submit',async event=>{
   event.preventDefault();const button=$('loginButton');setLoading(button,true);message('loginError','');
@@ -163,19 +294,54 @@ $('loginForm').addEventListener('submit',async event=>{
     $('password').value='';$('totp').value='';
     const state=await session();
     await enterDashboard(state.user||result.user);
-  }catch(error){message('loginError',error.message);}
+  }catch(error){if(!isInterrupted(error))message('loginError',error.message);}
   finally{setLoading(button,false);}
 });
 $('logoutButton').addEventListener('click',async()=>{
+  const button=$('logoutButton');setLoading(button,true);
   try{
     await api('/logout',{method:'POST',body:'{}'});
-    $('password').value='';$('totp').value='';
-    showLogin();await session();
+    showLogin();$('email').focus();
   }catch(error){
-    message('dashboardMessage','Uitloggen is niet bevestigd. Probeer opnieuw of sluit het browservenster.');
-  }
+    if(!isInterrupted(error))message('dashboardMessage','Uitloggen is niet bevestigd. Probeer opnieuw of sluit het browservenster.');
+  }finally{setLoading(button,false);}
 });
 $('refreshButton').addEventListener('click',refreshAll);
+$('leadsTab').addEventListener('click',()=>setView('leads'));
+$('outboxTab').addEventListener('click',()=>setView('outbox'));
+$('outboxPrev').addEventListener('click',()=>{if(outboxPage>1){outboxPage--;refreshAll();}});
+$('outboxNext').addEventListener('click',()=>{outboxPage++;refreshAll();});
+$('closeMailDialog').addEventListener('click',closeMailReview);
+$('mailDialog').addEventListener('cancel',event=>{event.preventDefault();closeMailReview();});
+$('resolveAction').addEventListener('change',()=>{
+  const retry=$('resolveAction').value==='retry';$('resolveConfirmed').checked=false;
+  $('retryExplanation').hidden=!retry;
+  $('resolveConfirmationText').textContent=retry
+    ?'Ik heb gecontroleerd dat deze notificatie niet is ontvangen en wil opnieuw laten verzenden.'
+    :'Ik heb deze notificatie in de ontvangende mailbox teruggevonden.';
+});
+$('mailReviewForm').addEventListener('submit',async event=>{
+  event.preventDefault();const item=currentNotification;
+  if(!item||!$('resolveAction').value||!$('resolveConfirmed').checked)return;
+  const button=$('resolveButton');setLoading(button,true);message('mailReviewMessage','');
+  let stateChanged=false;
+  try{
+    await api('/outbox/'+encodeURIComponent(item.id)+'/resolve',{method:'POST',body:JSON.stringify({
+      action:$('resolveAction').value,expectedStatus:item.status,expectedAttempt:item.attempts,confirmed:true,
+    })});
+    if(currentNotification===item)closeMailReview();
+    await refreshAll();
+    if(currentUser)message('dashboardMessage','De mailcontrole is opgeslagen.');
+  }catch(error){
+    if(!isInterrupted(error)&&currentNotification===item){
+      message('mailReviewMessage',error.message);
+      if(error.code==='STATE_CHANGED'){
+        stateChanged=true;$('resolveConfirmed').checked=false;
+        message('mailReviewMessage','Deze melding is inmiddels gewijzigd. Sluit dit venster en vernieuw het overzicht.');
+      }
+    }
+  }finally{setLoading(button,false);if(stateChanged)button.disabled=true;}
+});
 $('statusFilter').addEventListener('change',()=>{currentPage=1;refreshAll();});
 $('prevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;refreshAll();}});
 $('nextPage').addEventListener('click',()=>{if(lastItems.length===20){currentPage++;refreshAll();}});
@@ -185,7 +351,7 @@ document.addEventListener('keydown',event=>{
   if($('detailPane').hidden)return;
   if(event.key==='Escape'){event.preventDefault();closeDetail();return;}
   if(event.key!=='Tab')return;
-  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled])')].filter(node=>!node.hidden);
+  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled])')].filter(node=>node.getClientRects().length>0);
   if(!focusable.length)return;
   const first=focusable[0],last=focusable.at(-1);
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
@@ -193,16 +359,36 @@ document.addEventListener('keydown',event=>{
 });
 $('statusForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!currentLead)return;
+  const lead=currentLead,version=detailVersion;
   const button=$('statusForm').querySelector('button[type=submit]');setLoading(button,true);
   message('statusMessage','');
   try{
-    const result=await api('/leads/'+encodeURIComponent(currentLead.requestId)+'/status',{
+    const result=await api('/leads/'+encodeURIComponent(lead.requestId)+'/status',{
       method:'PATCH',body:JSON.stringify({status:$('editStatus').value}),
     });
-    currentLead.status=result.status;
-    message('statusMessage',result.changed?'Status bijgewerkt.':'Status was al bijgewerkt.');
+    if(version===detailVersion&&currentLead===lead){
+      currentLead.status=result.status;
+      message('statusMessage',result.changed?'Status bijgewerkt.':'Status was al bijgewerkt.');
+    }
     await refreshAll();
-  }catch(error){message('statusMessage',error.message);}
+  }catch(error){if(!isInterrupted(error)&&version===detailVersion)message('statusMessage',error.message);}
+  finally{setLoading(button,false);}
+});
+$('assignmentForm').addEventListener('submit',async event=>{
+  event.preventDefault();if(!currentLead||currentUser?.role!=='admin')return;
+  const lead=currentLead,version=detailVersion;
+  const button=$('assignmentForm').querySelector('button[type=submit]');setLoading(button,true);
+  message('assignmentMessage','');
+  try{
+    const result=await api('/leads/'+encodeURIComponent(lead.requestId)+'/assignee',{
+      method:'PATCH',body:JSON.stringify({userId:$('assignee').value||null}),
+    });
+    if(version===detailVersion&&currentLead===lead){
+      lead.assignedTo=result.assignedTo;
+      message('assignmentMessage',result.changed?'Toewijzing bijgewerkt.':'Toewijzing was al bijgewerkt.');
+    }
+    await refreshAll();
+  }catch(error){if(!isInterrupted(error)&&version===detailVersion)message('assignmentMessage',error.message);}
   finally{setLoading(button,false);}
 });
 (async()=>{
