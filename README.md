@@ -37,6 +37,10 @@ De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal
 
 De eerste openstaande controle is de echte SMTP-inboxontvangst in leads@thuisbatterijteam.nl, zie [issue #1](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/1). De V1-ervaring blijft het werkende productiepad totdat nieuwe onderdelen getest zijn.
 
+### Beheer-MVP in ontwikkeling
+
+Een beveiligde beheerwerkbank is voorbereid in [draft-PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13), gebaseerd op de MySQL- en auth-conceptbranches. Op `main` is deze **niet actief**. De branch bevat een login met verplichte TOTP, rolgecontroleerde dossier-API, een responsive aanvragenlijst en audit van statuswijzigingen, plus real-MySQL en Chromium-regressietests. Alle nieuwe endpoints blijven standaard gesloten bij `ADMIN_ENABLED=false`. De werkelijke Hostinger-DB, geheimen, migraties, owner-MFA en herstel/incidentproces moeten afzonderlijk worden gevalideerd. Zie [BEHEER-MVP.md](docs/BEHEER-MVP.md).
+
 ## Lokaal starten
 
 Gebruik Node.js 24. Voor ontwikkeling zijn één terminal en één opdracht na installatie voldoende:

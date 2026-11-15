@@ -14,3 +14,7 @@
 - Keep `LEAD_ENCRYPTION_KEY`, `LEAD_HASH_SECRET` and all DB credentials only in secure Hostinger environment settings. A lost encryption key loses the ability to decrypt; a rotated HMAC key affects idempotency.
 - The database receipt confirms only committed storage; SMTP acceptance and true inbox delivery must be tracked separately. Never silently fall back to SMTP-only after a DB outage.
 - Use CI's disposable MySQL service for database regression tests; never connect tests to live database or send real mail.
+
+- Beheer/MVP is behind `ADMIN_ENABLED=false` by default and depends on both migrations 001+002 and DB mode. No public accounts, no production activation while user provisioning, MFA recovery, backups and privacy/outbox incident workflow are incomplete.
+- Test dashboard security with disposable CI MySQL (tests/admin-integration.mjs) plus browser/accessibility tests (tests/beheer-browser.mjs) and never use real contacts or production credentials in QA.
+- Browser dashboard must stay within a 390px viewport without document expansion; the mobile list uses responsive cards while maintaining semantic table cells.
