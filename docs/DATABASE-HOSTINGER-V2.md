@@ -1,5 +1,7 @@
 # HYXI AURA — database en beheer op Hostinger
 
+> **Huidige status 16 november 2026:** deze handleiding documenteert eerder uitgevoerde Hostinger-installatiestappen. Database en migraties 001–004 zijn al live en mogen niet zonder bewezen noodzaak opnieuw worden uitgevoerd. De eigenaar accepteert Hostinger's **dagelijkse automatische backups**; een eigen back-upsysteem of onafhankelijke restore-oefening is geen actieve ontwikkelblokkade (restore niet onafhankelijk bewezen). De live leadketen via teammail naar Odoo is bevestigd. Voor nieuwe taken: [fast-lane roadmap](ROADMAP-FASTLANE-2026-11-16.md).
+
 Bijgewerkt 15 november 2026. Via Hostinger-SSH heeft de eigenaar de verbinding met MariaDB 11.8.9 en de succesvolle migraties 001–004 plus schemacontrole bevestigd. Er waren aanvankelijk 0 tabellen en na de migraties 0 actieve eigenaars. De oorspronkelijke aanmaak strandde op de MFA-bevestiging; de fast-lane-oplossing maakt een eigenaar aan met uitsluitend e-mailadres en één wachtwoord. Backup/restore en SMTP-inboxontvangst zijn nog niet bewezen; de eigenaar heeft op 15 november met één wachtwoord succesvol ingelogd op het live /beheer.
 
 ## 1. Privé-instellingen voorbereiden
