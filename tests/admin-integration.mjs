@@ -213,7 +213,6 @@ try {
   const absentAccount={
     email:'unknown-test@example.test',
     password:'WrongNotRealTestPass1234!',
-    totpSecret:newTotpSecret(),
   };
   for(let i=0;i<7;i++)responses.push((await tryLogin(brute,absentAccount,bruteCsrf)).status);
   assert.ok(responses.includes(429),'persistent account guard throttles after repeated attempts');
