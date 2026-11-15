@@ -1,5 +1,7 @@
 # HYXI AURA — deployment vanuit `main`
 
+> **Actuele stand 15 november 2026:** de eigenaar is ingelogd op het live password-only dashboard; MariaDB-migraties 001–004 zijn toegepast. Onderdelen hieronder beschrijven deels de oorspronkelijke **mail-only V1** en zijn historisch voor een reeds ingeschakelde databaseomgeving. Controleer vóór verdere activatie de huidige `/api/health`, echte databaselead + ontvangst op `leads@thuisbatterijteam.nl`, privacyverklaring en back-up. Zie [actuele overdracht](HANDOFF-LEADGEN-2026-11-15.md).
+
 Deze eerste release bevat de interactieve landingspagina en een echte, beveiligde aanvraagroute naar Thuisbatterij Team. De website kan direct worden gedeployed. Aanvragen via het formulier worden pas geactiveerd nadat de mailinstellingen zijn ingevuld. Zonder mailconfiguratie blijft rechtstreeks contact met Thuisbatterij Team mogelijk.
 
 ## 1. Koppel de repository

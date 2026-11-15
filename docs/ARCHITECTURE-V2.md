@@ -1,4 +1,6 @@
 # HYXI AURA 2.0 — Technische architectuur (ontwerp)
+> **Historisch document (stand 14 november 2026).** Sindsdien heeft de eigenaar MariaDB 11.8.9 met migraties 001–004 en het live password-only /beheer bevestigd. Actuele stand, resterende P0-werkzaamheden en volgorde staan in [HANDOFF-LEADGEN-2026-11-15.md](HANDOFF-LEADGEN-2026-11-15.md); dit document is niet langer de actuele productie-statusbron. Echte lead- en mailboxontvangst plus privacycorrectie zijn nog open.
+
 **Datum:** 14 november 2026. **Niet in productie geïmplementeerd.**
 
 ## 1. Bestaande technische situatie
