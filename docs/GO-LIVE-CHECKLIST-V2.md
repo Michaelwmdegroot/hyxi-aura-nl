@@ -1,4 +1,6 @@
 # HYXI AURA 2.0 — Go-livechecklist en operationele overdracht
+
+> **Actueel 15 nov 2026:** MariaDB 11.8.9, migraties 001–004, eerste beheeraccount en live dashboard-login door eigenaar bevestigd (0 leads). **Open P0:** actuele `leadEnabled`, één echte end-to-end aanvraag, mailboxontvangst, privacyverklaring versus nieuwe DB-opslag, back-up/retentie. Zie [handoff](HANDOFF-LEADGEN-2026-11-15.md). Geen 2FA vereist.
 **Status:** checklijst, geen bewijs dat openstaande acties klaar zijn.
 
 ## V1-productie
@@ -13,12 +15,12 @@
 - [ ] Controleer werkelijke privacyrollen, mailbox- en archiefretentie.
 
 ## Voordat DB/auth/dashboard live gaan
-- [ ] Hostinger MySQL en minimaal bevoorrechte databasegebruiker via hostingomgeving.
-- [ ] DB-omgeving variabelen privé invoeren (geen secrets in Git/issue/chat).
+- [x] Hostinger MariaDB 11.8.9 en specifieke DB-gebruiker; verbinding en schema gevalideerd via SSH (minimale privileges afzonderlijk beoordelen).
+- [x] DB-omgeving privé ingesteld; gebruiker bevestigde verbinding en 4 migraties, zonder geheimen te delen.
 - [ ] Back-up, terugzetten en schema rollback getest met fictieve data.
-- [ ] Eigenaartoegang, rollen en MFA-toegang goedgekeurd.
+- [x] Eerste eigenaaraccount en productie-login bevestigd; password-only (geen MFA) is expliciet door eigenaar gekozen.
 - [ ] Autorisatietests, sessieverval, CSRF, rate limiting en privacycheck uitgevoerd.
-- [ ] Formulieropslag en e-mailnotificatie apart en zichtbaar gecontroleerd.
+- [ ] **P0:** één echte formulieraanvraag aantonen in /beheer én inbox van leads@thuisbatterijteam.nl; dashboard heeft nu 0 leads.
 - [ ] Geen persoonsgegevens in fouten, logs, analytics of tests.
 
 ## Voordat offerte- en SEO-fase uitrollen

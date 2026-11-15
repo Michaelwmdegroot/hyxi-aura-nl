@@ -60,7 +60,7 @@ LEAD_ENABLED=true vereist daarnaast complete SMTP-instellingen. Controleer na he
 - npm run test:db: echte disposable MySQL 8 met fictieve accounts/aanvragen en fake mailtransporten. Auth, rollen, sessieverval, recovery/races, auditrollback, toewijzing, mailbeslissingen, budgetconcurrency en schema-afwijkingen.
 - npm run test:beheer: Chromium en axe voor desktop en 390px mobiel, inclusief CSRF-verversing, late antwoorden, rollen, toewijzing en mailcontrole. Publieke browserreis en Lighthouse blijven aparte CI-stappen.
 - De live-read vóór deze wijzigingen op 15 november gaf leadEnabled:false. Online aanvraaginname stond toen uit. Dit bewijst niet welke variabele ontbreekt of dat SMTP werkt.
-- Hostinger MariaDB 11.8.9, de databaseverbinding en migraties 001–004 zijn door de eigenaar via SSH bevestigd. Backup/restore, eerste eigenaarlogin en echte inboxontvangst blijven te controleren. Productie-activering blijft een aparte hostinghandeling.
+- Hostinger MariaDB 11.8.9, de databaseverbinding en migraties 001–004 zijn door de eigenaar via SSH bevestigd; daarnaast is /beheer-login met één wachtwoord door een screenshot aangetoond. Backup/restore en echte inboxontvangst blijven te controleren. Productie-activering blijft een aparte hostinghandeling.
 
 ## Afzonderlijk vervolgwerk
 

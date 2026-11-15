@@ -1,5 +1,7 @@
 # HYXI AURA · hyxi-aura.nl
 
+> **Actuele overdracht (15 nov 2026):** HYXI AURA staat live op Hostinger. De eigenaar heeft MariaDB-migraties 001–004 en een werkende **password-only /beheer-login** bevestigd. De account-/dashboard-MVP is dus meer dan een toekomstplan. **Nog niet bevestigd:** live formulier → DB-record → daadwerkelijke mailontvangst, privacy/retentie en monitoring. Zie **[het actuele leadgen-handoff](docs/HANDOFF-LEADGEN-2026-11-15.md)** en **[de startprompt voor de nieuwe agent](docs/NEXT-AGENT-LEADGEN-2026-11-15.md)**. Oudere secties hieronder beschrijven mede V1 en geplande functies; het handoff gaat voor bij statusconflicten.
+
 Een interactieve Nederlandse productervaring voor de HYXI AURA thuisbatterij. Bezoekers ontdekken de werking, verkennen een modulaire opstelling en vragen persoonlijk advies aan bij **Thuisbatterij Team**. De website is een initiatief van **NIVO Groep Holland B.V.** en is geen officiële HYXI-website.
 
 ## Wat zit erin?

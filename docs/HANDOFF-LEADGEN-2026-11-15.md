@@ -75,16 +75,16 @@ De website is **geen officiële HYXI-fabrikantwebsite**. Geen gefingeerde produc
 
 | Issue | Betekenis | Eerlijke status |
 | --- | --- | --- |
-| [#1](../issues/1) | echte lead-mail, privacy | **P0 OPEN**, niet aangetoond |
-| [#2](../issues/2) | duurzame DB/outbox | **technische kern GO**, live e2e/retentie/backup OPEN |
-| [#3](../issues/3) | auth/accounts | **password-only kern LIVE**, uitnodigingen/comfort OPEN; oude MFA-eis vervallen door eigenaarbesluit |
-| [#4](../issues/4) | dashboard/CRM-lite | **MVP LIVE**, notities/taken/zoeken/export OPEN |
-| [#5](../issues/5) | offerte-aanvraag | OPEN |
-| [#6](../issues/6) | UX/design | OPEN, eigenaar geeft 7/10 |
-| [#7](../issues/7) | SEO/GSC | OPEN |
-| [#8](../issues/8) | analytics/KPI | OPEN |
-| [#9](../issues/9) | monitoring/backup/later Portal | OPEN |
-| [#10](../issues/10) | masterplan | dit overdrachtsdocument is de nieuwe statusbron |
+| [#1](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/1) | echte lead-mail, privacy | **P0 OPEN**, niet aangetoond |
+| [#2](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/2) | duurzame DB/outbox | **technische kern GO**, live e2e/retentie/backup OPEN |
+| [#3](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/3) | auth/accounts | **password-only kern LIVE**, uitnodigingen/comfort OPEN; oude MFA-eis vervallen door eigenaarbesluit |
+| [#4](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/4) | dashboard/CRM-lite | **MVP LIVE**, notities/taken/zoeken/export OPEN |
+| [#5](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/5) | offerte-aanvraag | OPEN |
+| [#6](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/6) | UX/design | OPEN, eigenaar geeft 7/10 |
+| [#7](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/7) | SEO/GSC | OPEN |
+| [#8](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/8) | analytics/KPI | OPEN |
+| [#9](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/9) | monitoring/backup/later Portal | OPEN |
+| [#10](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10) | masterplan | dit overdrachtsdocument is de nieuwe statusbron |
 
 ## 6. Technische handgrepen voor nieuwe agent
 
