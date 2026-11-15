@@ -106,7 +106,7 @@ function updateConfiguration() {
   while (stack.children.length > chosen.count) stack.lastElementChild.remove();
   while (stack.children.length < chosen.count) { const module = document.createElement('div'); module.className = 'stack-module'; stack.append(module); }
   $('#form-configuration').textContent = `${decimal(chosen.nominal)} kWh · ${moduleText}`;
-  $('[data-quote-link]').forEach(link => { link.href = `/offerte/?moduleType=${chosen.type}&moduleCount=${chosen.count}`; });
+  $$('[data-quote-link]').forEach(link => { link.href = `/offerte/?moduleType=${chosen.type}&moduleCount=${chosen.count}`; });
 }
 $$('input[name="module-type"]').forEach(input => input.addEventListener('change', updateConfiguration));
 $('#module-count').addEventListener('input', updateConfiguration);
