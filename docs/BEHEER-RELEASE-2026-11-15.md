@@ -1,3 +1,5 @@
+> **Nieuwe afsluitende overdracht:** [Leadgen projectstatus en roadmap](HANDOFF-LEADGEN-2026-11-15.md) · [Startprompt opvolgende agent](NEXT-AGENT-LEADGEN-2026-11-15.md). De eigenaar heeft zijn eerste account aangemaakt en is op het live dashboard ingelogd; de live lead-/mailtest is nog niet bevestigd.
+
 > **Fast-lane actualisering 15 november 2026:** de gebruiker heeft wachtwoord-only Beheer gekozen. Het oude MFA-ontwerp in deze historische overdracht is vervangen: geen authenticatorcode of tweede wachtwoord. MariaDB 11.8.9 met schema 001–004 is door de eigenaar gecontroleerd. Lees docs/BEHEER-MVP.md en docs/BEHEER-SECURITY.md voor de actuele login.
 
 # HYXI AURA Beheer — voortzetting en overdracht 15 november 2026

@@ -1,5 +1,7 @@
 # Working on HYXI AURA
 
+> **Current handoff — 15 Nov 2026:** [Leadgen handoff](docs/HANDOFF-LEADGEN-2026-11-15.md) and [next-agent start](docs/NEXT-AGENT-LEADGEN-2026-11-15.md). Owner verified production MariaDB 11.8.9 migrations 001–004 and logged-in /beheer with 0 leads. Password-only access is a binding owner decision: do not reintroduce MFA. Live public lead intake / mailbox delivery are **not yet proven**; correct inaccurate database statement in public privacy page before further real intake.
+
 - Use Node.js 24 and the committed npm lockfile. `npm run dev` runs the frontend and lead API together.
 - Keep product facts traceable to `src/product-data.mjs` and `docs/PRODUCT-SOURCES.md`. The current manufacturer datasheets are preliminary. Never invent prices, savings, stock, guarantees, reviews or dealer status.
 - FAQ content is generated from `src/product-data.mjs` during the build. Keep the visible specifications and explanations consistent with that data.
@@ -10,11 +12,11 @@
 - Production starts through `server.mjs` and serves only `dist`. Development/QA helpers and source files are not public production assets.
 - Keep deploy instructions in `docs/HOSTINGER.md` current. Deployment targets `main`; domain, DNS, HTTPS and real SMTP configuration are separate hosting steps.
 
-- V2 encrypted MySQL mode is opt-in via `LEAD_STORAGE_MODE=database` and not enabled on production; default remains `mail`. Never switch production before backups, staging, privacy/retention and incident monitoring are independently validated.
+- Source defaults remain `LEAD_STORAGE_MODE=mail`; however the owner has already logged into production /beheer, which implies live database-mode administration. Do not incorrectly report production still in mail-only mode. Independently verify `LEAD_ENABLED` and actual end-to-end lead+SMTP delivery. Treat backup/restore and privacy/retention as priority release follow-up; no needless restaging or repeated DB migration.
 - Keep `LEAD_ENCRYPTION_KEY`, `LEAD_HASH_SECRET` and all DB credentials only in secure Hostinger environment settings. A lost encryption key loses the ability to decrypt; a rotated HMAC key affects idempotency.
 - The database receipt confirms only committed storage; SMTP acceptance and true inbox delivery must be tracked separately. Never silently fall back to SMTP-only after a DB outage.
 - Use CI's disposable MySQL service for database regression tests; never connect tests to live database or send real mail.
 
-- Beheer/MVP is behind `ADMIN_ENABLED=false` by default and uses reviewed migrations 001–004 and DB mode. Keep production activation separate from merging code with disabled defaults. Password-only trusted-terminal provisioning/recovery and the outbox incident workflow are implemented; verify the actual hosting setup, backups and privacy/retention before activation. See docs/BEHEER-RELEASE-2026-11-15.md.
+- `ADMIN_ENABLED=false` is the code default; owner's production /beheer screenshot confirms active admin session. MariaDB migrations 001–004 and first owner account are already complete. Password-only trusted-terminal account management and the outbox incident workflow are implemented. Do not request new admin bootstrap, secret regeneration or TOTP. See docs/HANDOFF-LEADGEN-2026-11-15.md.
 - Test dashboard security with disposable CI MySQL (tests/admin-integration.mjs) plus browser/accessibility tests (tests/beheer-browser.mjs) and never use real contacts or production credentials in QA.
 - Browser dashboard must stay within a 390px viewport without document expansion; the mobile list uses responsive cards while maintaining semantic table cells.
