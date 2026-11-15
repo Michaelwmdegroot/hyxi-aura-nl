@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { verifyAdminPassword, hashAdminPassword, newSessionToken, hashSessionToken, decryptTotp, verifyTotp } from './security.mjs';
+import { verifyAdminPassword, hashAdminPassword, newSessionToken, hashSessionToken } from './security.mjs';
 import { openLead, parseEncryptionKey } from '../db/crypto.mjs';
 import { assertAdminStructure, assertMigrationChecksum } from '../db/schema-check.mjs';
 import { createAdminOperations } from './operations.mjs';
@@ -27,14 +27,10 @@ export async function assertAdminSchema(pool) {
   await assertMigrationChecksum(pool,'002_admin_auth');
 }
 
-export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKey, now = Date.now }) {
+export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
   if (!pool || typeof pool.getConnection !== 'function') throw new Error('MySQL pool required.');
   if (typeof sessionSecret !== 'string' || Buffer.byteLength(sessionSecret, 'utf8') < 32) {
     throw new Error('Strong ADMIN_SESSION_SECRET required.');
-  }
-  if (typeof mfaKey !== 'string' || !/^[A-Za-z0-9+/]{43}=$/.test(mfaKey) ||
-      Buffer.from(mfaKey,'base64').length !== 32 || Buffer.from(mfaKey,'base64').toString('base64') !== mfaKey) {
-    throw new Error('ADMIN_MFA_KEY must be canonical 32-byte base64.');
   }
   const leadKey = parseEncryptionKey(leadEncryptionKey);
   const sessionHash = token => hashSessionToken(token, sessionSecret);
@@ -60,31 +56,26 @@ export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKe
     }
   }
 
-  async function login({ email, password, code, address }) {
+  async function login({ email, password, address }) {
     const normalized = normalizeEmail(email);
     await countAttempts(normalized, address);
     const [rows] = normalized
-      ? await pool.execute('SELECT id,login_email,password_hash,role,mfa_secret_encrypted,mfa_last_accepted_step,disabled_at FROM aura_admin_users WHERE login_email=? AND BINARY login_email=BINARY ? LIMIT 1', [normalized,normalized])
+      ? await pool.execute('SELECT id,login_email,password_hash,role,disabled_at FROM aura_admin_users WHERE login_email=? AND BINARY login_email=BINARY ? LIMIT 1', [normalized,normalized])
       : [[]];
     const user = rows[0] || null;
     if (!dummyHashPromise) dummyHashPromise = hashAdminPassword(DUMMY_PASSWORD);
     const passwordOk = await verifyAdminPassword(password, user?.password_hash || await dummyHashPromise);
     if (!user || user.disabled_at || !ADMIN_ROLES.has(user.role) || !passwordOk) return null;
-    let step;
-    try {
-      const secret = decryptTotp(user.mfa_secret_encrypted, user.id, mfaKey);
-      step = verifyTotp(secret, code, now(), Number(user.mfa_last_accepted_step));
-    } catch { return null; }
-    if (step === null) return null;
-
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      const [updated] = await conn.execute(
-        'UPDATE aura_admin_users SET mfa_last_accepted_step=? WHERE id=? AND mfa_last_accepted_step < ? AND disabled_at IS NULL AND password_hash=? AND mfa_secret_encrypted=?',
-        [step,user.id,step,user.password_hash,user.mfa_secret_encrypted],
+      // Account row lock prevents an old password from winning a reset race.
+      const [current] = await conn.execute(
+        'SELECT password_hash,role,disabled_at FROM aura_admin_users WHERE id=? FOR UPDATE',
+        [user.id],
       );
-      if (updated.affectedRows !== 1) {
+      if (!current[0] || current[0].disabled_at || !ADMIN_ROLES.has(current[0].role) ||
+          current[0].password_hash !== user.password_hash) {
         await conn.rollback();
         return null;
       }
@@ -99,8 +90,8 @@ export function createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKe
       );
       await conn.commit();
       return { token, user: { id:user.id, email:user.login_email, role:user.role } };
-    } catch (error) {
-      await conn.rollback().catch(() => {});
+    } catch(error) {
+      await conn.rollback().catch(()=>{});
       throw error;
     } finally { conn.release(); }
   }

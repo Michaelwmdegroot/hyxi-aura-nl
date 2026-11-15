@@ -62,12 +62,9 @@ export function loadConfig(env = process.env) {
     Buffer.byteLength(hashSecret, 'utf8') >= 32;
   // The admin UI can never be enabled on the SMTP-only website.
   const adminSessionSecret = String(env.ADMIN_SESSION_SECRET || '');
-  const adminMfaKey = String(env.ADMIN_MFA_KEY || '');
+  // One-password login; the private session secret remains server-side.
   const adminConfigured = storageMode === 'database' && dbConfigured &&
-    dbSecretsConfigured && Buffer.byteLength(adminSessionSecret, 'utf8') >= 32 &&
-    /^[A-Za-z0-9+/]{43}=$/.test(adminMfaKey) &&
-    Buffer.from(adminMfaKey, 'base64').length === 32 &&
-    Buffer.from(adminMfaKey, 'base64').toString('base64') === adminMfaKey;
+    dbSecretsConfigured && Buffer.byteLength(adminSessionSecret, 'utf8') >= 32;
   const adminEnabled = boolean(env.ADMIN_ENABLED) && adminConfigured;
   const trustProxyValue = String(env.TRUST_PROXY || 'false');
   // A fixed hop count is deliberate: never blindly trust user-supplied X-Forwarded-For.
@@ -87,7 +84,6 @@ export function loadConfig(env = process.env) {
     adminEnabled,
     adminConfigured,
     adminSessionSecret,
-    adminMfaKey,
     leadEnabled: boolean(env.LEAD_ENABLED) && smtpConfigured &&
       (storageMode === 'mail' || (dbConfigured && dbSecretsConfigured)),
     dailyLimit: integer(env.SMTP_DAILY_LIMIT, 100, 1, 1000),
