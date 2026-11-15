@@ -18,7 +18,7 @@ main{max-width:1240px;margin:0 auto;padding:84px 26px 110px}
 .product-frame img{width:auto;height:345px;object-fit:contain;position:relative;filter:drop-shadow(0 19px 24px #2a231d28)}
 .product-frame>span{position:absolute;bottom:23px;color:#6d5c53;text-transform:uppercase;font-size:9px;letter-spacing:.16em;font-weight:800}
 .benefits{background:#fff;border:1px solid #eceae4;border-radius:22px;padding:30px 30px 16px;margin-top:18px}.benefits h2{font-size:24px;letter-spacing:-.055em;margin:0 0 25px}
-.benefits ol{list-style:none;padding:0;margin:0}.benefits li{display:flex;align-items:start;gap:18px;padding:16px 0;border-top:1px solid #f0f0ec}.benefits strong{font-size:12px}.benefits li p,.aside-note{font-size:11px;line-height:1.8;color:#647066;margin:6px 0}.number{color:#b16848;font-size:11px;font-weight:850;padding-top:1px}
+.benefits ol{list-style:none;padding:0;margin:0}.benefits li{display:flex;align-items:start;gap:18px;padding:16px 0;border-top:1px solid #f0f0ec}.benefits strong{font-size:12px}.benefits li p,.aside-note{font-size:11px;line-height:1.8;color:#647066;margin:6px 0}.number{color:#93482e;font-size:11px;font-weight:850;padding-top:1px}
 .aside-note{padding:5px 12px 0;max-width:420px;margin:18px auto 0}
 .form-card{background:#fff;border:1px solid #e7eae3;border-radius:25px;padding:38px 38px 36px;box-shadow:0 20px 70px #28322b0a}
 .form-header .eyebrow{justify-content:start}.form-header h2{font-size:clamp(28px,3vw,39px);letter-spacing:-.055em;line-height:1.15;margin:14px 0 8px}.form-header p{font-size:12px;color:#5f6d63;line-height:1.7;margin:0 0 24px}
