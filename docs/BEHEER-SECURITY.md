@@ -5,7 +5,7 @@ Bijgewerkt 15 november 2026. Dit beschrijft de code en gecontroleerde testscenar
 ## Accounts en toegang
 
 - Geen publieke signup of herstelroute. Eerste eigenaar en vervolgbeheer via een vertrouwde interactieve terminal, met bevestiging van een verse authenticatorcode.
-- Salted scrypt-wachtwoordhashes, N=32768/r=8/p=1; minimaal 14 bytes en 12 niet-lege tekens. Geheime invoer zonder echo.
+- Salted scrypt-wachtwoordhashes, N=32768/r=8/p=1; minimaal 12 niet-lege tekens en maximaal 1024 bytes. Eerste eigenaar en vervolgaccounts vragen het wachtwoord één keer zonder echo; een aparte MFA-code blijft verplicht.
 - TOTP voor admin én sales, begrensde klokafwijking en anti-replay. Seeds worden accountgebonden met AES-256-GCM versleuteld.
 - Willekeurige 256-bit sessietokens, alleen HMAC-hash in DB, acht uur geldig. HttpOnly/SameSite=Strict/Secure cookies in productie. Server-side sessie- en rolcontrole per aanvraag.
 - Persistente limieten per gehashte bron-IP en account. Bron-IP wordt eerst begrensd zodat een geblokkeerde bron geen onbeperkte nieuwe accountcounters maakt. Login matcht het genormaliseerde e-mailadres exact.

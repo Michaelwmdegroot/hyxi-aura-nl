@@ -11,6 +11,9 @@ test('scrypt password hashes are salted, strong and verify in constant time', as
   assert.equal(await verifyAdminPassword(pwd + 'x', a), false);
   assert.equal(await verifyAdminPassword(pwd, 'broken'), false);
   await assert.rejects(() => hashAdminPassword('password123'));
+  const ordinaryLoginPassword = 'A1234567890!';
+  const normalHash = await hashAdminPassword(ordinaryLoginPassword);
+  assert.equal(await verifyAdminPassword(ordinaryLoginPassword, normalHash), true);
   await assert.rejects(() => hashAdminPassword('a'.repeat(1100)));
 });
 
