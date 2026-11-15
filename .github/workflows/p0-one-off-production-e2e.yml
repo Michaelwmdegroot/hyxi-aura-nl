@@ -1,0 +1,22 @@
+name: One-time HYXI AURA synthetic P0 intake test
+
+on:
+  push:
+    branches:
+      - ops/p0-one-time-lead-smoke
+
+permissions:
+  contents: read
+
+jobs:
+  one-time-public-intake:
+    if: github.ref == 'refs/heads/ops/p0-one-time-lead-smoke'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Submit single marked synthetic request via public CSRF-protected API
+        run: node scripts/p0-one-off-production-e2e.mjs
