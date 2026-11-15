@@ -1,7 +1,7 @@
 /** No public reset link: all account changes require the trusted server TTY. */
 import { loadConfig } from '../server/config.mjs';
 import { createLeadPool } from '../server/db/pool.mjs';
-import { newTotpSecret, validAdminPassword } from '../server/auth/security.mjs';
+import { validAdminPassword } from '../server/auth/security.mjs';
 import {
   listAdminAccounts, createAdminAccount, resetAdminAccount,
   disableAdminAccount, revokeAdminSessions, AccountOperationError,
@@ -17,23 +17,16 @@ const messages = {
   ACCOUNT_EXISTS: 'Er bestaat al een account met dit e-mailadres.',
   FIRST_OWNER_REQUIRED: 'Maak eerst de eigenaar aan met admin:create.',
   LAST_ACTIVE_ADMIN: 'De laatste actieve beheerder kan niet worden uitgeschakeld.',
-  MFA_CONFIRMATION_FAILED: 'De authenticatorcode klopt niet. Er is niets opgeslagen.',
   PASSWORD_POLICY: 'Gebruik één Beheer-wachtwoord van minimaal 12 tekens (maximaal 1024 bytes).',
   INVALID_CONFIGURATION: 'Database- of beveiligingsconfiguratie is onvolledig.',
   SCHEMA_NOT_READY: 'Voer eerst de gecontroleerde account-auditmigratie 003 uit.',
   BUSY: 'Een andere beheeractie is actief; probeer later opnieuw.',
 };
 
-async function enrollment(email) {
-  console.log('Laat de accounthouder zelf een uniek wachtwoord en authenticator instellen in deze vertrouwde terminal.');
-  const password = await askHidden('Wachtwoord voor Beheer (minimaal 12 tekens): ');
+async function enrollment() {
+  const password = await askHidden('Inlogwachtwoord (minimaal 12 tekens): ');
   if (!validAdminPassword(password)) throw new AccountOperationError('PASSWORD_POLICY');
-  const totpSecret = newTotpSecret();
-  console.log('Voeg handmatig toe in de authenticator: HYXI AURA Beheer (' + email + ').');
-  console.log('Eenmalige geheime instelsleutel: ' + totpSecret);
-  console.log('Tijdgebaseerd, 6 cijfers, 30 seconden. Bewaar of deel geen terminalopname.');
-  const confirmationCode = await askHidden('Actuele 6-cijferige authenticatorcode: ');
-  return { password, totpSecret, confirmationCode };
+  return {password};
 }
 
 async function run() {
@@ -41,9 +34,7 @@ async function run() {
   const config = loadConfig();
   // Provisioning intentionally works before LEAD_STORAGE_MODE or
   // ADMIN_ENABLED is switched on. It does not open any HTTP route.
-  if (!config.dbConfigured || Buffer.byteLength(config.adminSessionSecret) < 32 ||
-      !/^[A-Za-z0-9+/]{43}=$/.test(config.adminMfaKey) ||
-      Buffer.from(config.adminMfaKey, 'base64').toString('base64') !== config.adminMfaKey) {
+  if (!config.dbConfigured) {
     throw new AccountOperationError('INVALID_CONFIGURATION');
   }
   const pool = createLeadPool(config);
@@ -67,8 +58,8 @@ async function run() {
           !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(email)) throw new AccountOperationError('INVALID_EMAIL');
       if (await askVisible(`Typ AANMAKEN om een ${role}-account te maken: `) !== 'AANMAKEN') throw new Error('Cancelled.');
       const prepared = await enrollment(email);
-      const account = await createAdminAccount({ pool, email, role, ...prepared, mfaKey: config.adminMfaKey });
-      console.log('Account aangemaakt: ' + account.email + '. Wacht op een nieuwe authenticatorcode voor het eerste inloggen.');
+      const account = await createAdminAccount({ pool, email, role, ...prepared });
+      console.log('Account aangemaakt: ' + account.email + '.');
       return;
     }
     const selected = await askVisible('Accountnummer uit bovenstaande lijst: ');
@@ -76,16 +67,14 @@ async function run() {
     if (!Number.isSafeInteger(index) || index < 0 || index >= accounts.length) throw new Error('Invalid selection.');
     const account = accounts[index];
     if (action === 'reset') {
-      console.log('Herstel vervangt wachtwoord en MFA en trekt alle sessies in. Een uitgeschakeld account blijft uitgeschakeld.');
+      console.log('Herstel vervangt het wachtwoord en trekt alle sessies in. Een uitgeschakeld account blijft uitgeschakeld.');
       console.log('Verifieer de identiteit van de accounthouder rechtstreeks voordat je doorgaat.');
       if (await askVisible('Typ HERSTEL ' + account.email + ' na identiteitscontrole: ') !== 'HERSTEL ' + account.email) throw new Error('Recovery not confirmed.');
-      const prepared = await enrollment(account.email);
-      const result = await resetAdminAccount({
-        pool, userId: account.id, ...prepared, mfaKey: config.adminMfaKey,
-        sessionSecret: config.adminSessionSecret,
-      });
-      console.log('Wachtwoord en MFA vervangen; sessies ingetrokken: ' + result.revokedSessions + '.');
-      console.log(result.disabled ? 'Het account blijft uitgeschakeld.' : 'Wacht op een nieuwe authenticatorcode voordat je inlogt.');
+      if (Buffer.byteLength(config.adminSessionSecret) < 32) throw new AccountOperationError('INVALID_CONFIGURATION');
+      const prepared = await enrollment();
+      const result = await resetAdminAccount({pool,userId:account.id,...prepared,sessionSecret:config.adminSessionSecret});
+      console.log('Wachtwoord vervangen; sessies ingetrokken: ' + result.revokedSessions + '.');
+      console.log(result.disabled ? 'Het account blijft uitgeschakeld.' : 'Log in met je nieuwe wachtwoord.');
     } else {
       const verb = action === 'disable' ? 'UITSCHAKELEN' : 'INTREKKEN';
       if (await askVisible(`Typ ${verb} ${account.email} om te bevestigen: `) !== `${verb} ${account.email}`) throw new Error('Cancelled.');

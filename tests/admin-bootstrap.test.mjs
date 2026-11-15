@@ -7,8 +7,6 @@ import { runOwnerBootstrap } from '../scripts/admin-bootstrap.mjs';
 const preparedEnv = {
   NODE_ENV: 'test', LEAD_STORAGE_MODE: 'mail', ADMIN_ENABLED: 'false',
   DB_HOST: '127.0.0.1', DB_NAME: 'offline_test_fixture', DB_USER: 'test-fixture', DB_PASSWORD: 'never-connect',
-  ADMIN_SESSION_SECRET: 'offline-fixture-session-secret-at-least-32-bytes',
-  ADMIN_MFA_KEY: Buffer.alloc(32, 6).toString('base64'),
 };
 
 test('owner CLI refuses noninteractive use and does not echo supplied configuration', () => {
@@ -24,10 +22,10 @@ test('owner CLI refuses noninteractive use and does not echo supplied configurat
 test('incomplete owner setup is rejected before creating a database connection or asking secrets', async () => {
   let connections = 0, prompts = 0;
   await assert.rejects(runOwnerBootstrap({
-    env: { ...preparedEnv, ADMIN_MFA_KEY: '' }, requireTerminal() {},
+    env: { ...preparedEnv, DB_PASSWORD: '' }, requireTerminal() {},
     createPool() { connections++; throw new Error('Unexpected database connection'); },
     visible() { prompts++; }, hidden() { prompts++; }, writeLine() {},
-  }), /Complete DB and independent admin secrets/);
+  }), /Database configuration is incomplete/);
   assert.equal(connections, 0);
   assert.equal(prompts, 0);
 });
@@ -50,20 +48,20 @@ test('first owner can be prepared in mail mode with admin disabled after schema0
     visible: async () => { order.push('email'); return 'bootstrap@example.test'; },
     hidden: async label => {
       hiddenLabels.push(label);
-      return hiddenLabels.length === 1 ? 'OfflineFixturePassword2026!' : '123456';
+      return 'OfflineFixturePassword2026!';
     },
     writeLine() {},
     createOwner: async args => {
       assert.equal(args.pool, fakePool);
-      assert.equal(args.confirmationCode, '123456');
-      assert.match(args.totpSecret, /^[A-Z2-7]{32}$/);
-      assert.equal(args.mfaKey, preparedEnv.ADMIN_MFA_KEY);
+      assert.equal(args.password, 'OfflineFixturePassword2026!');
+      assert.equal(Object.hasOwn(args, 'confirmationCode'), false);
+      assert.equal(Object.hasOwn(args, 'totpSecret'), false);
       order.push('owner'); return { email: args.email };
     },
   });
   assert.equal(result.email, 'bootstrap@example.test');
   assert.deepEqual(order, ['tty', 'pool', 'schema003', 'email', 'owner', 'closed']);
-  assert.equal(hiddenLabels.length, 2, 'One login password and the MFA code use hidden input');
+  assert.equal(hiddenLabels.length, 1, 'Only one login password prompt');
 });
 
 test('schema failure closes the pool before any enrollment prompts', async () => {
@@ -78,7 +76,7 @@ test('schema failure closes the pool before any enrollment prompts', async () =>
   assert.equal(prompts, 0);
 });
 
-test('weak password is rejected before MFA; no double-entry is required', async () => {
+test('weak password is rejected before creating an account, without extra prompts', async () => {
   const prompts = [], output = [];
   const fakePool = {
     query: async () => [[{ total: 0 }]],

@@ -116,13 +116,13 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
   const json = express.json({limit:'4kb',type:'application/json',strict:true});
   app.post(prefix+'/login',json,bodyOk,async(req,res)=>{
     const body=req.body || {};
-    if(typeof body.email!=='string'||typeof body.password!=='string'||typeof body.code!=='string'||
-       body.email.length>254||body.password.length>1024||body.code.length!==6){
+    if(typeof body.email!=='string'||typeof body.password!=='string'||
+       body.email.length>254||body.password.length>1024||Object.keys(body).length!==2){
       return fail(res,401,'INVALID_LOGIN','De inloggegevens zijn niet geldig.');
     }
     try{
       const result=await adminStore.login({
-        email:body.email,password:body.password,code:body.code,
+        email:body.email,password:body.password,
         address:req.ip||req.socket.remoteAddress||'unknown',
       });
       if(!result)return fail(res,401,'INVALID_LOGIN','De inloggegevens zijn niet geldig.');

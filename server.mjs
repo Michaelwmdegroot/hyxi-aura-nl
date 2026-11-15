@@ -65,7 +65,6 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
         adminStore = createAdminStore({
           pool: leadPool,
           sessionSecret: config.adminSessionSecret,
-          mfaKey: config.adminMfaKey,
           leadEncryptionKey: config.encryptionKey,
         });
       } catch {

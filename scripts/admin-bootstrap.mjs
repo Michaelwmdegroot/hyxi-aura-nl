@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from '../server/config.mjs';
 import { createLeadPool } from '../server/db/pool.mjs';
-import { newTotpSecret, validAdminPassword } from '../server/auth/security.mjs';
+import { validAdminPassword } from '../server/auth/security.mjs';
 import { createFirstAdmin } from '../server/auth/bootstrap.mjs';
 import { assertAccountManagementSchema } from '../server/auth/accounts.mjs';
 import { requirePrivateTerminal, askVisible, askHidden } from './terminal-input.mjs';
@@ -25,15 +25,8 @@ export async function runOwnerBootstrap({
 } = {}) {
   requireTerminal();
   const cfg = loadConfig(env);
-  // Provisioning must work while the public site still uses mail mode.
-  // adminConfigured depends on activation storage mode; preparation requires
-  // the DB and independent admin secrets without opening any HTTP route.
-  if (!cfg.dbConfigured || Buffer.byteLength(cfg.adminSessionSecret) < 32 ||
-      !/^[A-Za-z0-9+/]{43}=$/.test(cfg.adminMfaKey) ||
-      Buffer.from(cfg.adminMfaKey, 'base64').length !== 32 ||
-      Buffer.from(cfg.adminMfaKey, 'base64').toString('base64') !== cfg.adminMfaKey) {
-    throw new Error('Complete DB and independent admin secrets must be set securely first.');
-  }
+  // First owner creation only needs the already-validated database.
+  if (!cfg.dbConfigured) throw new Error('Database configuration is incomplete.');
   const pool = createPool(cfg);
   try {
     // Fail before asking for a password or showing an enrollment secret.
@@ -41,25 +34,14 @@ export async function runOwnerBootstrap({
     const [existing] = await pool.query('SELECT COUNT(*) AS total FROM aura_admin_users');
     if (Number(existing[0]?.total) !== 0) throw new Error('An owner already exists; use audited account management.');
     writeLine('HYXI AURA Beheer — eerste eigenaar (eenmalige inrichting)');
-    writeLine('Gebruik uitsluitend een vertrouwde, niet-opgenomen terminal; deel de MFA-instelsleutel niet.');
+    writeLine('Je logt in met één wachtwoord, zonder authenticator.');
     const email = await visible('E-mailadres eigenaar: ');
     if (email.length < 6 || email.length > 254 || /[\u0000-\u001f\u007f-\u009f]/.test(email) ||
         !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(email)) throw new Error('Invalid owner email.');
-    // One login password. Duplicate hidden input was unreliable in the
-    // Hostinger browser terminal; TOTP remains a required second factor.
-    const password = await hidden('Wachtwoord voor Beheer (minimaal 12 tekens): ');
+    const password = await hidden('Inlogwachtwoord (minimaal 12 tekens): ');
     if (!validAdminPassword(password)) throw new Error('PASSWORD_POLICY');
-    const seed = newTotpSecret();
-    const uri = 'otpauth://totp/' + encodeURIComponent('HYXI AURA Beheer:' + email) +
-      '?secret=' + seed + '&issuer=' + encodeURIComponent('HYXI AURA Beheer') + '&digits=6&period=30';
-    writeLine('Voeg dit account handmatig toe aan jouw authenticator:');
-    writeLine('Eenmalige geheime instelsleutel: ' + seed);
-    writeLine('Authenticator URI: ' + uri);
-    const code = await hidden('Bevestig met een actuele 6-cijferige code: ');
-    const account = await createOwner({
-      pool, email, password, totpSecret: seed, confirmationCode: code, mfaKey: cfg.adminMfaKey,
-    });
-    writeLine('Eerste beheerder aangemaakt: ' + account.email + '. Wacht op een nieuwe authenticatorcode voordat je inlogt.');
+    const account = await createOwner({pool,email,password});
+    writeLine('Beheeraccount aangemaakt: ' + account.email + '.');
     return account;
   } finally { await pool.end().catch(() => {}); }
 }
@@ -77,7 +59,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       const safeMessages = {
         PASSWORD_POLICY: 'Gebruik één Beheer-wachtwoord van minimaal 12 tekens (maximaal 1024 bytes).',
         'Invalid owner email.': 'Het e-mailadres is ongeldig.',
-        'Authenticator confirmation failed.': 'De 6-cijferige authenticatorcode klopt niet of is verlopen.',
+        'Database configuration is incomplete.': 'Databaseconfiguratie ontbreekt in deze terminal.',
         'An owner already exists; use audited user management.': 'Er is al een eigenaaraccount. Gebruik admin:manage.',
       };
       console.error(safeMessages[error?.message] ||

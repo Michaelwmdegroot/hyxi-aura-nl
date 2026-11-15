@@ -89,7 +89,7 @@ function showLogin(text=''){
   $('outboxItems').replaceChildren();$('mailCount').textContent='0';
   $('workbenchViews').hidden=true;
   $('currentUser').textContent='Beheerder';$('currentRole').textContent='Beheer';
-  $('password').value='';$('totp').value='';$('statusFilter').value='';
+  $('password').value='';$('statusFilter').value='';
   $('pageLabel').textContent='Pagina 1';
   $('outboxPageLabel').textContent='Pagina 1';
   message('dashboardMessage','');message('listMessage','');
@@ -289,9 +289,9 @@ $('loginForm').addEventListener('submit',async event=>{
   event.preventDefault();const button=$('loginButton');setLoading(button,true);message('loginError','');
   try{
     const result=await api('/login',{method:'POST',body:JSON.stringify({
-      email:$('email').value.trim(),password:$('password').value,code:$('totp').value.trim(),
+      email:$('email').value.trim(),password:$('password').value,
     })});
-    $('password').value='';$('totp').value='';
+    $('password').value='';
     const state=await session();
     await enterDashboard(state.user||result.user);
   }catch(error){if(!isInterrupted(error))message('loginError',error.message);}

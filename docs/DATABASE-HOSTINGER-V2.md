@@ -1,19 +1,18 @@
 # HYXI AURA — database en beheer op Hostinger
 
-Bijgewerkt 15 november 2026. De eigenaar bevestigde via de Hostinger-SSH-terminal: databaseverbinding OK, versie 11.8.9-MariaDB-log, aanvankelijk 0 tabellen, migraties 001–004 toegepast, daaropvolgende volledige schemacontrole geslaagd en 0 actieve eigenaars. Backup/restore en beheer-/SMTP-activering zijn **niet** bewezen. De eerste eigenaar-bootstrap liep tweemaal vast direct na het herhalen van de verborgen wachtwoordinvoer; de fast-lane-correctie vervangt die twee prompts door één, met expliciete wachtwoordvalidatie.
+Bijgewerkt 15 november 2026. Via Hostinger-SSH heeft de eigenaar de verbinding met MariaDB 11.8.9 en de succesvolle migraties 001–004 plus schemacontrole bevestigd. Er waren aanvankelijk 0 tabellen en na de migraties 0 actieve eigenaars. De oorspronkelijke aanmaak strandde op de MFA-bevestiging; de fast-lane-oplossing maakt een eigenaar aan met uitsluitend e-mailadres en één wachtwoord. Backup/restore, eerste eigenaarlogin en SMTP-inboxontvangst zijn nog niet bewezen.
 
 ## 1. Privé-instellingen voorbereiden
 
 Gebruik [config/beheer.env.example](../config/beheer.env.example) als **aanvulling**, niet als vervanging van de bestaande omgeving. Neem de volledige DB_NAME en DB_USER inclusief Hostinger-prefix over. DB_PASSWORD is het databasewachtwoord, niet het mailboxwachtwoord. Bewaar werkende SMTP_*, SITE_URL, LEAD_TO, LEAD_ENABLED en CSRF_SECRET.
 
-Genereer vier onafhankelijke geheimen op een vertrouwde terminal en bewaar ze in een beveiligde kluis:
+Genereer drie onafhankelijke servergeheimen op een vertrouwde terminal en bewaar ze in een beveiligde kluis:
 
 | Variabele | Generatie |
 | --- | --- |
 | LEAD_ENCRYPTION_KEY | openssl rand -base64 32 |
 | LEAD_HASH_SECRET | openssl rand -hex 32 |
 | ADMIN_SESSION_SECRET | openssl rand -hex 32 |
-| ADMIN_MFA_KEY | openssl rand -base64 32 |
 
 Houd LEAD_STORAGE_MODE=mail en ADMIN_ENABLED=false tijdens de voorbereiding. Plaats echte waarden alleen in Hostinger of een private, genegeerde .env; niet in GitHub, chat of screenshots. Een Node-CLI moet de juiste private omgeving inladen; de hPanel-omgeving van de draaiende website is niet automatisch de omgeving van iedere SSH-shell.
 
@@ -44,7 +43,7 @@ De applicatie voert nooit automatisch DDL uit. Op de echte productiedatabase pas
 ADMIN_BOOTSTRAP=interactive-confirmed npm run admin:create
 ```
 
-Alleen een vertrouwde interactieve terminal wordt geaccepteerd. De procedure werkt terwijl opslag nog op mail staat en beheer uitgeschakeld is. Voer het zelfgekozen Beheer-inlogwachtwoord één keer in (minimaal 12 niet-lege tekens); de authenticatorcode is een aparte tweede factor, geen tweede wachtwoord. Beide invoeren zijn verborgen. Stel de getoonde MFA-sleutel in je authenticator in, bevestig de code en wacht vervolgens op een nieuwe code voor het eerste inloggen.
+Alleen een vertrouwde interactieve terminal wordt geaccepteerd. De procedure werkt terwijl opslag nog op mail staat en beheer uitgeschakeld is. Je geeft het e-mailadres en één zelfgekozen inlogwachtwoord van minimaal 12 niet-lege tekens op. Geen authenticator, geen extra wachtwoord en geen zescijferige code. Het wachtwoord wordt verborgen ingevoerd.
 
 Accountbeheer daarna:
 
@@ -54,7 +53,7 @@ ADMIN_OPERATIONS=interactive-confirmed npm run admin:manage
 
 ## 5. Activeren
 
-Als schema, herstel, owner/MFA, privacy/retentie en mailboxproces gecontroleerd zijn, stel in Hostinger in:
+Als schema, herstel, eerste eigenaarlogin, privacy/retentie en mailboxproces gecontroleerd zijn, stel in Hostinger in:
 
 ```dotenv
 LEAD_STORAGE_MODE=database

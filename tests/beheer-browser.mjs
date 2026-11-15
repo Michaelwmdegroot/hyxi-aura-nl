@@ -36,8 +36,8 @@ const leadData = {
 };
 const fakeAdmin={
   async currentSession(cookie){return signedIn&&cookie===token ? {id:'1',role,email:'beheerder@example.test'} : null;},
-  async login({email,password,code}){
-    if(email!=='beheerder@example.test'||password!=='FictiefEnVeiligWachtwoord2026!'||code!=='123456')return null;
+  async login({email,password}){
+    if(email!=='beheerder@example.test'||password!=='FictiefEnVeiligWachtwoord2026!')return null;
     signedIn=true;return {token,user:{id:'1',role,email}};
   },
   async logout(){signedIn=false;},
@@ -73,7 +73,6 @@ const config=loadConfig({
   LEAD_HASH_SECRET:'isolated-test-hmac-value-very-long-secret',
   ADMIN_ENABLED:'true',
   ADMIN_SESSION_SECRET:'test-only-admin-session-secret-with-more-than-32-bytes',
-  ADMIN_MFA_KEY:'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
 });
 assert.equal(config.adminEnabled,true);
 const app=createApp({
@@ -114,7 +113,6 @@ async function loginAndReview(context,label){
   assert.equal(before,401);
   await page.locator('#email').fill('beheerder@example.test');
   await page.locator('#password').fill('FictiefEnVeiligWachtwoord2026!');
-  await page.locator('#totp').fill('123456');
   await page.locator('#loginButton').click();
   await expect(page.locator('#dashboardView')).toBeVisible();
   await expect(page.locator('#statTotal')).toHaveText('2');
@@ -216,7 +214,7 @@ async function checkSalesAndExpiry(){
   await page.goto(base+'/beheer');await expect(page.locator('#loginView')).toBeVisible();
   await page.locator('#email').fill('beheerder@example.test');
   await page.locator('#password').fill('FictiefEnVeiligWachtwoord2026!');
-  await page.locator('#totp').fill('123456');await page.locator('#loginButton').click();
+  await page.locator('#loginButton').click();
   await expect(page.locator('#dashboardView')).toBeVisible();
   await expect(page.locator('#workbenchViews')).not.toBeVisible();
   await page.locator('.open-lead').first().click();

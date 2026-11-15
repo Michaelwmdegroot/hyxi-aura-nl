@@ -1,6 +1,6 @@
 /** Trusted-terminal account operations. This module has no public HTTP route. */
 import { createHmac, randomUUID } from 'node:crypto';
-import { hashAdminPassword, encryptTotp, verifyTotp } from './security.mjs';
+import { hashAdminPassword } from './security.mjs';
 import { assertAdminSchema } from './store.mjs';
 
 const roles = new Set(['admin', 'sales']);
@@ -28,18 +28,9 @@ function validUserId(userId) {
 function validSessionSecret(secret) {
   if (typeof secret !== 'string' || Buffer.byteLength(secret) < 32) fail('INVALID_CONFIGURATION');
 }
-async function credentials({ password, totpSecret, confirmationCode, mfaKey, userId, now = Date.now }) {
-  let step;
-  try { step = verifyTotp(totpSecret, confirmationCode, now()); }
-  catch { fail('MFA_CONFIRMATION_FAILED'); }
-  if (step === null) fail('MFA_CONFIRMATION_FAILED');
-  let passwordHash;
-  try { passwordHash = await hashAdminPassword(password); }
+async function credentials({ password }) {
+  try { return {passwordHash: await hashAdminPassword(password)}; }
   catch { fail('PASSWORD_POLICY'); }
-  let encrypted;
-  try { encrypted = encryptTotp(totpSecret, userId, mfaKey); }
-  catch { fail('INVALID_CONFIGURATION'); }
-  return { step, passwordHash, encrypted };
 }
 
 export async function assertAccountManagementSchema(pool) {
@@ -98,32 +89,32 @@ export async function listAdminAccounts(pool) {
   return rows.map(accountView);
 }
 
-export async function createAdminAccount({ pool, email, role, password, totpSecret, confirmationCode, mfaKey, now }) {
+export async function createAdminAccount({ pool, email, role, password }) {
   const loginEmail = emailValue(email);
   if (!roles.has(role)) fail('INVALID_ROLE');
   const id = randomUUID();
-  const prepared = await credentials({ password, totpSecret, confirmationCode, mfaKey, userId: id, now });
+  const prepared = await credentials({ password });
   return withAccounts(pool, async (conn, accounts) => {
     if (!accounts.some(row => row.role === 'admin' && !row.disabled_at)) fail('FIRST_OWNER_REQUIRED');
     if (accounts.some(row => row.login_email.toLowerCase() === loginEmail)) fail('ACCOUNT_EXISTS');
     await conn.execute(
       'INSERT INTO aura_admin_users (id,login_email,password_hash,role,mfa_secret_encrypted,mfa_last_accepted_step) VALUES (?,?,?,?,?,?)',
-      [id, loginEmail, prepared.passwordHash, role, prepared.encrypted, prepared.step],
+      [id, loginEmail, prepared.passwordHash, role, Buffer.alloc(0), -1],
     );
     await audit(conn, id, 'terminal_account_create');
     return { id, email: loginEmail, role, disabled: false };
   });
 }
 
-export async function resetAdminAccount({ pool, userId, password, totpSecret, confirmationCode, mfaKey, sessionSecret, now }) {
+export async function resetAdminAccount({ pool, userId, password, sessionSecret }) {
   validUserId(userId);
   validSessionSecret(sessionSecret);
-  const prepared = await credentials({ password, totpSecret, confirmationCode, mfaKey, userId, now });
+  const prepared = await credentials({ password });
   return withAccounts(pool, async (conn, accounts) => {
     const account = findAccount(accounts, userId);
     await conn.execute(
-      'UPDATE aura_admin_users SET password_hash=?,mfa_secret_encrypted=?,mfa_last_accepted_step=? WHERE id=?',
-      [prepared.passwordHash, prepared.encrypted, prepared.step, userId],
+      'UPDATE aura_admin_users SET password_hash=? WHERE id=?',
+      [prepared.passwordHash, userId],
     );
     const revokedSessions = await revoke(conn, userId);
     // Remove only this account's login guard. A shared source-IP guard

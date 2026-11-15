@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { hashAdminPassword, encryptTotp, verifyTotp } from './security.mjs';
+import { hashAdminPassword } from './security.mjs';
 import { assertAdminSchema } from './store.mjs';
 
 function validEmail(input) {
@@ -8,15 +8,12 @@ function validEmail(input) {
     ? value : null;
 }
 
-export async function createFirstAdmin({ pool, email, password, totpSecret, confirmationCode, mfaKey, now=Date.now }) {
+export async function createFirstAdmin({ pool, email, password }) {
   if (!pool || typeof pool.getConnection!=='function') throw new Error('Database connection required.');
   const loginEmail=validEmail(email);
   if (!loginEmail) throw new Error('Invalid owner email.');
-  const step=verifyTotp(totpSecret,confirmationCode,now());
-  if(step===null) throw new Error('Authenticator confirmation failed.');
   const passwordHash=await hashAdminPassword(password);
   const id=randomUUID();
-  const encrypted=encryptTotp(totpSecret,id,mfaKey);
   await assertAdminSchema(pool);
 
   const conn=await pool.getConnection();
@@ -31,7 +28,7 @@ export async function createFirstAdmin({ pool, email, password, totpSecret, conf
     if(Number(existing[0].total)!==0)throw new Error('An owner already exists; use audited user management.');
     await conn.execute(
       'INSERT INTO aura_admin_users (id,login_email,password_hash,role,mfa_secret_encrypted,mfa_last_accepted_step) VALUES (?,?,?,?,?,?)',
-      [id,loginEmail,passwordHash,'admin',encrypted,step],
+      [id,loginEmail,passwordHash,'admin',Buffer.alloc(0),-1],
     );
     await conn.execute(
       'INSERT INTO aura_admin_audit (actor_user_id,action,result_code) VALUES (?,?,?)',

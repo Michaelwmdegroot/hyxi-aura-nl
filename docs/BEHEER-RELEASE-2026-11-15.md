@@ -1,3 +1,5 @@
+> **Fast-lane actualisering 15 november 2026:** de gebruiker heeft wachtwoord-only Beheer gekozen. Het oude MFA-ontwerp in deze historische overdracht is vervangen: geen authenticatorcode of tweede wachtwoord. MariaDB 11.8.9 met schema 001–004 is door de eigenaar gecontroleerd. Lees docs/BEHEER-MVP.md en docs/BEHEER-SECURITY.md voor de actuele login.
+
 # HYXI AURA Beheer — voortzetting en overdracht 15 november 2026
 
 ## Uitgangspunt

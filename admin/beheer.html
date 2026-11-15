@@ -26,7 +26,6 @@
         <form id="loginForm" autocomplete="on">
           <div class="field"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="username" inputmode="email" required maxlength="254" placeholder="naam@bedrijf.nl"></div>
           <div class="field"><label for="password">Wachtwoord</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024" placeholder="Jouw wachtwoord"></div>
-          <div class="field"><label for="totp">Code uit authenticator</label><input id="totp" name="totp" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="6-cijferige code"></div>
           <p class="form-message" id="loginError" role="alert" hidden></p>
           <button class="primary wide" type="submit" id="loginButton">Veilig inloggen <span aria-hidden="true">→</span></button>
         </form>

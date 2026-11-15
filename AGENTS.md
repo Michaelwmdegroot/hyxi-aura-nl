@@ -15,6 +15,6 @@
 - The database receipt confirms only committed storage; SMTP acceptance and true inbox delivery must be tracked separately. Never silently fall back to SMTP-only after a DB outage.
 - Use CI's disposable MySQL service for database regression tests; never connect tests to live database or send real mail.
 
-- Beheer/MVP is behind `ADMIN_ENABLED=false` by default and uses reviewed migrations 001–004 and DB mode. Keep production activation separate from merging code with disabled defaults. Trusted-terminal provisioning/recovery and the outbox incident workflow are implemented; verify the actual hosting setup, backups and privacy/retention before activation. See docs/BEHEER-RELEASE-2026-11-15.md.
+- Beheer/MVP is behind `ADMIN_ENABLED=false` by default and uses reviewed migrations 001–004 and DB mode. Keep production activation separate from merging code with disabled defaults. Password-only trusted-terminal provisioning/recovery and the outbox incident workflow are implemented; verify the actual hosting setup, backups and privacy/retention before activation. See docs/BEHEER-RELEASE-2026-11-15.md.
 - Test dashboard security with disposable CI MySQL (tests/admin-integration.mjs) plus browser/accessibility tests (tests/beheer-browser.mjs) and never use real contacts or production credentials in QA.
 - Browser dashboard must stay within a 390px viewport without document expansion; the mobile list uses responsive cards while maintaining semantic table cells.
