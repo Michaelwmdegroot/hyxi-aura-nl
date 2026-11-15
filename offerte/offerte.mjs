@@ -61,6 +61,9 @@ function payload(){
   return body;
 }
 form.addEventListener('input',()=>{if(!submitting){key=null;clearError();}});
+const preset=new URLSearchParams(location.search);
+if(['7','9'].includes(preset.get('moduleType')))$('moduleType').value=preset.get('moduleType');
+if(/^[1-6]$/.test(preset.get('moduleCount')||''))$('moduleCount').value=preset.get('moduleCount');
 $('moduleType').addEventListener('change',selection);
 $('moduleCount').addEventListener('change',selection);
 selection();

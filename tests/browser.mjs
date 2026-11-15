@@ -353,7 +353,10 @@ try {
   const quotePage=await quoteContext.newPage();
   currentPage=quotePage;
   quotePage.on('pageerror',error=>report.browserErrors.push({viewport:'quote',message:error.message}));
-  await quotePage.goto(live.origin+'/offerte/');
+  await quotePage.goto(live.origin+'/offerte/?moduleType=7&moduleCount=3');
+  await expect(quotePage.locator('#moduleType')).toHaveValue('7');
+  await expect(quotePage.locator('#moduleCount')).toHaveValue('3');
+  await expect(quotePage.locator('#selectionLabel')).toContainText('3 × BAT-Q7');
   await quotePage.locator('#solar').selectOption('yes');
   await quotePage.locator('#phase').selectOption('three');
   await quotePage.locator('#annualUsage').fill('3500');
