@@ -21,9 +21,12 @@ Bekijk ook de [interactieve energie-ervaring](docs/screenshots/energy-experience
 
 **Node.js 24** met Express verzorgt de API en serveert de productiebuild. **Vite** bouwt de HTML-, CSS- en JavaScript-bestanden en staat bewust in `dependencies`: Hostinger installeert bij de productie-deploy geen `devDependencies`. **Three.js** laadt voor de interactieve woning; bij ontbrekende WebGL blijft de uitleg beschikbaar. **Nodemailer** verstuurt aanvragen via de ingestelde mailbox. **Zod** valideert de serverinvoer. Manrope en alle gebruikte webbeelden worden lokaal geserveerd.
 
-Er is geen database, openbare beheeromgeving, nieuwsbrief, advertentiepixel of analysetracker in deze release. SMTP-inloggegevens blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
+De standaard blijft SMTP-mailmodus. Optionele versleutelde MySQL-opslag en een beveiligde beheeromgeving zijn beschikbaar achter expliciete instellingen; ze worden niet door een build of merge geactiveerd. Er is geen publieke registratie, nieuwsbrief, advertentiepixel of analysetracker. Geheimen blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
 
 ## HYXI AURA 2.0 — volgende ontwikkelfase
+
+De database-, auth- en beheerontwikkeling is samengebracht in [PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13). De eerdere PR's #11/#12 zijn tussenstappen. De [overdracht van 15 november](docs/BEHEER-RELEASE-2026-11-15.md) bevat de gevonden problemen, oplossingen, testaanpak en actuele hostinggrens. Voor activering: [Hostinger MySQL-handleiding](docs/DATABASE-HOSTINGER-V2.md).
+
 
 De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal geaccepteerd (visueel 7/10). V2 wordt een zelfstandig leadplatform met betrouwbare e-mail, duurzame MySQL-opslag, een beveiligd dashboard, aparte offerteaanvragen en SEO/analytics. Dit is een **plan**, geen claim dat deze modules al in productie staan.
 
@@ -33,6 +36,10 @@ De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal
 - [Livegangchecklist](docs/GO-LIVE-CHECKLIST-V2.md)
 
 De eerste openstaande controle is de echte SMTP-inboxontvangst in leads@thuisbatterijteam.nl, zie [issue #1](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/1). De V1-ervaring blijft het werkende productiepad totdat nieuwe onderdelen getest zijn.
+
+### Beheer-MVP en hostinginrichting
+
+De beheerwerkbank bevat TOTP-login, rolgecontroleerde dossiers, statussen, toewijzing, mailincidenten, audit en veilig terminalaccountbeheer. Nieuwe endpoints blijven gesloten bij `ADMIN_ENABLED=false`. Database-migraties en eigenaar/MFA kunnen worden voorbereid terwijl de bestaande site in mailmodus blijft. Zie [BEHEER-MVP.md](docs/BEHEER-MVP.md) en het aanvullende [env-sjabloon](config/beheer.env.example). De live-healthcheck op 15 november vóór deze wijzigingen gaf `leadEnabled:false`; echte inboxontvangst en de private Hostinger-inrichting zijn nog afzonderlijk te bevestigen.
 
 ## Lokaal starten
 
@@ -78,6 +85,9 @@ Open `http://127.0.0.1:4173`. Deze aparte QA-omgeving gebruikt de echte validati
 | `npm test` | Unit- en integratietests; geen echte e-mail |
 | `npm run check` | De build controleren op pagina's, interne links, assets, schema, PDF's en publieke bestandsgrenzen |
 | `npm run test:browser` | Browserflow naar de echte Express-API met een lokale SMTP-testvervanger; geen echte e-mail |
+| `npm run test:db` | Test MySQL 8 transacties en outbox uitsluitend op geïsoleerde CI-testdatabase |
+| `npm run db:check` | Read-only MySQL-schema- en verbindingcontrole; geen persoonsgegevens zichtbaar |
+| `npm run db:migrate` | Alleen handmatige migratie met expliciete bevestiging, nooit automatische productie-DDL |
 
 De browsercontrole vereist een beschikbare Playwright Chromium-browser. Een bestaande browser kan worden opgegeven via `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`. De testsuite installeert niet zelf een browser.
 

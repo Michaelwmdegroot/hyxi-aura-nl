@@ -4,6 +4,11 @@ import { existsSync } from 'node:fs';
 import { loadConfig } from './server/config.mjs';
 import { createApp } from './server/app.mjs';
 import { createTransport } from './server/mail.mjs';
+import { createLeadPool, assertLeadSchema } from './server/db/pool.mjs';
+import { createMysqlLeadStore, assertNotificationBudgetSchema } from './server/db/store.mjs';
+import { createNotificationWorker } from './server/db/worker.mjs';
+import { createAdminStore, assertAdminSchema } from './server/auth/store.mjs';
+import { assertAccountManagementSchema } from './server/auth/accounts.mjs';
 
 export { createApp } from './server/app.mjs';
 export { loadConfig } from './server/config.mjs';
@@ -20,9 +25,63 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
   try {
     const config = loadConfig();
     const transport = createTransport(config);
-    const app = createApp({ config, transport, distDir });
+    let leadStore = null, notificationWorker = null, leadPool = null;
+    if (config.storageMode === 'database') {
+      if (config.dbConfigured && config.dbSecretsConfigured) {
+        try {
+          leadPool = createLeadPool(config);
+          await assertLeadSchema(leadPool);
+          leadStore = createMysqlLeadStore({
+            pool: leadPool,
+            encryptionKey: config.encryptionKey,
+            hashSecret: config.hashSecret,
+          });
+        } catch {
+          // A database failure disables the form but NOT the public homepage.
+          // Never revert to SMTP-only: that would silently lose audit/DB records.
+          console.error('HYXI AURA database is not ready. Lead intake is disabled until resolved.');
+          if (leadPool) await leadPool.end().catch(() => {});
+          leadPool = null;
+        }
+      } else {
+        console.warn('HYXI AURA database storage selected but configuration is incomplete. Intake disabled.');
+      }
+    }
+    // Closing the public intake or losing SMTP configuration must never lock
+    // the owner out of existing records and the incident workbench.
+    if (leadStore && transport) {
+      try {
+        await assertNotificationBudgetSchema(leadPool);
+        notificationWorker = createNotificationWorker({ store: leadStore, transport, config });
+      } catch {
+        console.error('HYXI AURA notification schema is not ready; intake and mail dispatch remain disabled.');
+      }
+    }
+    let adminStore = null;
+    if (config.adminEnabled && leadPool) {
+      try {
+        await assertAdminSchema(leadPool);
+        await assertAccountManagementSchema(leadPool);
+        adminStore = createAdminStore({
+          pool: leadPool,
+          sessionSecret: config.adminSessionSecret,
+          mfaKey: config.adminMfaKey,
+          leadEncryptionKey: config.encryptionKey,
+        });
+      } catch {
+        // The public site remains available even if the protected dashboard
+        // is unconfigured or the admin schema is not ready. Never log secrets.
+        console.error('HYXI AURA Beheer is not ready; protected routes remain closed.');
+      }
+    }
+    const app = createApp({
+      config, transport,
+      leadStore: notificationWorker ? leadStore : null,
+      notificationWorker, adminStore, distDir,
+    });
     const server = app.listen(config.port, '0.0.0.0', () => {
-      console.log(`HYXI AURA listening on port ${config.port}. Lead intake ${config.leadEnabled ? 'enabled' : 'disabled'}.`);
+      console.log(`HYXI AURA listening on port ${config.port}. Lead intake ${config.leadEnabled && (config.storageMode !== 'database' || Boolean(notificationWorker)) ? 'enabled' : 'disabled'}.`);
+      notificationWorker?.start();
     });
     server.on('error', error => {
       // Avoid dumping the environment or SMTP configuration into logs.
@@ -32,7 +91,8 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
     server.requestTimeout = 30000;
     server.headersTimeout = 15000;
     for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => {
-      server.close(() => { transport?.close?.(); process.exit(0); });
+      notificationWorker?.stop();
+      server.close(async () => { transport?.close?.(); if (leadPool) await leadPool.end().catch(() => {}); process.exit(0); });
       setTimeout(() => process.exit(1), 30000).unref();
     });
   } catch (error) {

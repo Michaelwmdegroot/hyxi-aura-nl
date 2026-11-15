@@ -45,7 +45,7 @@ Voeg in Hostinger de variabelen uit `.env.example` toe. Gebruik de echte mailbox
 | `SMTP_PASS` | Wachtwoord van die mailbox |
 | `SMTP_FROM` | Geautoriseerd afzenderadres zonder naam of haakjes |
 | `LEAD_TO=leads@thuisbatterijteam.nl` | Ontvangstadres van het team; gebruik het werkelijk beheerde adres |
-| `SMTP_DAILY_LIMIT=100` | Maximaal aantal verzendpogingen per UTC-dag, per serverproces |
+| `SMTP_DAILY_LIMIT=100` | Maximaal aantal verzendpogingen per UTC-dag; in mailmodus per proces, in databasemodus duurzaam gedeeld tussen workers |
 | `LEAD_RATE_LIMIT=6` | Maximaal zes nieuwe aanvragen/pogingen per IP per 15 minuten |
 | `CSRF_SECRET` | Optioneel: willekeurige geheime waarde van minimaal 32 tekens; bij ontbreken ontstaat er één per serverstart |
 | `TRUST_PROXY=false` | Veilige standaard; zie hieronder voor de hostingproxy |
@@ -101,9 +101,9 @@ Nieuwe successen: HTTP 201 met `{ "ok": true, "requestId": "AURA-…" }`. Herhaa
 
 ## Beveiliging en gegevens
 
-Alleen `dist` wordt publiek geserveerd. De omgeving, servercode, tests, documentatie en broncode buiten die build zijn niet via de webserver bereikbaar. Er is geen openbare beheeromgeving. Verzoekgrootte, velden, toestemmingsbevestiging, honeypot, oorsprong en CSRF-token worden gecontroleerd. Mailinhoud is platte tekst. Afzender, ontvanger, product en bron staan vast aan serverzijde. Er worden geen bestanden of externe URL's verwerkt vanuit de aanvraag.
+Publieke productassets komen uit `dist`. Bij expliciet ingeschakeld Beheer worden daarnaast alleen de drie vaste beheerinterfacebestanden geserveerd; klantgegevens komen uitsluitend via de geauthenticeerde API. Omgeving, servercode, tests en documentatie zijn niet publiek bereikbaar. Er is geen openbare registratie. Verzoekgrootte, velden, toestemming, honeypot, oorsprong en CSRF-token worden gecontroleerd. Mailinhoud is platte tekst. Afzender, ontvanger, product en bron staan vast aan serverzijde.
 
-Er zijn geen advertentiepixels, statistiekcookies of externe trackingdiensten ingebouwd. Persoonsgegevens gaan uitsluitend naar de geconfigureerde teammailbox. De applicatie slaat ze niet op schijf op en logt ze niet. Hostingtoegangslogs en mailboxbewaartermijnen vallen onder de beheerinstellingen van de eigenaar. De privacyverklaring moet aansluiten op de daadwerkelijk ingestelde ontvanger en verantwoordelijke.
+Er zijn geen advertentiepixels, statistiekcookies of externe trackingdiensten ingebouwd. In de standaard mailmodus gaan persoonsgegevens naar de geconfigureerde teammailbox en worden ze niet duurzaam door de app opgeslagen. De optionele databasemodus slaat de leadpayload versleuteld op en houdt technische audit/notificatiestatus bij. Activering vereist de [database- en beheerinrichting](DATABASE-HOSTINGER-V2.md) plus een passende privacy-/retentieafspraak. Persoonsgegevens en geheimen worden niet in applicatielogs geschreven.
 
 ### Operationele bewaartermijn
 
