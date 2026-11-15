@@ -10,6 +10,8 @@ export const leadSchema = z.object({
   phone: line(25).min(8, 'Vul een telefoonnummer in.').refine(value => /^(?:\+|00)?[\d ()-]+$/.test(value) && value.replace(/\D/g, '').length >= 9 && value.replace(/\D/g, '').length <= 15, 'Controleer je telefoonnummer.'),
   postcode: clean.regex(/^[1-9]\d{3}\s?[a-zA-Z]{2}$/, 'Vul een Nederlandse postcode in.').transform(value => value.replace(/\s/g, '').toUpperCase()),
   consent: z.literal(true, { error: 'Bevestig dat we je over deze aanvraag mogen benaderen.' }),
+  intent: z.literal('quote').optional(),
+  projectDetails: z.string().trim().max(1000).refine(value=> !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value),'Verwijder ongeldige tekens.').optional(),
   profile: z.object({
     solar: z.enum(['yes', 'planned', 'no']),
     annualUsage: z.number().int().min(500).max(100000).nullable(),

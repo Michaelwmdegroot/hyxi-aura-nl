@@ -150,9 +150,9 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 3 && new Set(sitemapUrls).size === 3, 'sitemap lists the three distinct public pages');
+ensure(sitemapUrls.length === 4 && new Set(sitemapUrls).size === 4, 'sitemap lists the four distinct public pages');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/privacy/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
 
 for (const file of built) {
   const publicPath = relative(dist, file).split(sep).join('/');

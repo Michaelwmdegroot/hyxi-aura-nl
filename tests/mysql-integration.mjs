@@ -219,6 +219,22 @@ try {
     await broken.close();
   }
 
+  // A distinct quote request must reuse the encrypted, transactional outbox path.
+  const quotePayload={...sample('Fictional Quote'),intent:'quote',projectDetails:'Vraag over bestaande omvormer.'};
+  const quoteLead=await store.receive({lead:quotePayload,requestKey:randomUUID()});
+  const [quoteRows]=await pool.execute('SELECT id,request_type,encrypted_payload FROM aura_leads WHERE request_id=?',[quoteLead.requestId]);
+  assert.equal(quoteRows[0]?.request_type,'quote');
+  assert.equal(openLead(quoteRows[0].encrypted_payload,quoteRows[0].id,key).projectDetails,'Vraag over bestaande omvormer.');
+  assert.ok(!quoteRows[0].encrypted_payload.includes(Buffer.from('Vraag over bestaande omvormer.')));
+  const quoteMails=[];
+  const quoteWorker=createNotificationWorker({store,config,transport:{async sendMail(mail){quoteMails.push(mail);return {accepted:[config.smtp.to]};}}});
+  await quoteWorker.flush(8);
+  const matchingQuoteMails=quoteMails.filter(mail=>mail.messageId === '<'+quoteLead.requestId+'@hyxi-aura.nl>');
+  assert.equal(matchingQuoteMails.length,1,'The quote has one matching notification even if other test leads are pending');
+  assert.match(matchingQuoteMails[0].subject,/offerteaanvraag/);
+  assert.match(matchingQuoteMails[0].text,/Vraag over bestaande omvormer/);
+  assert.equal((await status(quoteLead.requestId)).delivery_status,'accepted');
+
   console.log('PASS MySQL migration + AES-GCM + transaction rollback + durable idempotency + outbox failure/retry + API');
 } finally {
   await pool.end();

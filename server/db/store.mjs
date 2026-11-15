@@ -53,7 +53,7 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
       // Let the key's UNIQUE constraint choose the single winner instead.
       await conn.execute(
         'INSERT INTO aura_leads (id, request_id, request_type, status, source_domain, encrypted_payload, encryption_key_id, privacy_version, contact_requested_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [leadId, requestId, 'advice', 'new', 'hyxi-aura.nl', encrypted, KEY_ID, PRIVACY_VERSION, timestamp, timestamp, timestamp],
+        [leadId, requestId, lead.intent === 'quote' ? 'quote' : 'advice', 'new', 'hyxi-aura.nl', encrypted, KEY_ID, PRIVACY_VERSION, timestamp, timestamp, timestamp],
       );
       await conn.execute(
         'INSERT INTO aura_submission_keys (key_hash, payload_hash, lead_id, created_at, expires_at) VALUES (?, ?, ?, ?, ?)',

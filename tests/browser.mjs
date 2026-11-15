@@ -338,7 +338,7 @@ try {
       assert.ok(preview.height <= 260, `Mobile preview should stay compact, got ${preview.height}px`);
     }
     await page.locator('#samenstellen').screenshot({ path: resolve(resultsDir, `${viewport.label}-configurator.png`) });
-    for (const legalRoute of ['/privacy/', '/bronnen/']) {
+    for (const legalRoute of ['/privacy/', '/bronnen/', '/offerte/']) {
       await page.goto(`${live.origin}${legalRoute}`);
       await page.evaluate(async () => { await document.fonts.ready; });
       await assertNoOverflow(page, `${viewport.label}${legalRoute}`);
@@ -348,6 +348,37 @@ try {
     record(`${viewport.label}: layout guard, maximum configuration, privacy and source-page overflow/accessibility`);
     await context.close();
   }
+  currentCheck = 'standalone-quote-journey';
+  const quoteContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:'nl-NL'});
+  const quotePage=await quoteContext.newPage();
+  currentPage=quotePage;
+  quotePage.on('pageerror',error=>report.browserErrors.push({viewport:'quote',message:error.message}));
+  await quotePage.goto(live.origin+'/offerte/?moduleType=7&moduleCount=3');
+  await expect(quotePage.locator('#moduleType')).toHaveValue('7');
+  await expect(quotePage.locator('#moduleCount')).toHaveValue('3');
+  await expect(quotePage.locator('#selectionLabel')).toContainText('3 × BAT-Q7');
+  await quotePage.locator('#solar').selectOption('yes');
+  await quotePage.locator('#phase').selectOption('three');
+  await quotePage.locator('#annualUsage').fill('3500');
+  await quotePage.locator('#moduleType').selectOption('9');
+  await quotePage.locator('#moduleCount').selectOption('2');
+  await quotePage.locator('#projectDetails').fill('Fictieve behoefte: passende installatie beoordelen.');
+  await quotePage.locator('#fullName').fill('Fictieve Browserofferte');
+  await quotePage.locator('#email').fill('browserofferte@example.test');
+  await quotePage.locator('#phone').fill('0612345678');
+  await quotePage.locator('#postcode').fill('1234AB');
+  await quotePage.locator('#consent').check();
+  await assertNoOverflow(quotePage,'mobile/offerte-complete');
+  await quotePage.locator('#submitQuote').click();
+  await expect(quotePage.locator('#quoteResult')).toBeVisible({timeout:15000});
+  await expect(quotePage.locator('#quoteReceipt')).toHaveText(/^AURA-[a-f0-9-]{36}$/);
+  const sentQuote=live.calls.find(mail=>/Nieuwe offerteaanvraag/.test(mail.subject));
+  assert.ok(sentQuote,'A quote must be sent via the existing API and injected SMTP transport');
+  assert.match(sentQuote.text,/Fictieve behoefte: passende installatie beoordelen/);
+  await accessibility(quotePage,'mobile/offerte-confirmation');
+  await quotePage.screenshot({path:resolve(resultsDir,'mobile-offerte-success.png'),fullPage:true});
+  record('Standalone quote: responsive form → CSRF API → quote-classified mail → matching receipt');
+  await quoteContext.close();
   currentCheck = 'no-webgl-fallback';
   const fallbackContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce', locale: 'nl-NL' });
   fallbackContext.setDefaultTimeout(10000);
