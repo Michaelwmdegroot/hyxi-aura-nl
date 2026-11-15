@@ -52,7 +52,7 @@ export function buildLeadMail(config, lead, requestId, now) {
     'Dit is de keuze van de bezoeker, geen technisch installatieadvies of definitieve offerte.',
     '',
     'De bezoeker heeft expliciet verzocht om contact over deze aanvraag.',
-    'Privacyversie: 2026-11-14. Geen toestemming voor nieuwsbrieven of andere marketing gevraagd.',
+    'Privacyversie: 2026-11-15. Geen toestemming voor nieuwsbrieven of andere marketing gevraagd.',
   ];
   if (lead.attribution && Object.values(lead.attribution).some(Boolean)) {
     lines.push('', 'Campagneherkomst (door de bezoeker aangeleverde UTM-waarden)');
