@@ -1,6 +1,6 @@
 # HYXI AURA — deployment vanuit `main`
 
-> **Actuele stand 15 november 2026:** de eigenaar is ingelogd op het live password-only dashboard; MariaDB-migraties 001–004 zijn toegepast. Onderdelen hieronder beschrijven deels de oorspronkelijke **mail-only V1** en zijn historisch voor een reeds ingeschakelde databaseomgeving. Controleer vóór verdere activatie de huidige `/api/health`, echte databaselead + ontvangst op `leads@thuisbatterijteam.nl`, privacyverklaring en back-up. Zie [actuele overdracht](HANDOFF-LEADGEN-2026-11-15.md).
+> **Huidig besluit 16 november 2026:** MariaDB 11.8.9 en de vier migraties zijn live; eigenaar gebruikt één-wachtwoord Beheer. Een echte adviesaanvraag is naar database, `leads@` en via bestaande e-mailimport naar Odoo bewezen. De aparte offertepagina is live; externe readinesscheck 7/7 groen. **Hostinger maakt volgens eigenaar dagelijks automatische backups; voorziening is afgevinkt en geen eigen ontwikkelwerk.** Een zelfstandige restore is niet door dit project getest. Hieronder staan ook **historische V1/activeringsstappen**; voer ze niet opnieuw uit. [Nieuwe roadmap](ROADMAP-FASTLANE-2026-11-16.md).
 
 Deze eerste release bevat de interactieve landingspagina en een echte, beveiligde aanvraagroute naar Thuisbatterij Team. De website kan direct worden gedeployed. Aanvragen via het formulier worden pas geactiveerd nadat de mailinstellingen zijn ingevuld. Zonder mailconfiguratie blijft rechtstreeks contact met Thuisbatterij Team mogelijk.
 
