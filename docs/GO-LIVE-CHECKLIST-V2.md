@@ -1,6 +1,6 @@
 # HYXI AURA 2.0 — Go-livechecklist en operationele overdracht
 
-> **Actueel 16 november 2026:** website, database, password-only `/beheer`, privacycorrectie en publieke aanvraag-API werken. Een synthetische productieaanvraag is als HTTP 201 opgeslagen, ontvangen in `leads@` en door inkomende-e-mailautomatisering in Odoo CRM als verkoopkans verschenen (eigenaarbewijs). Productiecode bevat nu ook `/offerte/` na PR #21; afzonderlijke quote-livecontrole blijft nodig. **Open P0-operations:** gecontroleerde back-up/herstelproef, retentie/verwijderproces en betrokken opvolgverantwoordelijken. Zie [status 16 november](STATUS-P0-P1-2026-11-16.md).
+> **Actueel 16 november 2026:** de live adviesaanvraag is aangetoond van HTTP 201/databasecommit tot werkelijke teammail en Odoo-verkoopkans via inkomende e-mail. `/offerte/` is eveneens live (publieke monitor 7/7 PASS). **Eigenaarbesluit: dagelijkse automatische Hostinger-backups zijn een geaccepteerde voorziening en afgevinkt; geen extra backup-/restoreproject als ontwikkelgate.** Niet door ons getest is een afzonderlijke restore. Open: retentie/daadwerkelijke verwijdering, opvolgreminders, KPI's, SEO/GSC en één gecontroleerde live quoteproef. Zie [actuele roadmap](ROADMAP-FASTLANE-2026-11-16.md).
 **Status:** checklijst, geen bewijs dat openstaande acties klaar zijn.
 
 ## V1-productie
@@ -14,20 +14,22 @@
 - [ ] Verifieer Search Console-eigendom, sitemap en indexatie.
 - [ ] Controleer werkelijke privacyrollen, mailbox- en archiefretentie.
 
-## Voordat DB/auth/dashboard live gaan
+## Oorspronkelijke database-/beheeracceptatie (inmiddels live)
 - [x] Hostinger MariaDB 11.8.9 en specifieke DB-gebruiker; verbinding en schema gevalideerd via SSH (minimale privileges afzonderlijk beoordelen).
 - [x] DB-omgeving privé ingesteld; gebruiker bevestigde verbinding en 4 migraties, zonder geheimen te delen.
-- [ ] Back-up, terugzetten en schema rollback getest met fictieve data.
+- [x] Hostinger's dagelijkse automatische back-upvoorziening **door eigenaar bevestigd en geaccepteerd**; geen eigen backupsysteem nodig. Een onafhankelijke restore is niet als uitgevoerd gerapporteerd en geen ontwikkelblokkade.
 - [x] Eerste eigenaaraccount en productie-login bevestigd; password-only (geen MFA) is expliciet door eigenaar gekozen.
-- [ ] Autorisatietests, sessieverval, CSRF, rate limiting en privacycheck uitgevoerd.
-- [ ] **P0 restacceptatie:** het synthetische aanvraagnummer is na DB-commit ook in leads@ en Odoo bevestigd; nog visueel onder bestaande login in /beheer terugvinden.
+- [x] CI-testdekking voor autorisatie, sessieverval, CSRF, loginlimieten en afgeschermde API, met disposable MySQL en browser/a11y; geen claim over een onafhankelijke live penetratietest.
+- [x] Productie-integratiebevestiging: één synthetische aanvraag is na databasecommit werkelijk in leads@ en Odoo teruggevonden.
+- [ ] Optioneel: visueel hetzelfde dossier onder de bestaande login in /beheer terugvinden; geen nieuwe DB-migratie of account aanmaken.
 - [ ] Geen persoonsgegevens in fouten, logs, analytics of tests.
 
-## Voordat offerte- en SEO-fase uitrollen
+## Offerte- en SEO-/groeivervolg
 - [ ] Actuele fabrikantdatasheets en beperkingen opnieuw bevestigen.
 - [ ] Alleen geautoriseerde kosten, montage, BTW, garantie en levertijdregels gebruiken.
 - [ ] Websitevisie/-screens van 7/10 naar volgende designreview brengen.
-- [ ] Nieuwe SEO-pagina's schrijven voor unieke gebruikersvragen.
+- [x] Aparte offertepagina met eigen zoekintentie en canonical/sitemap is live; externe probe 7/7 groen.
+- [ ] Meer inhoudelijke SEO-pagina's per eigen bezoekersvraag publiceren; Search Console nog niet geverifieerd.
 - [ ] Domeinbesluit vastleggen: eigen functie vs technisch samenvoegen.
 - [ ] Meetmodel en cookiebesluit afstemmen vóór analytics.
 - [ ] Echte prestaties na livegang en marketingeffect monitoren.
