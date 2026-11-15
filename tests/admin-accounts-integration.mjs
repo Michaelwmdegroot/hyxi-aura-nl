@@ -12,28 +12,21 @@ import {
   createAdminAccount, resetAdminAccount, disableAdminAccount, revokeAdminSessions,
   listAdminAccounts, assertAccountManagementSchema,
 } from '../server/auth/accounts.mjs';
-import { newTotpSecret, totpForStep, verifyAdminPassword, decryptTotp } from '../server/auth/security.mjs';
+import { verifyAdminPassword } from '../server/auth/security.mjs';
 
 if (process.env.CI !== 'true' || process.env.NODE_ENV !== 'test' || process.env.DB_NAME !== 'aura_ci') {
   throw new Error('Account tests require the disposable CI MySQL database aura_ci.');
 }
-const mfaKey = randomBytes(32).toString('base64');
 const sessionSecret = randomBytes(32).toString('hex');
 const cfg = loadConfig({
   ...process.env, ADMIN_ENABLED: 'false', LEAD_STORAGE_MODE: 'mail',
-  ADMIN_MFA_KEY: mfaKey, ADMIN_SESSION_SECRET: sessionSecret,
+  ADMIN_SESSION_SECRET: sessionSecret,
 });
 assert.equal(cfg.adminEnabled, false);
 const pool = createLeadPool(cfg);
-let now = Date.now();
-const codeFor = (seed, offset = 0) => totpForStep(seed, Math.floor(now / 30000) + offset);
-const enrollment = () => {
-  const totpSecret = newTotpSecret();
-  return {
-    password: 'Fictief.Account.Alleen.CI.' + randomBytes(8).toString('hex'),
-    totpSecret, confirmationCode: codeFor(totpSecret), mfaKey, now: () => now,
-  };
-};
+const enrollment = () => ({
+  password: 'Fictief.Account.Alleen.CI.' + randomBytes(8).toString('hex'),
+});
 const create = (email, role = 'sales', prepared = enrollment()) => createAdminAccount({ pool, email, role, ...prepared });
 const reset = (id, prepared, overridePool = pool) => resetAdminAccount({
   pool: overridePool, userId: id, ...prepared, sessionSecret,
@@ -75,25 +68,23 @@ try {
   assert.equal((await listAdminAccounts(pool)).length, 3);
   assert.equal(Object.hasOwn((await listAdminAccounts(pool))[0], 'passwordHash'), false);
   await assert.rejects(create(' ACCOUNT-SALES@EXAMPLE.TEST ', 'sales'), { code: 'ACCOUNT_EXISTS' });
-  await assert.rejects(create('bad-mfa@example.test', 'sales', { ...enrollment(), confirmationCode: 'no-code' }), { code: 'MFA_CONFIRMATION_FAILED' });
+  await assert.rejects(create('bad-password@example.test', 'sales', { password: 'short' }), { code: 'PASSWORD_POLICY' });
   assert.equal((await listAdminAccounts(pool)).length, 3);
   const persisted = await rowFor(sales.id);
   assert.equal(await verifyAdminPassword(salesEnrollment.password, persisted.password_hash), true);
-  assert.equal(decryptTotp(persisted.mfa_secret_encrypted, sales.id, mfaKey), salesEnrollment.totpSecret);
-  assert.equal(Number(persisted.mfa_last_accepted_step), Math.floor(now / 30000));
+  assert.equal(Buffer.from(persisted.mfa_secret_encrypted).length, 0);
+  assert.equal(Number(persisted.mfa_last_accepted_step), -1);
 
-  const store = createAdminStore({ pool, sessionSecret, mfaKey, leadEncryptionKey: cfg.encryptionKey, now: () => now });
-  const loginSales = (prepared, offset = 0) => store.login({
-    email: sales.email, password: prepared.password, code: codeFor(prepared.totpSecret, offset), address: '192.0.2.10',
+  const store = createAdminStore({ pool, sessionSecret, leadEncryptionKey: cfg.encryptionKey });
+  const loginSales = prepared => store.login({
+    email: sales.email, password: prepared.password, address: '192.0.2.10',
   });
-  assert.equal(await loginSales(salesEnrollment), null, 'Enrollment MFA code is already consumed');
-  now += 31000;
   const session = await loginSales(salesEnrollment);
   assert.ok(session?.token);
   assert.equal((await store.currentSession(session.token)).id, sales.id);
 
-  const failedReset = { ...enrollment(), confirmationCode: 'not-a-totp' };
-  await assert.rejects(reset(sales.id, failedReset), { code: 'MFA_CONFIRMATION_FAILED' });
+  const failedReset = { password: 'short' };
+  await assert.rejects(reset(sales.id, failedReset), { code: 'PASSWORD_POLICY' });
   assert.equal((await rowFor(sales.id)).password_hash, persisted.password_hash);
   assert.ok(await store.currentSession(session.token));
 
@@ -124,26 +115,22 @@ try {
   const newRow = await rowFor(sales.id);
   assert.equal(await verifyAdminPassword(salesEnrollment.password, newRow.password_hash), false);
   assert.equal(await verifyAdminPassword(newEnrollment.password, newRow.password_hash), true);
-  assert.equal(decryptTotp(newRow.mfa_secret_encrypted, sales.id, mfaKey), newEnrollment.totpSecret);
+  assert.equal(Buffer.from(newRow.mfa_secret_encrypted).length, 0);
   assert.equal((await pool.execute('SELECT guard_hash FROM aura_admin_login_guards WHERE guard_hash=?', [accountGuard]))[0].length, 0);
   assert.equal((await pool.execute('SELECT guard_hash FROM aura_admin_login_guards WHERE guard_hash=?', [sourceGuard]))[0].length, 1);
-  assert.equal(await loginSales(newEnrollment), null, 'Recovery confirmation code is already consumed');
-  now += 31000;
   const renewed = await loginSales(newEnrollment);
   assert.ok(renewed?.token);
   assert.equal((await revokeAdminSessions({ pool, userId: sales.id })).revokedSessions, 1);
   assert.equal(await store.currentSession(renewed.token), null);
   assert.equal((await rowFor(sales.id)).disabled_at, null);
 
-  now += 31000;
   const beforeDisable = await loginSales(newEnrollment);
   assert.ok(beforeDisable?.token);
   const disabled = await disableAdminAccount({ pool, userId: sales.id });
   assert.equal(disabled.changed, true);
   assert.equal(disabled.revokedSessions, 1);
   assert.equal(await store.currentSession(beforeDisable.token), null);
-  now += 31000;
-  assert.equal(await loginSales(newEnrollment), null, 'Disabled accounts cannot authenticate with valid new MFA codes');
+  assert.equal(await loginSales(newEnrollment), null, 'Disabled accounts cannot authenticate with a valid password');
   assert.equal((await disableAdminAccount({ pool, userId: sales.id })).changed, false);
   assert.equal((await reset(sales.id, enrollment())).disabled, true, 'Credential reset cannot silently reactivate an account');
 
@@ -151,7 +138,6 @@ try {
   // it cannot commit a new session after the reset revoked existing sessions.
   const raceEnrollment = enrollment();
   const race = await create('account-race@example.test', 'sales', raceEnrollment);
-  now += 31000;
   const raceReplacement = enrollment();
   let resetInjected = false;
   const racePool = {
@@ -161,12 +147,11 @@ try {
       return pool.getConnection();
     },
   };
-  const racingStore = createAdminStore({ pool: racePool, sessionSecret, mfaKey, leadEncryptionKey: cfg.encryptionKey, now: () => now });
-  // Use the accepted +1 clock window: merely checking lastAcceptedStep would
-  // otherwise accidentally hide the credential race after the reset.
+  const racingStore = createAdminStore({ pool: racePool, sessionSecret, leadEncryptionKey: cfg.encryptionKey });
+  // The in-flight login must fail when the password is reset after its
+  // initial read but before the account row is locked.
   const racingLogin = await racingStore.login({
-    email: race.email, password: raceEnrollment.password,
-    code: codeFor(raceEnrollment.totpSecret, 1), address: '192.0.2.11',
+    email: race.email, password: raceEnrollment.password, address: '192.0.2.11',
   });
   assert.equal(resetInjected, true);
   assert.equal(racingLogin, null);
@@ -184,5 +169,5 @@ try {
   assert.ok(audits.length >= 10);
   assert.ok(audits.every(row => row.actor_user_id === null && row.target_user_id), 'Terminal actions record the subject without impersonating it');
   assert.doesNotMatch(JSON.stringify(audits), /@|password_hash|totpSecret|scrypt\$/);
-  console.log('PASS account migration/retry, provisioning, MFA confirmation, duplicate prevention, atomic recovery, session revocation, audit rollback, login/reset race and last-admin protection');
+  console.log('PASS account migration/retry, provisioning, password-only validation, duplicate prevention, atomic recovery, session revocation, audit rollback, login/reset race and last-admin protection');
 } finally { await pool.end(); }
