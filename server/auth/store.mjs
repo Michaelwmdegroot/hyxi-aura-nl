@@ -133,12 +133,16 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
     return {total,statuses,notifications:Object.fromEntries(notifications.map(r=>[r.delivery_status,Number(r.total)]))};
   }
 
-  async function listLeads(actor,{status='',page=1}={}) {
+  async function listLeads(actor,{status='',page=1,search=''}={}) {
     if(status && !STATUSES.has(status)) throw new AdminInputError();
+    if(typeof search!=='string'||search.length>64||(search&&!/^[a-zA-Z0-9-]+$/.test(search))) {
+      throw Object.assign(new Error('Ongeldig aanvraagnummer.'),{code:'BAD_FILTER'});
+    }
     const current=Number.isSafeInteger(page)&&page>0?Math.min(100,page):1;
     const where=[],params=[];
     if(actor.role!=='admin'){where.push('l.assigned_user_id=?');params.push(actor.id);}
     if(status){where.push('l.status=?');params.push(status);}
+    if(search){where.push('LOWER(l.request_id) LIKE ?');params.push('%'+search.toLowerCase()+'%');}
     const condition=where.length?' WHERE '+where.join(' AND '):'';
     const [rows]=await pool.query(
       "SELECT l.id,l.request_id,l.status,l.request_type,l.source_domain,l.created_at,l.assigned_user_id,o.delivery_status FROM aura_leads l LEFT JOIN aura_notification_outbox o ON o.lead_id=l.id AND o.event_type='lead_received'"+

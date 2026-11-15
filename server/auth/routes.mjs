@@ -175,9 +175,10 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
     catch(error){backendError(res,error);}
   });
   app.get(prefix+'/leads',authenticated,async(req,res)=>{
-    const page=Number(req.query.page||1),status=String(req.query.status||'');
-    if(!Number.isSafeInteger(page)||page<1||page>100||status.length>40)return fail(res,422,'BAD_FILTER','Ongeldige filters.');
-    try{res.json({ok:true,...await adminStore.listLeads(req.beheerUser,{status,page})});}
+    const page=Number(req.query.page||1),status=String(req.query.status||''),search=req.query.search??'';
+    if(!Number.isSafeInteger(page)||page<1||page>100||status.length>40||typeof search!=='string'||search.length>64||
+      (search&&!/^[a-zA-Z0-9-]+$/.test(search)))return fail(res,422,'BAD_FILTER','Ongeldige filters.');
+    try{res.json({ok:true,...await adminStore.listLeads(req.beheerUser,{status,page,search})});}
     catch(error){backendError(res,error);}
   });
   app.get(prefix+'/leads/:requestId',authenticated,async(req,res)=>{
