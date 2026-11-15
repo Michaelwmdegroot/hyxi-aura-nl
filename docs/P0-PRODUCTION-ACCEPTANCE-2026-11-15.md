@@ -1,5 +1,7 @@
 # HYXI AURA — P0 productieacceptatie en herstelroute (15 november 2026)
 
+> **Historische productieacceptatiehandleiding.** De externe aanvraag→database→leads@-mail→Odoo-e-mailimport is op 15/16 november bewezen. De eigenaar heeft op 16 november **dagelijkse Hostinger-backups als voldoende bevestigd**; extra backup-/restoretesten zijn niet meer een actieve releaseblokkade. Dit is een acceptatiebesluit, **geen claim van onafhankelijk geteste restore**. De actuele status/volgorde staat in [fast-lane roadmap](ROADMAP-FASTLANE-2026-11-16.md).
+
 **Status: testinstructie, geen bewijs van voltooiing.** Basis: `main` 87882ae en bestaande Hostinger-productie met MariaDB 11.8.9, migraties 001–004, werkend password-only /beheer. Database en beheer **niet opnieuw opzetten**. Doel: aantoonbare keten **publiek formulier → DB-ontvangstnummer → /beheer → inbox van leads@thuisbatterijteam.nl**.
 
 ## Wat deze release daadwerkelijk wijzigt
@@ -35,9 +37,9 @@ De gekoppelde Hostinger Mail-account voor `leads@thuisbatterijteam.nl` is read-o
 
 ## Nog open om P0 af te tekenen
 
-- [ ] Nieuwste `main` daadwerkelijk in productie en privacytekst zichtbaar.
-- [ ] Read-only `leadEnabled: true` op de **actuele** live API.
+- [x] De nieuwe privacytekst en `/offerte/` zijn publiek zichtbaar; externe productiecontrole 7/7 groen.
+- [x] Read-only `leadEnabled: true` op de live API, extern geverifieerd.
 - [ ] Eén live aanvraag-ID zichtbaar in beveiligde database en dashboard.
-- [ ] Overeenkomstige HYXI-mail aangetroffen in `leads@` INBOX/Junk.
-- [ ] Hostinger backup **en herstel naar geïsoleerde testdatabase** geverifieerd.
+- [x] Overeenkomstige HYXI-mail aantoonbaar aangetroffen in `leads@` INBOX; Odoo via inkomende mail bevestigd.
+- [x] Hostinger maakt volgens eigenaar dagelijks automatische backups; als projectvoorziening geaccepteerd. Onafhankelijk herstel is niet getest en niet nodig als faseblokkade.
 - [ ] Beheerder mailbox + reservepersoon benoemd; retentie-eigenaar benoemd.
