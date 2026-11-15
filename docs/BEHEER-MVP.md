@@ -1,5 +1,7 @@
 # HYXI AURA Beheer — uitvoering en activering
 
+> **Huidige status 16 november 2026:** dit document bevat de historische activeringsstappen; **uitvoering is al bevestigd**. MariaDB-migraties 001–004, eigenaaraccount en password-only Beheer bestaan. Er zijn inmiddels echte leads tot Odoo bevestigd en de dashboardwerkbank ondersteunt statussen, zoeken, volgende actie, vervolgdatum en versleutelde notities. Herhaal accountbootstrap of migraties niet. De eigenaar heeft Hostinger's dagelijkse back-ups als voldoende geaccepteerd; geen eigen back-uptraject. Zie [de actuele roadmap](ROADMAP-FASTLANE-2026-11-16.md).
+
 Bijgewerkt 15 november 2026. De implementatie is samengebracht in [PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13), inclusief de eerdere database- en authenticatiebranches. Een build of merge schakelt databaseopslag en beheer niet automatisch in.
 
 ## Werkende onderdelen
