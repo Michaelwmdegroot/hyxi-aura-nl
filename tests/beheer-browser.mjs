@@ -74,6 +74,8 @@ async function accessibility(page,label){
 async function layout(page,label){
   const sizes=await page.evaluate(()=>({body:document.body.scrollWidth,doc:document.documentElement.scrollWidth,width:innerWidth}));
   assert.ok(sizes.body<=sizes.width+1&&sizes.doc<=sizes.width+1,label+' horizontal overflow '+JSON.stringify(sizes));
+  const expected=label.startsWith('mobile')?390:1440;
+  assert.ok(sizes.width<=expected+1,label+' layout viewport incorrectly expanded: '+JSON.stringify(sizes));
 }
 async function loginAndReview(context,label){
   const page=await context.newPage();
