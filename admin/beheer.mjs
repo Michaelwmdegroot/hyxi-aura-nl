@@ -183,7 +183,7 @@ async function loadNotifications(version=refreshVersion){
     if(item.errorCode)time.textContent+=' · '+item.errorCode;
     text.append(heading,state,time);
     const button=document.createElement('button');button.type='button';button.className='secondary small review-mail';
-    button.textContent='Controleer melding →';button.setAttribute('aria-label','Controleer mail voor '+item.requestId);
+    button.textContent='Controleer melding →';button.setAttribute('aria-label','Controleer melding voor '+item.requestId);
     button.addEventListener('click',()=>openMailReview(item));
     card.append(text,button);$('outboxItems').append(card);
   }
