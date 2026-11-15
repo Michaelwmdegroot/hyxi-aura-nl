@@ -229,9 +229,10 @@ try {
   const quoteMails=[];
   const quoteWorker=createNotificationWorker({store,config,transport:{async sendMail(mail){quoteMails.push(mail);return {accepted:[config.smtp.to]};}}});
   await quoteWorker.flush(8);
-  assert.equal(quoteMails.length,1);
-  assert.match(quoteMails[0].subject,/offerteaanvraag/);
-  assert.match(quoteMails[0].text,/Vraag over bestaande omvormer/);
+  const matchingQuoteMails=quoteMails.filter(mail=>mail.messageId === '<'+quoteLead.requestId+'@hyxi-aura.nl>');
+  assert.equal(matchingQuoteMails.length,1,'The quote has one matching notification even if other test leads are pending');
+  assert.match(matchingQuoteMails[0].subject,/offerteaanvraag/);
+  assert.match(matchingQuoteMails[0].text,/Vraag over bestaande omvormer/);
   assert.equal((await status(quoteLead.requestId)).delivery_status,'accepted');
 
   console.log('PASS MySQL migration + AES-GCM + transaction rollback + durable idempotency + outbox failure/retry + API');
