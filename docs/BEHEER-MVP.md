@@ -71,3 +71,9 @@ Zie [Hostinger-stappen](DATABASE-HOSTINGER-V2.md), [beveiliging](BEHEER-SECURITY
 ## Werkbank: zoeken zonder extra migratie
 
 Vanaf de fast-lane vervolgrelease biedt het aanvraagoverzicht een toetsenbordvriendelijke zoekbalk voor **volledige of gedeeltelijke aanvraagnummer-ID's**. De server filtert op toegestane tekens en bewaakt bestaande admin/sales-toewijzingsrechten; geen gegevens verschijnen in de publieke API. Naam-/e-mailzoeken is bewust nog niet toegevoegd: de contactgegevens liggen versleuteld en we maken geen onbeschermde PII-index aan voor een snelle zoekfeature. Verzoeken met SQL-wildcards worden afgewezen. Dit is de eerste stap van issue #4; interne notities en vervolgacties blijven open.
+
+## P1: versleutelde vervolgacties en interne notities
+
+Binnen bestaande Beheer-authenticatie is een vervolgdossier toegevoegd: **volgende actie**, **vervolgdatum** en **append-only notities**. De drie velden worden als onderdeel van de bestaande AES-256-GCM versleutelde leadpayload opgeslagen. Daardoor is **geen nieuwe migratie** of ongecodeerde persoonsinformatie-index nodig. De update gebruikt een row-lock/transactie zodat een gelijktijdige notitie niet stilletjes wordt overschreven. Alleen geautoriseerde admin of aan dit dossier toegewezen sales mag lezen/schrijven; status, assignee, outbox en sessies blijven ongewijzigd.
+
+Het admin-auditlog en lead-eventlog registreren **wie** een vervolgactie wijzigde, zonder notitietekst in logs, SQL-indexen of tests. Notities worden niet overschreven; maximaal 200 notities van 1000 tekens per dossier en in de UI worden de laatste 10 getoond. Beperk invoer tot zakelijke noodzakelijke informatie. Verwijder-/inzageverzoeken moeten ook deze notities meenemen. Er is nog **geen automatische reminder** of datumoverzicht; die functies blijven vervolgtaken. De HTML en API blijven noindex, CSRF-, sessie- en rollenbeschermd.
