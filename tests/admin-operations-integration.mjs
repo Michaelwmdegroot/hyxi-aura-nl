@@ -68,6 +68,22 @@ try {
   assert.equal((await store.assignLead(admin, lead.requestId, sales.id)).changed, true);
   assert.equal((await store.assignLead(admin, lead.requestId, sales.id)).changed, false);
   assert.equal((await store.getLead(sales, lead.requestId)).contact.fullName, 'Fictional Operations Applicant');
+  const followUpPayload={nextAction:'Afspraak bevestigen',dueDate:'2026-11-24',note:'Volgende week bellen'};
+  assert.equal((await store.updateFollowup(sales,lead.requestId,followUpPayload)).changed,true);
+  const updatedFollowup=await store.getLead(sales,lead.requestId);
+  assert.equal(updatedFollowup.followUp.nextAction,'Afspraak bevestigen');
+  assert.equal(updatedFollowup.followUp.dueDate,'2026-11-24');
+  assert.equal(updatedFollowup.followUp.notes.length,1);
+  assert.equal(updatedFollowup.followUp.notes[0].text,'Volgende week bellen');
+  assert.equal((await store.updateFollowup(sales,lead.requestId,{nextAction:'Afspraak bevestigen',dueDate:'2026-11-24',note:''})).changed,false);
+  await assert.rejects(() => store.updateFollowup(sales,other.requestId,followUpPayload),{code:'NOT_FOUND'});
+  await assert.rejects(() => store.updateFollowup(sales,lead.requestId,{...followUpPayload,note:'x'.repeat(1001)}),{code:'BAD_FOLLOWUP'});
+  const [following]=await pool.execute('SELECT encrypted_payload FROM aura_leads WHERE request_id=?',[lead.requestId]);
+  assert.equal(following.length,1);
+  assert.equal(Buffer.from(following[0].encrypted_payload).includes(Buffer.from('Volgende week bellen')),false,'Encrypted payload must not contain plaintext notes');
+  const [followupAudit]=await pool.execute("SELECT COUNT(*) AS total FROM aura_admin_audit WHERE action='followup_update' AND lead_id=?",[lead.id]);
+  assert.equal(Number(followupAudit[0].total),1);
+
   await assert.rejects(() => store.getLead(sales, other.requestId), { code: 'NOT_FOUND' });
   await store.assignLead(admin, lead.requestId, null);
   await assert.rejects(() => store.getLead(sales, lead.requestId), { code: 'NOT_FOUND' });
@@ -111,6 +127,13 @@ try {
   const salesHeaders = await login(base, sales), adminHeaders = await login(base, admin);
   assert.equal((await fetch(base + '/api/beheer/outbox', { headers: salesHeaders })).status, 403);
   assert.equal((await fetch(base + '/api/beheer/assignees', { headers: salesHeaders })).status, 403);
+  const followupUrl=base+'/api/beheer/leads/'+lead.requestId+'/followup';
+  assert.equal((await fetch(followupUrl,{method:'PATCH',headers:{...salesHeaders,'X-Aura-CSRF':'invalid'},body:JSON.stringify({nextAction:'',dueDate:null,note:''})})).status,403);
+  assert.equal((await fetch(followupUrl,{method:'PATCH',headers:salesHeaders,body:JSON.stringify({nextAction:'',dueDate:null,note:''})})).status,404,'Unassigned sales must not mutate follow-up');
+  assert.equal((await fetch(followupUrl,{method:'PATCH',headers:adminHeaders,body:JSON.stringify({nextAction:'Volgende contactpoging',dueDate:'2026-11-30',note:''})})).status,200);
+  const afterFollowup=await (await fetch(base+'/api/beheer/leads/'+lead.requestId,{headers:adminHeaders})).json();
+  assert.equal(afterFollowup.lead.followUp.nextAction,'Volgende contactpoging');
+
   const assignmentUrl = base + '/api/beheer/leads/' + lead.requestId + '/assignee';
   assert.equal((await fetch(assignmentUrl, { method: 'PATCH', headers: salesHeaders, body: JSON.stringify({ userId: sales.id }) })).status, 403);
   assert.equal((await fetch(assignmentUrl, { method: 'PATCH', headers: { ...adminHeaders, 'X-Aura-CSRF': 'invalid' }, body: JSON.stringify({ userId: sales.id }) })).status, 403);

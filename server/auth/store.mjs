@@ -1,6 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { verifyAdminPassword, hashAdminPassword, newSessionToken, hashSessionToken } from './security.mjs';
-import { openLead, parseEncryptionKey } from '../db/crypto.mjs';
+import { openLead, parseEncryptionKey, sealLead } from '../db/crypto.mjs';
+import { normalizeFollowup, parseFollowupInput } from './followup.mjs';
 import { assertAdminStructure, assertMigrationChecksum } from '../db/schema-check.mjs';
 import { createAdminOperations } from './operations.mjs';
 
@@ -176,6 +177,7 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
       notification:{status:r.delivery_status||'unknown',attempts:Number(r.attempt_count||0),errorCode:r.last_error_code||null},
       contact:{fullName:lead.fullName,email:lead.email,phone:lead.phone,postcode:lead.postcode},
       profile:lead.profile,attribution:lead.attribution||{},
+      followUp:normalizeFollowup(lead.followUp),
     };
   }
 
@@ -208,5 +210,51 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
     } finally {conn.release();}
   }
 
-  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus,...createAdminOperations({pool})};
+
+  async function updateFollowup(actor,requestId,input) {
+    if(!VALID_ID.test(requestId))throw new AdminNotFoundError();
+    const parsed=parseFollowupInput(input);
+    if(!parsed)throw Object.assign(new Error('Invalid follow-up.'),{code:'BAD_FOLLOWUP'});
+    const conn=await pool.getConnection();
+    try{
+      await conn.beginTransaction();
+      const [rows]=await conn.execute(
+        'SELECT id,assigned_user_id,encrypted_payload,encryption_key_id FROM aura_leads WHERE request_id=? LIMIT 1 FOR UPDATE',
+        [requestId],
+      );
+      const row=rows[0];
+      if(!row||!canRead(actor,row))throw new AdminNotFoundError();
+      const payload=openLead(row.encrypted_payload,row.id,leadKey,row.encryption_key_id);
+      const old=normalizeFollowup(payload.followUp);
+      if(parsed.note&&old.notes.length>=200)throw Object.assign(new Error('Notes limit reached.'),{code:'BAD_FOLLOWUP'});
+      const changed=old.nextAction!==parsed.nextAction||old.dueDate!==parsed.dueDate||Boolean(parsed.note);
+      if(changed){
+        const notes=parsed.note
+          ? [...old.notes,{text:parsed.note,createdAt:new Date().toISOString(),authorId:actor.id}]
+          : old.notes;
+        payload.followUp={nextAction:parsed.nextAction,dueDate:parsed.dueDate,notes};
+        const encrypted=sealLead(payload,row.id,leadKey,row.encryption_key_id);
+        await conn.execute('UPDATE aura_leads SET encrypted_payload=?,updated_at=UTC_TIMESTAMP(3) WHERE id=?',[encrypted,row.id]);
+        await conn.execute(
+          'INSERT INTO aura_lead_events (lead_id,event_type,actor_type,actor_id,metadata_json) VALUES (?,?,?,?,?)',
+          [row.id,'followup_updated','admin',actor.id,JSON.stringify({
+            actionUpdated:old.nextAction!==parsed.nextAction,
+            dueDateUpdated:old.dueDate!==parsed.dueDate,
+            noteAdded:Boolean(parsed.note),
+          })],
+        );
+        await conn.execute(
+          'INSERT INTO aura_admin_audit (actor_user_id,lead_id,action,result_code) VALUES (?,?,?,?)',
+          [actor.id,row.id,'followup_update','ok'],
+        );
+      }
+      await conn.commit();
+      return {requestId,changed,followUp:changed?payload.followUp:old};
+    }catch(error){
+      await conn.rollback().catch(()=>{});
+      throw error;
+    }finally{conn.release();}
+  }
+
+  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus,updateFollowup,...createAdminOperations({pool})};
 }

@@ -214,6 +214,27 @@ function fillDetails(container,rows){
     dt.textContent=label;dd.textContent=textOr(value);dl.append(dt,dd);
   }
 }
+function renderFollowup(value){
+  const followup=value||{};
+  $('nextAction').value=followup.nextAction||'';
+  $('followupDate').value=followup.dueDate||'';
+  const notes=$('followupNotes');notes.replaceChildren();
+  const entries=Array.isArray(followup.notes)?followup.notes:[];
+  for(const entry of entries.slice(-10).reverse()){
+    const article=document.createElement('article');
+    article.className='followup-note';
+    const time=document.createElement('time');
+    time.textContent=formatDate(entry.createdAt);time.dateTime=entry.createdAt||'';
+    const content=document.createElement('p');
+    content.textContent=entry.text||'';
+    article.append(time,content);notes.append(article);
+  }
+  if(entries.length>10){
+    const extra=document.createElement('p');extra.className='followup-hint';
+    extra.textContent=(entries.length-10)+' oudere notities zijn niet in dit overzicht getoond.';
+    notes.append(extra);
+  }
+}
 function openPane(){
   previousFocus=document.activeElement;
   $('detailPane').hidden=false;$('detailBackdrop').hidden=false;
@@ -234,6 +255,8 @@ function closeDetail(){
   $('detailLoading').textContent='';message('statusMessage','');
   $('assignmentForm').hidden=true;$('assignee').replaceChildren();message('assignmentMessage','');
   $('editStatus').value='new';
+  $('nextAction').value='';$('followupDate').value='';$('followupNote').value='';
+  $('followupNotes').replaceChildren();message('followupMessage','');
   currentLead=null;$('detailTitle').textContent='Aanvraag';
   const restore=previousFocus;previousFocus=null;
   if(!$('dashboardView').hidden){
@@ -269,6 +292,7 @@ async function openDetail(requestId){
       ['Pogingen',n.attempts],['Foutcode',n.errorCode],
     ]);
     $('editStatus').value=r.status;
+    renderFollowup(r.followUp);
     $('assignmentForm').hidden=!assignees;
     $('assignee').replaceChildren();message('assignmentMessage','');
     if(assignees){
@@ -359,7 +383,7 @@ document.addEventListener('keydown',event=>{
   if($('detailPane').hidden)return;
   if(event.key==='Escape'){event.preventDefault();closeDetail();return;}
   if(event.key!=='Tab')return;
-  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled])')].filter(node=>node.getClientRects().length>0);
+  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled])')].filter(node=>node.getClientRects().length>0);
   if(!focusable.length)return;
   const first=focusable[0],last=focusable.at(-1);
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
@@ -380,6 +404,27 @@ $('statusForm').addEventListener('submit',async event=>{
     }
     await refreshAll();
   }catch(error){if(!isInterrupted(error)&&version===detailVersion)message('statusMessage',error.message);}
+  finally{setLoading(button,false);}
+});
+$('followupForm').addEventListener('submit',async event=>{
+  event.preventDefault();if(!currentLead)return;
+  const lead=currentLead,version=detailVersion;
+  const button=$('followupForm').querySelector('button[type=submit]');
+  setLoading(button,true);message('followupMessage','');
+  try{
+    const nextAction=$('nextAction').value.trim();
+    const dueDate=$('followupDate').value||null;
+    const note=$('followupNote').value.trim();
+    const result=await api('/leads/'+encodeURIComponent(lead.requestId)+'/followup',{
+      method:'PATCH',body:JSON.stringify({nextAction,dueDate,note}),
+    });
+    if(version===detailVersion&&currentLead===lead){
+      lead.followUp=result.followUp;
+      $('followupNote').value='';
+      renderFollowup(result.followUp);
+      message('followupMessage',result.changed?'Opvolging opgeslagen.':'Geen wijzigingen.');
+    }
+  }catch(error){if(!isInterrupted(error)&&version===detailVersion)message('followupMessage',error.message);}
   finally{setLoading(button,false);}
 });
 $('assignmentForm').addEventListener('submit',async event=>{
