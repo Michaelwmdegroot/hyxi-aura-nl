@@ -153,7 +153,11 @@ async function loadLeads(version=refreshVersion){
   const rows=$('leadRows');rows.replaceChildren();
   for(const lead of lastItems){
     const tr=document.createElement('tr');
-    tr.append(makeCell(lead.requestId),makeCell(formatDate(lead.createdAt)));
+    const refCell=makeCell(lead.requestId);
+    if(lead.requestType==='quote'){
+      const kind=document.createElement('small');kind.className='request-kind';kind.textContent=' · Offerte';refCell.append(kind);
+    }
+    tr.append(refCell,makeCell(formatDate(lead.createdAt)));
     const status=makeCell('');status.textContent='';status.append(makeBadge(lead.status));tr.append(status);
     const delivery=makeCell('');delivery.textContent='';delivery.append(makeBadge(lead.deliveryStatus));tr.append(delivery);
     const act=makeCell('');act.textContent='';const btn=document.createElement('button');
@@ -286,6 +290,8 @@ async function openDetail(requestId){
       ['Doel',({solar:'Eigen zonnestroom',prices:'Stroomprijzen',backup:'Back-up',unsure:'Advies'})[p.goal]],
       ['Aansluiting',({single:'1-fase',three:'3-fase',unknown:'Onbekend'})[p.phase]],
       ['Modules',p.moduleCount+' × BAT-Q'+p.moduleType],
+      ['Aanvraagtype',r.requestType==='quote'?'Offerteaanvraag':'Adviesaanvraag'],
+      ['Aanvullende wensen',r.projectDetails||'Niet opgegeven'],
     ]);
     fillDetails('systemFields',[
       ['Ontvangen',formatDate(r.createdAt)],['Website',r.source],['Mailstatus',labels[n.status]||n.status],
