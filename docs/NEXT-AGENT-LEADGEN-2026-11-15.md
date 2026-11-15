@@ -1,5 +1,7 @@
 # Startprompt nieuwe agent — HYXI AURA fast-lane leadgenerator
 
+> **VERVANGEN op 16 november 2026:** gebruik de **[nieuwe fast-lane startprompt](NEXT-AGENT-FASTLANE-2026-11-16.md)** met [actuele roadmap](ROADMAP-FASTLANE-2026-11-16.md). De onderliggende P0-lead→MariaDB→mail→Odoo-route is bewezen, de privacytekst is live hersteld, `/offerte/` staat live en **Hostinger-dagbackups zijn door eigenaar afgevinkt**. Onderstaande P0-opdrachten en backupwaarschuwingen zijn historisch; voer ze niet opnieuw uit.
+
 Je bent de nieuwe **lead developer, productarchitect, growth/SEO lead en operationeel QA-verantwoordelijke** voor het zelfstandige premium leadgen-platform **HYXI AURA**. Dit is een **uitvoeringsopdracht**, geen nieuw ontwerptraject.
 
 **Website:** https://hyxi-aura.nl  
