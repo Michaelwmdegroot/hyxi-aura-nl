@@ -1,6 +1,6 @@
 # HYXI AURA · hyxi-aura.nl
 
-> **Actuele overdracht (15 nov 2026):** HYXI AURA staat live op Hostinger. De eigenaar heeft MariaDB-migraties 001–004 en een werkende **password-only /beheer-login** bevestigd. De account-/dashboard-MVP is dus meer dan een toekomstplan. **Nog niet bevestigd:** live formulier → DB-record → daadwerkelijke mailontvangst, privacy/retentie en monitoring. Zie **[het actuele leadgen-handoff](docs/HANDOFF-LEADGEN-2026-11-15.md)** en **[de startprompt voor de nieuwe agent](docs/NEXT-AGENT-LEADGEN-2026-11-15.md)**. Oudere secties hieronder beschrijven mede V1 en geplande functies; het handoff gaat voor bij statusconflicten.
+> **Actuele status 16 november 2026:** De echte HYXI AURA-keten is aangetoond: één synthetische aanvraag gaf **HTTP 201 na MariaDB-commit**, kwam daadwerkelijk in `leads@thuisbatterijteam.nl` aan en werd via binnenkomende e-mail automatisch als lead in Odoo CRM aangemaakt (eigenaarsscreenshot). Het password-only `/beheer` werkt; de publieke `leadEnabled`-controle was groen. De aparte `/offerte/`-flow is als [PR #21](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/21) gemerged met 3/3 groene CI. **Nog open:** databaseback-up/herstelproef, veilige retentie/verwijdering, operationele mailboxverantwoordelijkheid, visuele bevestiging van het testdossier in Beheer, Search Console, opvolgherinneringen en commerciële/UX-uitbreiding. Zie [status en bewijs](docs/STATUS-P0-P1-2026-11-16.md); eerdere [overdracht](docs/HANDOFF-LEADGEN-2026-11-15.md) is historisch.
 
 Een interactieve Nederlandse productervaring voor de HYXI AURA thuisbatterij. Bezoekers ontdekken de werking, verkennen een modulaire opstelling en vragen persoonlijk advies aan bij **Thuisbatterij Team**. De website is een initiatief van **NIVO Groep Holland B.V.** en is geen officiële HYXI-website.
 
@@ -10,6 +10,8 @@ Een interactieve Nederlandse productervaring voor de HYXI AURA thuisbatterij. Be
 - Een interactieve woning met zonnige middag, avond en stroomuitval, telkens met en zonder batterij.
 - Een configurator voor één tot zes BAT-Q7- of BAT-Q9-modules, met totale én bruikbare capaciteit.
 - Een aanvraag in drie stappen, inclusief de gekozen configuratie en expliciet verzoek om contact.
+- Een aparte mobiele offerteaanvraag op `/offerte/`, inclusief gewenste modules en optionele installatievraag; herkenbaar als `quote` in Beheer en interne e-mail.
+- Een afgeschermde werkbank met statussen, toewijzing, zoeken op aanvraagnummer en versleutelde vervolgacties en notities.
 - Servervalidatie en SMTP-aflevering bij het team, met bescherming tegen misbruik en dubbele verzending.
 - Statische, leesbare productinhoud, FAQ, bronpagina, privacyverklaring, fabrikant-PDF's, sitemap en metadata.
 

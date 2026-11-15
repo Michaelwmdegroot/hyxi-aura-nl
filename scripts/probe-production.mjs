@@ -2,7 +2,7 @@
 import { fileURLToPath } from 'node:url';
 
 const BASE = 'https://hyxi-aura.nl';
-const PATHS = ['/api/health', '/api/config', '/privacy/', '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const PATHS = ['/api/health', '/api/config', '/privacy/', '/offerte/', '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
@@ -32,8 +32,11 @@ export async function probeProduction(fetcher = fetch) {
     privacyDeployed: observed['/privacy/'].status === 200 &&
       observed['/privacy/'].content.includes('Privacyverklaring · versie 15 november 2026') &&
       observed['/privacy/'].content.includes('versleuteld op in een beveiligde database'),
+    quotePageReady: observed['/offerte/'].status === 200 &&
+      observed['/offerte/'].content.includes('id="quoteForm"') &&
+      observed['/offerte/'].content.includes('href="https://hyxi-aura.nl/offerte/"'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
-      observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/'),
+      observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/'),
     robotsPresent: observed['/robots.txt'].status === 200 &&
       observed['/robots.txt'].content.includes('Sitemap: https://hyxi-aura.nl/sitemap.xml'),
     unauthenticatedLeadsBlocked: observed['/api/beheer/leads'].status === 401,
