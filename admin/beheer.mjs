@@ -11,7 +11,7 @@ const labels = {
 };
 let csrfToken = null, currentPage = 1, currentLead = null, lastItems = [], previousFocus = null;
 let currentUser = null, viewVersion = 0, detailVersion = 0, refreshVersion = 0;
-let outboxPage = 1, currentNotification = null, activeView = 'leads';
+let outboxPage = 1, currentNotification = null, activeView = 'leads', currentSearch = '';
 const requests = new Set();
 
 function interrupted(){return new DOMException('Dit verzoek is niet meer actueel.','AbortError');}
@@ -89,7 +89,7 @@ function showLogin(text=''){
   $('outboxItems').replaceChildren();$('mailCount').textContent='0';
   $('workbenchViews').hidden=true;
   $('currentUser').textContent='Beheerder';$('currentRole').textContent='Beheer';
-  $('password').value='';$('statusFilter').value='';
+  $('password').value='';$('statusFilter').value='';$('requestSearch').value='';currentSearch='';
   $('pageLabel').textContent='Pagina 1';
   $('outboxPageLabel').textContent='Pagina 1';
   message('dashboardMessage','');message('listMessage','');
@@ -146,6 +146,7 @@ async function loadLeads(version=refreshVersion){
   message('listMessage','Aanvragen laden…');
   const params=new URLSearchParams({page:String(currentPage)});
   if($('statusFilter').value)params.set('status',$('statusFilter').value);
+  if(currentSearch)params.set('search',currentSearch);
   const data=await api('/leads?'+params.toString());
   if(version!==refreshVersion||!currentUser)return data;
   lastItems=data.items;
@@ -343,6 +344,13 @@ $('mailReviewForm').addEventListener('submit',async event=>{
   }finally{setLoading(button,false);if(stateChanged)button.disabled=true;}
 });
 $('statusFilter').addEventListener('change',()=>{currentPage=1;refreshAll();});
+$('requestSearchForm').addEventListener('submit',event=>{
+  event.preventDefault();currentSearch=$('requestSearch').value.trim();
+  currentPage=1;refreshAll();
+});
+$('requestSearch').addEventListener('search',()=>{
+  if($('requestSearch').value===''){currentSearch='';currentPage=1;refreshAll();}
+});
 $('prevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;refreshAll();}});
 $('nextPage').addEventListener('click',()=>{if(lastItems.length===20){currentPage++;refreshAll();}});
 $('closeDetail').addEventListener('click',closeDetail);

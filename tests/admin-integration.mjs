@@ -147,6 +147,12 @@ try {
   assert.equal(listData.items.some(x=>x.requestId===assigned.requestId),true);
   assert.equal(listData.items.some(x=>x.requestId===unassigned.requestId),true);
   assert.doesNotMatch(JSON.stringify(listData),/Test Assigned|only-tests@example/,'List has no PII');
+  const part=assigned.requestId.slice(5,13);
+  const searched=await (await secured(f,'/api/beheer/leads?search='+part.toUpperCase(),adminSession)).json();
+  assert.deepEqual(searched.items.map(item=>item.requestId),[assigned.requestId], 'Case-insensitive request-ID search');
+  const missing=await (await secured(f,'/api/beheer/leads?search=NOT-FOUND',adminSession)).json();
+  assert.equal(missing.items.length,0);
+  assert.equal((await secured(f,'/api/beheer/leads?search=%25',adminSession)).status,422,'Wildcard search must not be allowed');
   const details=await secured(f,'/api/beheer/leads/'+assigned.requestId,adminSession);
   assert.equal(details.status,200);
   assert.equal((await details.json()).lead.contact.fullName,'Test Assigned');
@@ -201,6 +207,8 @@ try {
   const salesLeads=await (await secured(second,'/api/beheer/leads',salesCookie)).json();
   assert.equal(salesLeads.items.some(x=>x.requestId===assigned.requestId),true);
   assert.equal(salesLeads.items.some(x=>x.requestId===unassigned.requestId),false);
+  const salesSearch=await (await secured(second,'/api/beheer/leads?search='+unassigned.requestId, salesCookie)).json();
+  assert.equal(salesSearch.items.length,0,'Sales request-ID search respects dossier assignment');
   assert.equal((await secured(second,'/api/beheer/leads/'+unassigned.requestId,salesCookie)).status,404);
   assert.equal((await secured(second,'/api/beheer/leads/'+assigned.requestId,salesCookie)).status,200);
 

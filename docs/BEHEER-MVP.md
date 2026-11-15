@@ -67,3 +67,7 @@ LEAD_ENABLED=true vereist daarnaast complete SMTP-instellingen. Controleer na he
 Interne notities, vervolgdatum/taken, zoeken, auditexport, automatische retentie/verwijdering, uitnodigingen per e-mail, offertegenerator en NIVO Portal-koppeling blijven aparte producttaken. Issues #2–#4 blijven open voor de resterende product- en operationele scope.
 
 Zie [Hostinger-stappen](DATABASE-HOSTINGER-V2.md), [beveiliging](BEHEER-SECURITY.md) en [overdracht 15 november](BEHEER-RELEASE-2026-11-15.md).
+
+## Werkbank: zoeken zonder extra migratie
+
+Vanaf de fast-lane vervolgrelease biedt het aanvraagoverzicht een toetsenbordvriendelijke zoekbalk voor **volledige of gedeeltelijke aanvraagnummer-ID's**. De server filtert op toegestane tekens en bewaakt bestaande admin/sales-toewijzingsrechten; geen gegevens verschijnen in de publieke API. Naam-/e-mailzoeken is bewust nog niet toegevoegd: de contactgegevens liggen versleuteld en we maken geen onbeschermde PII-index aan voor een snelle zoekfeature. Verzoeken met SQL-wildcards worden afgewezen. Dit is de eerste stap van issue #4; interne notities en vervolgacties blijven open.

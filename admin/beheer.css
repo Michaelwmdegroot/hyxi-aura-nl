@@ -63,3 +63,10 @@
   .mail-review-fields{padding:14px;grid-template-columns:70px minmax(0,1fr);gap:10px}
   .admin-label{display:inline-block;margin-top:12px}
 }
+
+/* Accessible request-number lookup; deliberately avoids a plaintext PII search index. */
+.panel-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px;min-width:0}
+#requestSearchForm{display:flex;align-items:center;gap:6px;min-width:0}
+#requestSearch{width:clamp(150px,17vw,235px);min-width:0;max-width:100%;padding:10px;border:1px solid #e5e9e4;border-radius:10px;background:#fbfcfa;color:#34443b;font-size:11px}
+#requestSearchForm button{white-space:nowrap}
+@media(max-width:680px){.panel-actions{justify-content:stretch;gap:10px}.panel-actions select{margin-top:0;width:100%}#requestSearchForm{width:100%;max-width:100%}#requestSearch{flex:1;width:0;min-width:0}}
