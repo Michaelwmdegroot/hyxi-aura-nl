@@ -3,7 +3,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { keyedHash, openLead, parseEncryptionKey, parseHashKey, sealLead } from './crypto.mjs';
 import { assertMigrationChecksum, assertNotificationBudgetStructure } from './schema-check.mjs';
 
-const PRIVACY_VERSION = '2026-11-14';
+const PRIVACY_VERSION = '2026-11-15';
 const KEY_ID = 'v1';
 const utc = millis => new Date(millis).toISOString().slice(0, 23).replace('T', ' ');
 
