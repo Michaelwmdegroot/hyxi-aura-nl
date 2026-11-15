@@ -83,6 +83,7 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
   function backendError(res,error) {
     if(error?.code==='NOT_FOUND')return fail(res,404,'NOT_FOUND','Deze aanvraag is niet beschikbaar.');
     if(error?.code==='BAD_STATUS')return fail(res,422,'BAD_STATUS','Kies een geldige status.');
+    if(error?.code==='BAD_FOLLOWUP')return fail(res,422,'BAD_FOLLOWUP','Controleer de vervolgactie, datum en notitie.');
     if(error?.code==='FORBIDDEN')return fail(res,403,'FORBIDDEN','Deze actie is alleen beschikbaar voor beheerders.');
     if(error?.code==='BAD_ASSIGNEE')return fail(res,422,'BAD_ASSIGNEE','Kies een actieve medewerker.');
     if(error?.code==='BAD_FILTER')return fail(res,422,'BAD_FILTER','Kies geldige filters.');
@@ -190,6 +191,10 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
       return fail(res,422,'BAD_STATUS','Kies een geldige status.');
     }
     try{res.json({ok:true,...await adminStore.changeStatus(req.beheerUser,req.params.requestId,req.body.status)});}
+    catch(error){backendError(res,error);}
+  });
+  app.patch(prefix+'/leads/:requestId/followup',authenticated,json,bodyOk,async(req,res)=>{
+    try{res.json({ok:true,...await adminStore.updateFollowup(req.beheerUser,req.params.requestId,req.body)});}
     catch(error){backendError(res,error);}
   });
   app.patch(prefix+'/leads/:requestId/assignee',authenticated,administrator,json,bodyOk,async(req,res)=>{
