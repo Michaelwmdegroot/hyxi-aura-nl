@@ -39,7 +39,7 @@ De eerste openstaande controle is de echte SMTP-inboxontvangst in leads@thuisbat
 
 ### Beheer-MVP en hostinginrichting
 
-De beheerwerkbank bevat TOTP-login, rolgecontroleerde dossiers, statussen, toewijzing, mailincidenten, audit en veilig terminalaccountbeheer. Nieuwe endpoints blijven gesloten bij `ADMIN_ENABLED=false`. Database-migraties en eigenaar/MFA kunnen worden voorbereid terwijl de bestaande site in mailmodus blijft. Zie [BEHEER-MVP.md](docs/BEHEER-MVP.md) en het aanvullende [env-sjabloon](config/beheer.env.example). De live-healthcheck op 15 november vóór deze wijzigingen gaf `leadEnabled:false`; echte inboxontvangst en de private Hostinger-inrichting zijn nog afzonderlijk te bevestigen.
+De beheerwerkbank bevat wachtwoordlogin zonder authenticator, rolgecontroleerde dossiers, statussen, toewijzing, mailincidenten, audit en veilig terminalaccountbeheer. Nieuwe endpoints blijven gesloten bij `ADMIN_ENABLED=false`. Database-migraties en eigenaaraccount kunnen worden voorbereid terwijl de bestaande site in mailmodus blijft. Zie [BEHEER-MVP.md](docs/BEHEER-MVP.md) en het aanvullende [env-sjabloon](config/beheer.env.example). De live-healthcheck op 15 november vóór deze wijzigingen gaf `leadEnabled:false`; echte inboxontvangst en de private Hostinger-inrichting zijn nog afzonderlijk te bevestigen.
 
 ## Lokaal starten
 
