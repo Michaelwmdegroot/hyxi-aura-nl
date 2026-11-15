@@ -21,12 +21,14 @@ const safeEqual = (left, right) => {
 function cspFor(directory) {
   const hashes = new Set();
   // Hash JSON-LD scripts so structured data needs no blanket inline-script exception.
-  try {
-    const html = readFileSync(resolve(directory, 'index.html'), 'utf8');
-    for (const match of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
-      hashes.add(`'sha256-${createHash('sha256').update(match[1]).digest('base64')}'`);
-    }
-  } catch { /* API tests and an unbuilt checkout have no public index yet. */ }
+  for (const page of ['index.html', 'offerte/index.html']) {
+    try {
+      const html = readFileSync(resolve(directory, page), 'utf8');
+      for (const match of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+        hashes.add(`'sha256-${createHash('sha256').update(match[1]).digest('base64')}'`);
+      }
+    } catch { /* Unbuilt checkout or fixture without this public page. */ }
+  }
   return [
     "default-src 'self'", `script-src 'self' ${[...hashes].join(' ')}`.trim(),
     "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:",
