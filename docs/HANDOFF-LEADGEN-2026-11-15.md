@@ -1,5 +1,7 @@
 # HYXI AURA — definitieve faseoverdracht | 15 november 2026
 
+> **HISTORISCHE OVERDRACHT — superseded 16 november 2026.** De daadwerkelijke HYXI-adviestest is inmiddels tot MariaDB-commit, `leads@`-INBOX en automatische Odoo-verkoopkans bevestigd. De privacytekst is gecorrigeerd, Beheer is uitgebreid en `/offerte/` staat live. De eigenaar heeft dagelijkse automatische **Hostinger-backups als voldoende bevestigd**; bouw geen eigen backup- of restoreproject als actieve ontwikkelgate. Lees voor actuele status, beslissingen en werkzaamheden **[ROADMAP-FASTLANE-2026-11-16.md](ROADMAP-FASTLANE-2026-11-16.md)** en [nieuwe startprompt](NEXT-AGENT-FASTLANE-2026-11-16.md). Historische '0 leads', 'mail niet bewezen' en 'backup open' hieronder zijn dus niet meer actueel.
+
 **Status:** website, database en privé-dashboard zijn live / door eigenaar bevestigd; **volledig geautomatiseerde leadmachine is nog NIET bewezen of afgerond**. Dit document vervangt verouderde statusaannames in eerdere projectplannen, maar wist de historische documenten niet.
 
 **Project:** https://hyxi-aura.nl · **Repo:** https://github.com/Michaelwmdegroot/hyxi-aura-nl · **productiebranch:** main · **hoofdissue:** #10 · **projectstartprompt:** [NEXT-AGENT-LEADGEN-2026-11-15.md](NEXT-AGENT-LEADGEN-2026-11-15.md).

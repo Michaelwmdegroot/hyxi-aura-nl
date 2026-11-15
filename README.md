@@ -1,6 +1,6 @@
 # HYXI AURA · hyxi-aura.nl
 
-> **Actuele status 16 november 2026:** De echte HYXI AURA-keten is aangetoond: één synthetische aanvraag gaf **HTTP 201 na MariaDB-commit**, kwam daadwerkelijk in `leads@thuisbatterijteam.nl` aan en werd via binnenkomende e-mail automatisch als lead in Odoo CRM aangemaakt (eigenaarsscreenshot). Het password-only `/beheer` werkt; de publieke `leadEnabled`-controle was groen. De aparte `/offerte/`-flow is als [PR #21](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/21) gemerged met 3/3 groene CI. **Nog open:** databaseback-up/herstelproef, veilige retentie/verwijdering, operationele mailboxverantwoordelijkheid, visuele bevestiging van het testdossier in Beheer, Search Console, opvolgherinneringen en commerciële/UX-uitbreiding. Zie [status en bewijs](docs/STATUS-P0-P1-2026-11-16.md); eerdere [overdracht](docs/HANDOFF-LEADGEN-2026-11-15.md) is historisch.
+> **Actueel 16 november 2026:** De HYXI AURA-leadketen is bewezen tot en met de via inkomende e-mail aangemaakte Odoo-verkoopkans. De site, password-only `/beheer`, versleutelde MariaDB-opslag, betrouwbare teammail, onafhankelijke publieke monitor en `/offerte/` staan live. **Hostinger's dagelijkse automatische backups zijn door de eigenaar bevestigd en afgevinkt**; er is geen eigen backupimplementatie nodig en er is geen onafhankelijk herstelbewijs geclaimd. Nog te bouwen: privacyretentie/verwijderproces, taakherinneringen, privacyvriendelijke KPI's, Search Console/SEO-content en verdere conversie-/UX-optimalisatie. Zie [actuele roadmap](docs/ROADMAP-FASTLANE-2026-11-16.md), [bewijsstatus](docs/STATUS-P0-P1-2026-11-16.md) en [nieuwe startprompt](docs/NEXT-AGENT-FASTLANE-2026-11-16.md).
 
 Een interactieve Nederlandse productervaring voor de HYXI AURA thuisbatterij. Bezoekers ontdekken de werking, verkennen een modulaire opstelling en vragen persoonlijk advies aan bij **Thuisbatterij Team**. De website is een initiatief van **NIVO Groep Holland B.V.** en is geen officiële HYXI-website.
 
@@ -25,21 +25,21 @@ Bekijk ook de [interactieve energie-ervaring](docs/screenshots/energy-experience
 
 **Node.js 24** met Express verzorgt de API en serveert de productiebuild. **Vite** bouwt de HTML-, CSS- en JavaScript-bestanden en staat bewust in `dependencies`: Hostinger installeert bij de productie-deploy geen `devDependencies`. **Three.js** laadt voor de interactieve woning; bij ontbrekende WebGL blijft de uitleg beschikbaar. **Nodemailer** verstuurt aanvragen via de ingestelde mailbox. **Zod** valideert de serverinvoer. Manrope en alle gebruikte webbeelden worden lokaal geserveerd.
 
-De standaard blijft SMTP-mailmodus. Optionele versleutelde MySQL-opslag en een beveiligde beheeromgeving zijn beschikbaar achter expliciete instellingen; ze worden niet door een build of merge geactiveerd. Er is geen publieke registratie, nieuwsbrief, advertentiepixel of analysetracker. Geheimen blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
+De codefallback blijft SMTP-mailmodus, maar **productie werkt aantoonbaar in versleutelde database-modus met een ingelogd Beheer-dashboard**. Een nieuw deploy zet geen private featureflags uit zichzelf aan. Er is geen publieke registratie, nieuwsbrief, advertentiepixel of analysetracker. Geheimen blijven uitsluitend in de hostingomgeving of een lokale, genegeerde `.env`.
 
 ## HYXI AURA 2.0 — volgende ontwikkelfase
 
 De database-, auth- en beheerontwikkeling is samengebracht in [PR #13](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/13). De eerdere PR's #11/#12 zijn tussenstappen. De [overdracht van 15 november](docs/BEHEER-RELEASE-2026-11-15.md) bevat de gevonden problemen, oplossingen, testaanpak en actuele hostinggrens. Voor activering: [Hostinger MySQL-handleiding](docs/DATABASE-HOSTINGER-V2.md).
 
 
-De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal geaccepteerd (visueel 7/10). V2 wordt een zelfstandig leadplatform met betrouwbare e-mail, duurzame MySQL-opslag, een beveiligd dashboard, aparte offerteaanvragen en SEO/analytics. Dit is een **plan**, geen claim dat deze modules al in productie staan.
+De eigenaar heeft de werkende V1-landingspagina op 14 november 2026 als mijlpaal geaccepteerd (visueel 7/10). De database, betrouwbare e-mail, het dashboard en de aparte offerteaanvraag zijn inmiddels op productie gerealiseerd. **SEO Search Console en privacyvriendelijke analytics zijn nog werkpakketten**, net als automatisering van vervolgacties en privacyretentie.
 
 - [Master-issue #10 en werkpakketten](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10)
 - [Projectplan en roadmap](docs/PROJECT-PLAN-V2-2026-11-14.md)
 - [Technische architectuur](docs/ARCHITECTURE-V2.md)
 - [Livegangchecklist](docs/GO-LIVE-CHECKLIST-V2.md)
 
-De eerste openstaande controle is de echte SMTP-inboxontvangst in leads@thuisbatterijteam.nl, zie [issue #1](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/1). De V1-ervaring blijft het werkende productiepad totdat nieuwe onderdelen getest zijn.
+De werkelijke SMTP-inboxontvangst is eerder aangetoond en de e-mailimport naar Odoo bevestigd. Raadpleeg de [roadmap](docs/ROADMAP-FASTLANE-2026-11-16.md) in plaats van die historische controle als open blokkade te behandelen.
 
 ### Beheer-MVP en hostinginrichting
 
