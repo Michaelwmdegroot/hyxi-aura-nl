@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from '../server/config.mjs';
 import { createLeadPool } from '../server/db/pool.mjs';
-import { newTotpSecret } from '../server/auth/security.mjs';
+import { newTotpSecret, validAdminPassword } from '../server/auth/security.mjs';
 import { createFirstAdmin } from '../server/auth/bootstrap.mjs';
 import { assertAccountManagementSchema } from '../server/auth/accounts.mjs';
 import { requirePrivateTerminal, askVisible, askHidden } from './terminal-input.mjs';
@@ -45,9 +45,10 @@ export async function runOwnerBootstrap({
     const email = await visible('E-mailadres eigenaar: ');
     if (email.length < 6 || email.length > 254 || /[\u0000-\u001f\u007f-\u009f]/.test(email) ||
         !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(email)) throw new Error('Invalid owner email.');
-    const password = await hidden('Nieuw sterk wachtwoord: ');
-    const repeat = await hidden('Herhaal wachtwoord: ');
-    if (password !== repeat) throw new Error('Wachtwoorden komen niet overeen.');
+    // One login password. Duplicate hidden input was unreliable in the
+    // Hostinger browser terminal; TOTP remains a required second factor.
+    const password = await hidden('Wachtwoord voor Beheer (minimaal 12 tekens): ');
+    if (!validAdminPassword(password)) throw new Error('PASSWORD_POLICY');
     const seed = newTotpSecret();
     const uri = 'otpauth://totp/' + encodeURIComponent('HYXI AURA Beheer:' + email) +
       '?secret=' + seed + '&issuer=' + encodeURIComponent('HYXI AURA Beheer') + '&digits=6&period=30';
@@ -70,8 +71,17 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     process.exitCode = 1;
   } else {
     try { await runOwnerBootstrap(); }
-    catch {
-      console.error('Eigenaaraccount niet aangemaakt. Controleer invoer, migraties en configuratie in de beveiligde omgeving.');
+    catch (error) {
+      // Only known, non-sensitive validation errors are shown. Never echo
+      // passwords, MFA secrets, SQL, hostnames or internal errors to a TTY.
+      const safeMessages = {
+        PASSWORD_POLICY: 'Gebruik één Beheer-wachtwoord van minimaal 12 tekens (maximaal 1024 bytes).',
+        'Invalid owner email.': 'Het e-mailadres is ongeldig.',
+        'Authenticator confirmation failed.': 'De 6-cijferige authenticatorcode klopt niet of is verlopen.',
+        'An owner already exists; use audited user management.': 'Er is al een eigenaaraccount. Gebruik admin:manage.',
+      };
+      console.error(safeMessages[error?.message] ||
+        'Eigenaaraccount niet aangemaakt. Controleer de privéconfiguratie en database; er zijn geen wachtwoorden gelogd.');
       process.exitCode = 1;
     }
   }

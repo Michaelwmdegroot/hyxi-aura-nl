@@ -1,6 +1,6 @@
 # HYXI AURA — database en beheer op Hostinger
 
-Bijgewerkt 15 november 2026. De eigenaar heeft een database en databasegebruiker aangemaakt. De echte verbinding, serverversie, backup/restore en migraties zijn nog niet vanuit deze ontwikkelomgeving bewezen.
+Bijgewerkt 15 november 2026. De eigenaar bevestigde via de Hostinger-SSH-terminal: databaseverbinding OK, versie 11.8.9-MariaDB-log, aanvankelijk 0 tabellen, migraties 001–004 toegepast, daaropvolgende volledige schemacontrole geslaagd en 0 actieve eigenaars. Backup/restore en beheer-/SMTP-activering zijn **niet** bewezen. De eerste eigenaar-bootstrap liep tweemaal vast direct na het herhalen van de verborgen wachtwoordinvoer; de fast-lane-correctie vervangt die twee prompts door één, met expliciete wachtwoordvalidatie.
 
 ## 1. Privé-instellingen voorbereiden
 
@@ -44,7 +44,7 @@ De applicatie voert nooit automatisch DDL uit. Op de echte productiedatabase pas
 ADMIN_BOOTSTRAP=interactive-confirmed npm run admin:create
 ```
 
-Alleen een vertrouwde interactieve terminal wordt geaccepteerd. De procedure werkt terwijl opslag nog op mail staat en beheer uitgeschakeld is. Wachtwoord en bevestigingscode zijn verborgen. Stel de getoonde MFA-sleutel in je authenticator in, bevestig de code en wacht vervolgens op een nieuwe code voor het eerste inloggen.
+Alleen een vertrouwde interactieve terminal wordt geaccepteerd. De procedure werkt terwijl opslag nog op mail staat en beheer uitgeschakeld is. Voer het zelfgekozen Beheer-inlogwachtwoord één keer in (minimaal 12 niet-lege tekens); de authenticatorcode is een aparte tweede factor, geen tweede wachtwoord. Beide invoeren zijn verborgen. Stel de getoonde MFA-sleutel in je authenticator in, bevestig de code en wacht vervolgens op een nieuwe code voor het eerste inloggen.
 
 Accountbeheer daarna:
 

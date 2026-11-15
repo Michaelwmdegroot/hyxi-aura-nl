@@ -31,7 +31,7 @@ ADMIN_BOOTSTRAP=interactive-confirmed npm run admin:create
 
 db:prepare voert migraties 001–004 expliciet en in volgorde uit, met checksums en controle van de werkelijke tabellen. Het verandert geen featureflag, maakt geen account aan en verstuurt geen mail. Voer de inrichting eerst met fictieve gegevens op de geïsoleerde testdatabase uit en controleer backup/restore voordat de productiedatabase wordt ingericht. DDL draait nooit tijdens build, deployment of startup.
 
-Het eigenaarsscript werkt al in mailmodus terwijl beheer gesloten is. Het toont de authenticatorinstelling alleen in de vertrouwde terminal. Wacht na bevestiging op een nieuwe code voordat je inlogt: de instelcode mag niet worden hergebruikt.
+Het eigenaarsscript werkt al in mailmodus terwijl beheer gesloten is. Vanaf de fast-lane-correctie vraagt de terminal het zelfgekozen Beheer-wachtwoord slechts één keer (minimaal 12 niet-lege tekens) in plaats van twee verborgen prompts. Dat is het enige inlogwachtwoord; MFA blijft verplicht. Het toont de authenticatorinstelling alleen in de vertrouwde terminal. Wacht na bevestiging op een nieuwe code voordat je inlogt: de instelcode mag niet worden hergebruikt.
 
 Vervolgbeheer:
 

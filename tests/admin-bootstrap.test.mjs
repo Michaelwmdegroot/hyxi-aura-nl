@@ -50,7 +50,7 @@ test('first owner can be prepared in mail mode with admin disabled after schema0
     visible: async () => { order.push('email'); return 'bootstrap@example.test'; },
     hidden: async label => {
       hiddenLabels.push(label);
-      return hiddenLabels.length < 3 ? 'OfflineFixturePassword2026!' : '123456';
+      return hiddenLabels.length === 1 ? 'OfflineFixturePassword2026!' : '123456';
     },
     writeLine() {},
     createOwner: async args => {
@@ -63,7 +63,7 @@ test('first owner can be prepared in mail mode with admin disabled after schema0
   });
   assert.equal(result.email, 'bootstrap@example.test');
   assert.deepEqual(order, ['tty', 'pool', 'schema003', 'email', 'owner', 'closed']);
-  assert.equal(hiddenLabels.length, 3, 'Both passwords and the MFA code use hidden input');
+  assert.equal(hiddenLabels.length, 2, 'One login password and the MFA code use hidden input');
 });
 
 test('schema failure closes the pool before any enrollment prompts', async () => {
@@ -76,4 +76,27 @@ test('schema failure closes the pool before any enrollment prompts', async () =>
   }), /Schema 003 missing/);
   assert.equal(closed, true);
   assert.equal(prompts, 0);
+});
+
+test('weak password is rejected before MFA; no double-entry is required', async () => {
+  const prompts = [], output = [];
+  const fakePool = {
+    query: async () => [[{ total: 0 }]],
+    end: async () => {},
+  };
+  let ownerCreated = false;
+  await assert.rejects(runOwnerBootstrap({
+    env: preparedEnv,
+    requireTerminal() {},
+    createPool: () => fakePool,
+    checkSchema: async () => {},
+    visible: async () => 'bootstrap@example.test',
+    hidden: async label => { prompts.push(label); return 'short'; },
+    writeLine: line => output.push(line),
+    createOwner: async () => { ownerCreated = true; },
+  }), /PASSWORD_POLICY/);
+  assert.equal(prompts.length, 1);
+  assert.equal(prompts[0].includes('Herhaal'), false);
+  assert.equal(ownerCreated, false);
+  assert.equal(output.some(line => line.includes('Eenmalige geheime instelsleutel')), false);
 });

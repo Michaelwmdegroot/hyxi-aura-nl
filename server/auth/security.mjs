@@ -6,10 +6,16 @@ const scrypt = promisify(scryptCallback);
 const opts = { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
+// One login password plus TOTP. No second password or duplicate prompt.
+export function validAdminPassword(password) {
+  return typeof password === 'string' &&
+    Buffer.byteLength(password,'utf8') >= 12 &&
+    Buffer.byteLength(password,'utf8') <= 1024 &&
+    password.trim().length >= 12 &&
+    !password.includes('\0');
+}
 export async function hashAdminPassword(password) {
-  if (typeof password !== 'string' || Buffer.byteLength(password) < 14 ||
-      Buffer.byteLength(password) > 1024 || password.trim().length < 12 ||
-      password.includes('\0')) throw new Error('Password policy not met.');
+  if (!validAdminPassword(password)) throw new Error('Password policy not met.');
   const salt = randomBytes(24);
   const derived = await scrypt(password, salt, 64, opts);
   return ['scrypt', 'v1', salt.toString('hex'), derived.toString('hex')].join('$');

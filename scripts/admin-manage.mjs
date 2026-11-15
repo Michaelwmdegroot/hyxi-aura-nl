@@ -1,7 +1,7 @@
 /** No public reset link: all account changes require the trusted server TTY. */
 import { loadConfig } from '../server/config.mjs';
 import { createLeadPool } from '../server/db/pool.mjs';
-import { newTotpSecret } from '../server/auth/security.mjs';
+import { newTotpSecret, validAdminPassword } from '../server/auth/security.mjs';
 import {
   listAdminAccounts, createAdminAccount, resetAdminAccount,
   disableAdminAccount, revokeAdminSessions, AccountOperationError,
@@ -18,7 +18,7 @@ const messages = {
   FIRST_OWNER_REQUIRED: 'Maak eerst de eigenaar aan met admin:create.',
   LAST_ACTIVE_ADMIN: 'De laatste actieve beheerder kan niet worden uitgeschakeld.',
   MFA_CONFIRMATION_FAILED: 'De authenticatorcode klopt niet. Er is niets opgeslagen.',
-  PASSWORD_POLICY: 'Gebruik minimaal 14 bytes en 12 niet-lege tekens voor het wachtwoord.',
+  PASSWORD_POLICY: 'Gebruik één Beheer-wachtwoord van minimaal 12 tekens (maximaal 1024 bytes).',
   INVALID_CONFIGURATION: 'Database- of beveiligingsconfiguratie is onvolledig.',
   SCHEMA_NOT_READY: 'Voer eerst de gecontroleerde account-auditmigratie 003 uit.',
   BUSY: 'Een andere beheeractie is actief; probeer later opnieuw.',
@@ -26,9 +26,8 @@ const messages = {
 
 async function enrollment(email) {
   console.log('Laat de accounthouder zelf een uniek wachtwoord en authenticator instellen in deze vertrouwde terminal.');
-  const password = await askHidden('Nieuw sterk wachtwoord: ');
-  const repeat = await askHidden('Herhaal wachtwoord: ');
-  if (password !== repeat) throw new Error('Password confirmation failed.');
+  const password = await askHidden('Wachtwoord voor Beheer (minimaal 12 tekens): ');
+  if (!validAdminPassword(password)) throw new AccountOperationError('PASSWORD_POLICY');
   const totpSecret = newTotpSecret();
   console.log('Voeg handmatig toe in de authenticator: HYXI AURA Beheer (' + email + ').');
   console.log('Eenmalige geheime instelsleutel: ' + totpSecret);
