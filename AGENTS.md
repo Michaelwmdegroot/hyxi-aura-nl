@@ -1,6 +1,6 @@
 # Working on HYXI AURA
 
-> **Current handoff — 15 Nov 2026:** [Leadgen handoff](docs/HANDOFF-LEADGEN-2026-11-15.md) and [next-agent start](docs/NEXT-AGENT-LEADGEN-2026-11-15.md). Owner verified production MariaDB 11.8.9 migrations 001–004 and logged-in /beheer with 0 leads. Password-only access is a binding owner decision: do not reintroduce MFA. Live public lead intake / mailbox delivery are **not yet proven**; correct inaccurate database statement in public privacy page before further real intake.
+> **Current verified status — 16 Nov 2026:** see [P0/P1 status](docs/STATUS-P0-P1-2026-11-16.md). The owner confirmed an Odoo CRM lead generated automatically from the same incoming HYXI test email. GitHub Actions proved one HTTP 201 public lead accepted after DB commit and the corresponding email was independently found in `leads@`; this is email-to-CRM routing, **not a direct Portal/Odoo API**. Password-only Beheer, 001–004 migrations and privacy correction are done. PRs #17–#21 are merged, including `/offerte/`. Remaining critical work: independently proven backup/restore and retention, actual owner/sales follow-up, Search Console and quote-route production acceptance. Do not re-create database, bootstrap users or introduce MFA.
 
 - Use Node.js 24 and the committed npm lockfile. `npm run dev` runs the frontend and lead API together.
 - Keep product facts traceable to `src/product-data.mjs` and `docs/PRODUCT-SOURCES.md`. The current manufacturer datasheets are preliminary. Never invent prices, savings, stock, guarantees, reviews or dealer status.

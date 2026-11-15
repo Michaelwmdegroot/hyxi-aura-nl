@@ -7,6 +7,7 @@ De GitHub Actions workflow `.github/workflows/public-production-readiness.yml` c
 - Publieke `/api/health`: bereikbaar en `leadEnabled: true`.
 - Publieke `/api/config`: dezelfde beschikbaarheidsstatus. De respons kan een CSRF-token bevatten: **de workflow logt dit nooit**.
 - `/privacy/`: nieuwe DB-privacytekst is live gedeployd.
+- `/offerte/`: de aparte quote-landing en canonieke formulierroute zijn publiek bereikbaar en de sitemap noemt de pagina.
 - `/sitemap.xml` en `/robots.txt`: minimale SEO-bereikbaarheid.
 - `/api/beheer/leads` zonder login: moet **401** geven; er wordt geen beheerlogin geprobeerd.
 

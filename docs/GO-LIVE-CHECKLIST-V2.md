@@ -1,14 +1,14 @@
 # HYXI AURA 2.0 — Go-livechecklist en operationele overdracht
 
-> **Actueel 15 nov 2026:** MariaDB 11.8.9, migraties 001–004, eerste beheeraccount en live dashboard-login door eigenaar bevestigd (0 leads). **Open P0:** actuele `leadEnabled`, één echte end-to-end aanvraag, mailboxontvangst, privacyverklaring versus nieuwe DB-opslag, back-up/retentie. Zie [handoff](HANDOFF-LEADGEN-2026-11-15.md). Geen 2FA vereist.
+> **Actueel 16 november 2026:** website, database, password-only `/beheer`, privacycorrectie en publieke aanvraag-API werken. Een synthetische productieaanvraag is als HTTP 201 opgeslagen, ontvangen in `leads@` en door inkomende-e-mailautomatisering in Odoo CRM als verkoopkans verschenen (eigenaarbewijs). Productiecode bevat nu ook `/offerte/` na PR #21; afzonderlijke quote-livecontrole blijft nodig. **Open P0-operations:** gecontroleerde back-up/herstelproef, retentie/verwijderproces en betrokken opvolgverantwoordelijken. Zie [status 16 november](STATUS-P0-P1-2026-11-16.md).
 **Status:** checklijst, geen bewijs dat openstaande acties klaar zijn.
 
 ## V1-productie
 - [x] Eigenaar bevestigt werkende website en 7/10 als ontwerpbasis.
 - [x] CI voor Node24/productiebouw/browser/API/Hostinger-startsmoke groen.
 - [x] Basis product- en energie-ervaring, Q7/Q9 en adviesformulier aanwezig.
-- [ ] Controleer feitelijke openbare /api/health status en variabele leadEnabled.
-- [ ] Bevestig één echte herkenbare testaanvraag in leads@thuisbatterijteam.nl met juist gekozen product.
+- [x] Externe productiereadiness controleerde /api/health en /api/config: leadEnabled=true.
+- [x] Één synthetische aanvraag met correct BAT-Q9-profiel is door de API bevestigd, daadwerkelijk in leads@ ontvangen en ook als Odoo CRM-lead geregistreerd.
 - [ ] Controleer SPF/DKIM/DMARC, Reply-To, spamfolder en verzendfoutscenario.
 - [ ] Wijs mailboxbeheerder, escalatie bij uitval en opvolgroutine aan.
 - [ ] Verifieer Search Console-eigendom, sitemap en indexatie.
@@ -20,7 +20,7 @@
 - [ ] Back-up, terugzetten en schema rollback getest met fictieve data.
 - [x] Eerste eigenaaraccount en productie-login bevestigd; password-only (geen MFA) is expliciet door eigenaar gekozen.
 - [ ] Autorisatietests, sessieverval, CSRF, rate limiting en privacycheck uitgevoerd.
-- [ ] **P0:** één echte formulieraanvraag aantonen in /beheer én inbox van leads@thuisbatterijteam.nl; dashboard heeft nu 0 leads.
+- [ ] **P0 restacceptatie:** het synthetische aanvraagnummer is na DB-commit ook in leads@ en Odoo bevestigd; nog visueel onder bestaande login in /beheer terugvinden.
 - [ ] Geen persoonsgegevens in fouten, logs, analytics of tests.
 
 ## Voordat offerte- en SEO-fase uitrollen
