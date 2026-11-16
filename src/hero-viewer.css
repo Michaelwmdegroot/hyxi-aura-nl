@@ -11,7 +11,7 @@
 
 /* All visible battery silhouettes have body height H; images never stretch.
    Excess transparent *source canvas* is clipped by the single stage. */
-.hero-visual{--aura-body-height:420px}
+.hero-visual{--aura-body-height:420px;touch-action:pan-y}
 .hero-product-stage{position:relative;z-index:2;flex:0 1 440px;width:min(100%,440px);height:calc(var(--aura-body-height) + 5px);transform:translateY(35px);min-width:0;overflow:hidden;isolation:isolate;cursor:ew-resize;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .hero-product-stage .hero-product{display:block;position:absolute;z-index:2;top:0;left:50%;width:auto;max-width:none;height:var(--aura-body-height);opacity:0;transform:translateX(-50%);object-fit:contain;filter:drop-shadow(7px 13px 12px #1a1d1a12);transition:opacity .19s cubic-bezier(.21,.6,.25,1);pointer-events:none;-webkit-user-drag:none}
 .hero-product-stage .hero-product.is-active{opacity:1;z-index:3}

@@ -135,12 +135,16 @@ if (gallery) {
   }, { passive: true });
 
   // Gesture recognition remains passive: vertical page scrolling is never hijacked.
-  stage.addEventListener('touchstart', event => {
-    if (event.touches.length !== 1) return;
-    touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  gallery.addEventListener('touchstart', event => {
+    if (event.touches.length !== 1 || event.target.closest('.hero-view-switcher')) return;
+    const point = event.touches[0];
+    const bounds = stage.getBoundingClientRect();
+    if (point.clientX < bounds.left || point.clientX > bounds.right ||
+        point.clientY < bounds.top || point.clientY > bounds.bottom) return;
+    touchStart = { x: point.clientX, y: point.clientY };
     prefetchAngles();
   }, { passive: true });
-  stage.addEventListener('touchend', event => {
+  gallery.addEventListener('touchend', event => {
     if (!touchStart || !event.changedTouches.length) return;
     const dx = event.changedTouches[0].clientX - touchStart.x;
     const dy = event.changedTouches[0].clientY - touchStart.y;
@@ -149,5 +153,5 @@ if (gallery) {
     const next = Math.max(0, Math.min(2, order.indexOf(current) + (dx < 0 ? 1 : -1)));
     void show(order[next]);
   }, { passive: true });
-  stage.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
+  gallery.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
 }
