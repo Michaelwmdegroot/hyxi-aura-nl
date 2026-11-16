@@ -1,8 +1,8 @@
 # HYXI AURA — launch-readiness checklist: van werkende basis naar automatische leadmachine
-**Versie:** 16 november 2026 · **Prioriteit:** eigenaarsoordeel nieuwe visuele baseline **6/10**, commerciële lanceergrens **minimaal 9/10**  
+**Versie:** 16 november 2026 · **Prioriteit:** eigenaarsoordeel actuele visuele baseline **circa 7/10** (eerder 6/10), commerciële lanceergrens **minimaal 9/10**  
 **Project:** https://hyxi-aura.nl · **Master:** https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10 · **Design:** https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/6  
 **Codebasis bij audit:** main `69eb8efe4b7a0afa16aa1d6b0d5f9146fcc99d94` · 0 open PR · 3/3 post-merge CI · 10/10 externe publieke readiness (na Hostinger-deploy).  
-**Belangrijk:** de website is technisch LIVE, maar heeft op eigenaarsoordeel **NO-GO voor actieve commerciële lancering/advertentieverkeer**. De oorspronkelijke historische 7/10 in eerdere roadmap/issue is door de eigenaar op 16 november vervangen door **6/10**. De 9/10-acceptatie is een **menselijke designreview**, geen Lighthouse-score.
+**Belangrijk:** de website is technisch LIVE, maar heeft op eigenaarsoordeel **NO-GO voor actieve commerciële lancering/advertentieverkeer**. Na een tussentijdse beoordeling van 6/10 heeft de eigenaar de bestaande hero herwaardeerd naar ongeveer **7/10**; dat is nog geen 9/10-lanceergoedkeuring. De 9/10-acceptatie is een **menselijke designreview**, geen Lighthouse-score.
 
 ## 1. Wat ‘automatisch leadgeneratieplatform’ betekent
 
@@ -17,7 +17,7 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 - [x] Hostinger dagelijkse automatische backups als eigenaar-geaccepteerde voorziening. **Geen onafhankelijk restorebewijs; geen eigen backupsysteem bouwen.**
 - [x] Bestaande Odoo-routing is via **mailimport**, geen HYXI→Odoo API. Behoud de werkende keten.
 
-## 2. P0 — DESIGN 6/10 → minimaal 9/10 [HARD COMMERCIAL LAUNCH GATE]
+## 2. P0 — DESIGN circa 7/10 → minimaal 9/10 [HARD COMMERCIAL LAUNCH GATE]
 **Eigenaar beslist pas GO na review van echte voor-/na-views**, desktop en mobiel. Niet volstaan met een technisch groene CI.
 
 - [ ] **V0 visuele audit:** bewaar 1440/1280/768/390/320-screenshots van de complete pagina, de offerte, configurator en kennischeck. Beoordeel hiërarchie, scrolldiepte, tekstgrootte, witruimte, contrast, overliggende UI en productbeeld. Controleer Safari op een echte iPhone.
@@ -28,7 +28,7 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 - [ ] **Mobiele hiërarchie repareren:** CTA en vaste balk mogen product/tekst niet hinderlijk overlappen; galerij, configurator en formulieren met goed tappable controls en niet onnodig lange blokken; passende ruimte voor leesbare tekst op 390/320px.
 - [ ] **Motion met mate:** Three.js uitsluitend waar techniek begrijpelijker wordt, soepele productview/energyflow, met correcte no-WebGL/SVG-, no-JS- en reduced-motion-uitvoering. Geen onnodige downloads of animatieblokkades.
 - [ ] **Productidentiteit en menselijk vertrouwen:** heldere relatie HYXI (fabrikant), NIVO Groep Holland B.V. (initiatief) en Thuisbatterij Team (advies/aanvragen); echte team-/installatiebewijzen alleen met rechten/toestemming. Geen fictieve reviews, certificaten, garanties of 'vanaf'-prijzen.
-- [ ] **Eigenaarreview ≥9/10:** screens en echte URL voor hero, mobiel, productsecties, CTA en offerte. Bij score 8/10 of lager opnieuw itereren. Geen commerciële GO bij 6/10.
+- [ ] **Eigenaarreview ≥9/10:** screens en echte URL voor hero, mobiel, productsecties, CTA en offerte. Bij score 8/10 of lager opnieuw itereren. Geen commerciële GO onder de afgesproken 9/10-grens.
 - [ ] **Objectieve guardrails:** bestaande API/leadflow en mobiel toegankelijk houden; toetsenbord, axe WCAG A/AA, contrast, echte Safari, WebGL-fallback, CLS/LCP en Lighthouse als richtwaarden. 3/3 CI groen + onafhankelijke live GET-readiness.
 
 **Zichtbare aandachtspunten uit huidige CI-screenshots:** de lichtgrijze typografie en veel witruimte geven een afstandelijke indruk; er zijn meerdere overliggende hero-cards en een vaste mobiele CTA; de gestileerde/illustratieve energiewoning heeft een andere beeldtaal dan echte premium-productbeelden; mobiel is de journey lang. Dit zijn concrete ontwerpkandidaten ter verificatie, **geen bewezen effect op conversie**.
@@ -89,7 +89,7 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 ## 9. Verplichte GO / NO-GO — commerciële lancering
 
 **NO-GO zolang één harde voorwaarde ontbreekt:**
-1. [ ] Eigenaar geeft het **gebouwde visuele ontwerp minstens 9/10** op desktop en echte mobiele Safari na review; geen ontoereikende 6/10 online promoten.
+1. [ ] Eigenaar geeft het **gebouwde visuele ontwerp minstens 9/10** op desktop en echte mobiele Safari na review; geen nog onvoldoende beoordeelde V3 als definitieve commerciële GO aanmerken.
 2. [ ] Boven-de-vouw propositie, echte product- en bedrijfsidentiteit, duidelijke CTA, telefoon/fallback en correcte productclaims zijn akkoord.
 3. [ ] Complete advies-/offertejourneys, 320/390/768/1440, keyboard, reduced-motion, WebGL-fallback, echte Safari en CI zijn zonder kritieke regressies; live read-only readiness groen.
 4. [ ] Sales eigenaar/vervanger, eerste-contactafspraak, mailincidentroute en werkende Odoo-kansen per intakevariant zijn operationeel gecontroleerd.
