@@ -150,9 +150,9 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 6 && new Set(sitemapUrls).size === 6, 'sitemap lists the six distinct public pages');
+ensure(sitemapUrls.length === 7 && new Set(sitemapUrls).size === 7, 'sitemap lists the seven distinct public pages');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
 
 
 // Knowledge pages must remain real, indexable static HTML and part of the user journey.
@@ -168,6 +168,21 @@ for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom']) {
   ensure(schema.some(item => item['@type'] === 'BreadcrumbList'), `Knowledge ${slug}: breadcrumb JSON-LD`);
   ensure(home.includes(`href="/kennis/${slug}/"`), `Knowledge ${slug}: homepage links to new resource`);
 }
+
+
+// Installation check is a useful standalone document AND a native, no-JS GET form.
+// Never introduce personal information into its URL or save the precheck responses.
+const checkPage = documentCache.get(resolve(dist, 'kennis/installatiecheck/index.html')) || '';
+ensure(Boolean(checkPage), 'Installation check: static HTML in production build');
+ensure(checkPage.includes('<form class="check-form" id="installation-check-form" action="/offerte/" method="get">'), 'Installation check: native GET to existing quote page');
+for (const field of ['solar', 'phase', 'goal']) ensure(checkPage.includes(`name="${field}"`), `Installation check: ${field} present`);
+for (const field of ['fullName','email','phone','postcode']) ensure(!new RegExp(`name=["']${field}["']`).test(checkPage), `Installation check: no ${field} collected`);
+ensure(checkPage.includes('Preliminary') && checkPage.includes('href="/kennis/noodstroom/"') && checkPage.includes('href="/kennis/bat-q7-vs-bat-q9/"'), 'Installation check: original source-backed content and internal links');
+ensure(home.includes('href="/kennis/installatiecheck/"'), 'Installation check: homepage discovery');
+ensure(checkPage.includes('href="/downloads/hyxi-aura-1-fase-datasheet.pdf"'), 'Installation check: official manufacturer source');
+const checkSchema = [...checkPage.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].flatMap(match=>{try {const json=JSON.parse(match[1]);return json['@graph']||[json];}catch{return[];}});
+ensure(checkSchema.some(item=>item['@type']==='WebPage'&&item.url===`${origin}/kennis/installatiecheck/`), 'Installation check: matching WebPage schema');
+ensure(checkSchema.some(item=>item['@type']==='BreadcrumbList'), 'Installation check: breadcrumb schema');
 
 for (const file of built) {
   const publicPath = relative(dist, file).split(sep).join('/');

@@ -57,7 +57,7 @@ test('public discovery includes both guides and links back to conversion flows',
     assert.ok(sitemap.includes(`<loc>${base}${path}</loc>`), path);
     assert.ok(config.includes(`'kennis/${slug}/index.html'`), path);
   }
-  assert.equal((sitemap.match(/<loc>/g) || []).length,6);
+  assert.equal((sitemap.match(/<loc>/g) || []).length,7);
 });
 
 test('horizontally scrollable knowledge tables have keyboard focus and accessible names', async () => {
@@ -71,4 +71,18 @@ test('horizontally scrollable knowledge tables have keyboard focus and accessibl
       assert.match(attributes, /aria-label="[^"]+"/);
     }
   }
+});
+
+test('installation check is an original semantic information route with a native GET handoff and no PII',async()=>{
+  const [html,sitemap,quote,js]=await Promise.all([
+    file('kennis/installatiecheck/index.html'),file('public/sitemap.xml'),file('offerte/index.html'),file('kennis/installatiecheck/installatiecheck.mjs')
+  ]);
+  assert.equal((html.match(/<h1(?:\\s|>)/g)||[]).length,1);
+  assert.ok(html.includes('<form class="check-form" id="installation-check-form" action="/offerte/" method="get">'));
+  assert.ok(sitemap.includes('<loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc>'));
+  assert.match(html,/Preliminary/);
+  for(const name of ['solar','phase','goal'])assert.ok(html.includes(`name="${name}"`));
+  for(const name of ['fullName','email','phone','postcode'])assert.doesNotMatch(html,new RegExp(`name="${name}"`));
+  assert.ok(quote.includes('id="check-prefill-note"'));
+  assert.ok(js.includes('new FormData(form)'));
 });

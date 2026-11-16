@@ -64,6 +64,14 @@ form.addEventListener('input',()=>{if(!submitting){key=null;clearError();}});
 const preset=new URLSearchParams(location.search);
 if(['7','9'].includes(preset.get('moduleType')))$('moduleType').value=preset.get('moduleType');
 if(/^[1-6]$/.test(preset.get('moduleCount')||''))$('moduleCount').value=preset.get('moduleCount');
+// Accept only known anonymous answer values from the public installation precheck.
+// No names, phone numbers, addresses or free text are accepted from the URL.
+let prefilled=false;
+for(const [field,allowed] of Object.entries({solar:['yes','planned','no'],phase:['single','three','unknown'],goal:['solar','prices','backup','unsure']})){
+  const value=preset.get(field);
+  if(value!==null&&allowed.includes(value)){$(field).value=value;prefilled=true;}
+}
+if(prefilled)$('check-prefill-note').hidden=false;
 $('moduleType').addEventListener('change',selection);
 $('moduleCount').addEventListener('change',selection);
 selection();
