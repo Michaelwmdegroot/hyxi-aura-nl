@@ -1,4 +1,6 @@
 # HYXI AURA — actuele fast-lane roadmap en besluiten
+
+> **UPDATE 16 NOV 2026 — BEIDE ODOO LEADTYPES BEVESTIGD.** De eigenaar heeft aparte advies- en offerteaanvragen als automatisch toegewezen Odoo-leads in twee screenshots getoond. Daarmee valt **alle Odoo-doorzetontwikkeling en extra testinstroom** uit de backlog. Focus op [de nieuwe post-Odoo groeiprioriteiten](NEXT-ROADMAP-POST-ODOO-2026-11-16.md).
 **Statusdatum:** 16 november 2026  
 **Productie:** https://hyxi-aura.nl · https://hyxi-aura.nl/offerte/ · https://hyxi-aura.nl/beheer  
 **GitHub:** https://github.com/Michaelwmdegroot/hyxi-aura-nl · `main`  
@@ -45,7 +47,7 @@ De bestaande proef gebruikte correlatie-ID `AURA-5c724b2b-2f4a-40f3-849e-41c7f42
 
 **B. Vervolgacties in Beheer ([#4](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/4)).** **GEREALISEERD in [PR #26](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/26):** vandaag/verlopen taken in eigen tab, Europe/Amsterdam-datum, admin/sales-scope en dossieropening. **Bewuste schaalgrens:** de versleutelde due-datum vergt een server-side scan van maximaal 2.500 actieve dossiers, met zichtbare waarschuwing voor onvolledigheid en maximaal 100 getoonde acties. **OPEN:** een geïndexeerde due-projectie als de leadvolumes werkelijk tegen die limiet lopen en alleen na afstemming met Odoo eventueel een enkele idempotente herinnering. Geen parallel CRM bouwen. [Technisch document](P1-DUE-FOLLOWUPS-2026-11-16.md).
 
-**C. Productieacceptatie offerte ([#5](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/5)).** **GEREED voor de HYXI→mail-keten:** de aparte `/offerte/` is live; [de eenmalige productietest](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43785349123) gaf HTTP 201 na commit, met offerte-ID `AURA-3b22e306-ebee-406f-94f8-8d72b74ffbab`; echte `leads@`-INBOX-ontvangst met 3 × BAT-Q7 en aanvullende wensen is bevestigd. Voor juist deze quote is het Odoo-record niet afzonderlijk gecontroleerd en was er geen ingelogde production-Beheer-dossierinzage. **OPEN:** eventuele aanvullende intake/UX en na noodzaak operationele Odoo-afstemming, geen herhaalde testleads.
+**C. Advies- en offerte-doorzet ([#5](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/5)).** **VOLLEDIG AFGEVINKT als technische Odoo-invoer:** zowel een adviesaanvraag als een afzonderlijke offerteaanvraag is via de bestaande mailbox `leads@thuisbatterijteam.nl` automatisch als **toegewezen Odoo CRM-lead** aangetroffen, met visuele bevestiging door de eigenaar op 16 november 2026 (twee Odoo-screenshots). De eerdere [offerte-API→database→mailproef](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43785349123) blijft historisch bewijs. **Geen extra tests, testleads, Odoo API, mailroutering of Portal-koppeling bouwen.** Optionele conversie-UX van de offertepagina is een ander onderwerp. In Odoo zetten medewerkers leads intern om in verkoopkansen/klanten; dit is geen HYXI-ontwikkelopgave.
 
 **D. Operationele mailcontrole concreet maken ([#9](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/9)).** De SMTP-outbox en Beheer 'Mailcontrole' werken. Verbeter zo nodig de zichtbaarheid van `failed`/`uncertain`, met een eenvoudige escalatie; `accepted` is SMTP-acceptatie en niet automatisch werkelijke inboxontvangst. De e-mailroute naar Odoo werkt al: geen vervangende API bouwen. SPF/DKIM/DMARC, fallback-owner en privacyretentie in mailbox/Odoo zijn onderhoudspunten, geen reden om nieuwe leadcampagnes onnodig te blokkeren.
 
@@ -71,7 +73,7 @@ De bestaande proef gebruikte correlatie-ID `AURA-5c724b2b-2f4a-40f3-849e-41c7f42
 | #2 MySQL/outbox | **Engine plus handmatige privacyexport/delete gereed** | Betrouwbare laatste-contactdatum, automatische bewaartermijn en externe kopieën blijven open |
 | #3 Beheer-login/auth | **Afgerond voor eigenaarsscope** | Optionele uitnodigingen geen huidige afhankelijkheid |
 | #4 Werkbank | **Vandaag/verlopen tab gereed** | Scanlimiet 2.500, latere index en evt. dedup Odoo-herinnering |
-| #5 Offerte | **Pagina live, quote HTTP201 + inbox bevestigd** | Optionele intake/UX, Odoo-test niet herhaald |
+| #5 Offerte | **Pagina live, offerte + advies als Odoo-lead bevestigd** | Odoo-integratie DONE; eventueel alleen toekomstige offerte-UX verbeteren als conversiedata dat ondersteunt |
 | #6 Premium UX | **Open** | Volgende design-/mobiele verbeterfase |
 | #7 SEO | **Technische basis live** | Search Console, indexatie en originele pagina's |
 | #8 KPI's | **14-daagse register-KPI's gebouwd** | Betrouwbare bezoekers-/eerste-contactmeting en Search Console blijven open |

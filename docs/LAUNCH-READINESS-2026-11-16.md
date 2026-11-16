@@ -11,7 +11,7 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 ### Technisch al gereed; niet opnieuw bouwen
 - [x] Node 24/Vite op Hostinger, `main` auto-deploy, MariaDB 11.8.9, migraties 001–004, beveiligd password-only Beheer met bestaande eigenaarlogin.
 - [x] Drie-staps adviesaanvraag, aparte offerteaanvraag en Q7/Q9-configurator met selecties, intakevalidatie, toestemming, server-CSRF/rate limit/honeypot.
-- [x] Transactionele versleutelde opslag, idempotentie, SMTP-outbox en mailcontrole; éénmalige productieadvies-API→mail→Odoo door eigenaar bevestigd; een offerte-API→mail afzonderlijk bevestigd.
+- [x] Transactionele versleutelde opslag, idempotentie, SMTP-outbox en mailcontrole; **advies én offerte** via `leads@thuisbatterijteam.nl` als **Odoo CRM-leads automatisch aangemaakt en toegewezen**, beide bevestigd met screenshots door de eigenaar op 16 november 2026. Geen extra Odoo-integratie of testlead nodig.
 - [x] Beheer: rollen, status, zoekfunctie, toewijzing, versleutelde notities, vervolgdatum, vandaag/verlopen, geauditeerde handmatige export/verwijdering en 14-daagse **opgeslagen lead**-KPI's.
 - [x] Drie originele HYXI-kennisroutes (Q7/Q9, noodstroom, installatiecheck), 7 sitemap-URL's, canonicals, interne links en fabrikantbronbeleid; 10/10 live read-only checks.
 - [x] Hostinger dagelijkse automatische backups als eigenaar-geaccepteerde voorziening. **Geen onafhankelijk restorebewijs; geen eigen backupsysteem bouwen.**
@@ -52,7 +52,7 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 ## 4. P0 — SALES & OPERATIONS [NO LEAD LEFT BEHIND]
 - [ ] Wijs binnen NIVO/Thuisbatterij Team een **eigenaar + vervanger** voor de leadinbox en Odoo-invoer aan; definieer een werkbaar eerste-contact-SLA tijdens kantooruren en bij afwezigheid.
 - [ ] Leg per aanvraagtype vast hoe in Odoo wordt toegewezen, gekwalificeerd, opgevolgd, geoffreerd en afgesloten. **Odoo is de commerciële opvolgbron; HYXI Beheer blijft intake-/incidentbron** tenzij expliciet anders besloten. Geen dubbel CRM-werk.
-- [ ] Controleer in bestaande Odoo-mailimport of **quote** evenals **advice** correct als verkoopkans met uniek AURA-ID belandt. De adviesroute is eerder bewezen; voor quote is alleen DB→mail apart bewezen. Eerst bestaande of normale nieuwe dossiers bekijken; geen onnodige synthetische leads.
+- [x] **Odoo-doorzet voor offerte én advies bevestigd**: beide typen verschijnen als automatisch toegewezen **CRM-leads** via de bestaande inboximport. Geen extra technische controle of nieuwe synthetische leads. De verdere kwalificatie, conversie naar verkoopkans en offertes vallen onder de interne salesopvolging in Odoo.
 - [x] **Admin-only Beheer-incidentmelding en triageroute** voor SMTP-outbox `failed` / `uncertain` in [PR #43](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/43): aantallen direct na login en refresh, geen incident = geen paneel, overzichtsfout verbergt summary niet. Menselijke mailboxcheck en niet-blind-heraanbieden worden uitgelegd. Dit is géén proactieve externe notificatie.
 - [ ] **Proactieve veilige escalatie** buiten het ingelogde dashboard: pas ontwerpen als verantwoordelijke, vervanger, contactmoment/SLA en alarmkanaal zijn vastgelegd. Een SMTP-acceptatie is **geen** bewezen inboxdelivery.
 - [ ] SPF, DKIM, DMARC, Reply-To, spam-/bouncebeleid en afzenders/ontvangers van echte productie-e-mail controleren, zonder huidige werkende mailroute te pauzeren.
@@ -100,11 +100,15 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 1. [ ] Eigenaar geeft het **gebouwde visuele ontwerp minstens 9/10** op desktop en echte mobiele Safari na review; geen nog onvoldoende beoordeelde V3 als definitieve commerciële GO aanmerken.
 2. [ ] Boven-de-vouw propositie, echte product- en bedrijfsidentiteit, duidelijke CTA, telefoon/fallback en correcte productclaims zijn akkoord.
 3. [ ] Complete advies-/offertejourneys, 320/390/768/1440, keyboard, reduced-motion, WebGL-fallback, echte Safari en CI zijn zonder kritieke regressies; live read-only readiness groen.
-4. [ ] Sales eigenaar/vervanger, eerste-contactafspraak, mailincidentroute en werkende Odoo-kansen per intakevariant zijn operationeel gecontroleerd.
+4. [ ] Sales eigenaar/vervanger en eerste-contactafspraak zijn operationeel vastgelegd; de **invoer als Odoo-lead voor beide varianten is al bevestigd**, geen extra ontwikkelcontrole.
 5. [ ] Actuele privacy-/contacttoestemming en veilige procedure voor HYXI + Odoo + mail zijn vastgesteld; nieuwe meting alleen na privacybesluit.
 6. [ ] Basismeetplan en minimaal één **gekozen instroomkanaal** (GSC/organisch of gecontroleerde betaalde pilot) zijn klaar. Uitgaven pas na GO.
 
 **Na launch / opschalen vereist daarnaast:** echte kwalitatieve instroom, contactmomenten, salesresultaten en wekelijkse terugkoppeling. **Technisch online ≠ 9/10-design ≠ aantoonbare autonome winstgevende leadmachine.**
+
+## Actuele herprioritering na Odoo-eigenaarsbevestiging
+
+Zie [Vervolgroadmap post-Odoo](NEXT-ROADMAP-POST-ODOO-2026-11-16.md): geen Odoo-ontwikkelwerk meer nodig. Resterende technische waarde zit in GSC-indexatieverificatie, privacyvriendelijke bezoek-naar-leadmeting en originele zoekintentiecontent. Sales blijft intern eigenaar van contact/kwalificatie in Odoo.
 
 ## 10. Aanbevolen bouwvolgorde
 
