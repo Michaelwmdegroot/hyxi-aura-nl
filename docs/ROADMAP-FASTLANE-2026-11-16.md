@@ -4,6 +4,8 @@
 **GitHub:** https://github.com/Michaelwmdegroot/hyxi-aura-nl · `main`  
 **Masterissue:** [#10](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10)
 
+> **EIGENAARSBESLUIT LAUNCH 16 NOV 2026:** de huidige visuele kwaliteit wordt op **6/10** beoordeeld, commerciële lancering **NO-GO** tot een door de eigenaar beoordeelde **minimaal 9/10** en aanvullende conversie-/sales-/privacy-acceptatie. Gebruik [de nieuwe actuele launchchecklist](LAUNCH-READINESS-2026-11-16.md) als voortaan leidende taakvolgorde voor commercial readiness; bestaande historische fasen hieronder blijven bewijs van de technische bouw. Technisch LIVE is niet hetzelfde als commerciële launch-ready.
+
 > **Deze roadmap is vanaf 16 november 2026 de actuele statusbron.** Documenten van 14–15 november beschrijven grotendeels historische implementatie- en activeringsstappen. Lees deze roadmap vóór je oude TODO's opnieuw uitvoert.
 
 Zie ook [Phase 3-bewijs en exacte productietests](PHASE3-VERIFIED-2026-11-16.md). **Voor de overname na deze afgeronde fase zijn [de definitieve Phase 4-handoff](HANDOFF-PHASE4-2026-11-16.md) en [de volgende agent-startprompt](STARTPROMPT-PHASE4-2026-11-16.md) leidend.**
