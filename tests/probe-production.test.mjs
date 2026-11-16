@@ -7,6 +7,7 @@ const good = {
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
   '/privacy/': [200, 'Privacyverklaring · versie 16 november 2026; versleuteld op in een beveiligde database; Odoo CRM'],
+  '/bronnen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/bronnen/"><p>Bronnen gecontroleerd op 16 november 2026</p><a class="secondary-presenter" href="/">Thuisbatterij Team</a><p>De HTA2-datasheet vermeldt onterecht HSA2 en 160000 W</p><a href="/kennis/1-fase-of-3-fasen/">Faseuitleg</a>'],
   '/offerte/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/offerte/"><form id="quoteForm"></form>'],
   '/kennis/bat-q7-vs-bat-q9/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/"><title>HYXI AURA BAT-Q7 vs BAT-Q9</title><a href="/offerte/">'],
   '/kennis/noodstroom/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/noodstroom/"><title>HYXI AURA bij stroomuitval</title><a href="/offerte/">'],
@@ -25,7 +26,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,13);
+  assert.equal(Object.keys(result.checks).length,14);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -114,4 +115,15 @@ test('the source-backed one-/three-phase guide is live and in the sitemap',async
 test('public privacy page must name the actual Odoo CRM email-import processor',async()=>{
   const stale=await probeProduction(mock({...good,'/privacy/':[200,'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database']}));
   assert.equal(stale.checks.privacyDeployed,false);
+});
+
+test('manufacturer source page is public, canonical and transparent about Preliminary HTA2 errors',async()=>{
+  const missing=await probeProduction(mock({...good,'/bronnen/':[404,'']}));
+  assert.equal(missing.checks.sourceDocumentationDeployed,false);
+  assert.equal(missing.ok,false);
+  const old=await probeProduction(mock({...good,'/bronnen/':[200,good['/bronnen/'][1].replace('160000 W','fabrikantspecificatie')]}));
+  assert.equal(old.checks.sourceDocumentationDeployed,false);
+  assert.equal(old.ok,false);
+  const wrongBrand=await probeProduction(mock({...good,'/bronnen/':[200,good['/bronnen/'][1].replace('secondary-presenter','legacy-hyxi')] }));
+  assert.equal(wrongBrand.checks.sourceDocumentationDeployed,false);
 });

@@ -8,7 +8,7 @@ const KNOWLEDGE = [
   { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
   { path: '/kennis/1-fase-of-3-fasen/', title: 'HYXI AURA 1 fase of 3 fasen' },
 ];
-const PATHS = ['/', '/api/health', '/api/config', '/privacy/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const PATHS = ['/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
@@ -89,6 +89,15 @@ export async function probeProduction(fetcher = fetch) {
       observed['/privacy/'].content.includes('Privacyverklaring · versie 16 november 2026') &&
       observed['/privacy/'].content.includes('Odoo CRM') &&
       observed['/privacy/'].content.includes('versleuteld op in een beveiligde database'),
+    // The manufacturer's Preliminary HTA2 errors must be explained publicly.
+    // Test the actual HTML, not an assumed Google index or source-link crawl.
+    sourceDocumentationDeployed: observed['/bronnen/'].status === 200 &&
+      observed['/bronnen/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/bronnen/">') &&
+      observed['/bronnen/'].content.includes('Bronnen gecontroleerd op 16 november 2026') &&
+      observed['/bronnen/'].content.includes('onterecht') &&
+      observed['/bronnen/'].content.includes('160000 W') &&
+      observed['/bronnen/'].content.includes('href="/kennis/1-fase-of-3-fasen/"') &&
+      observed['/bronnen/'].content.includes('secondary-presenter'),
     quotePageReady: observed['/offerte/'].status === 200 &&
       observed['/offerte/'].content.includes('id="quoteForm"') &&
       observed['/offerte/'].content.includes('href="https://hyxi-aura.nl/offerte/"'),
