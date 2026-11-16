@@ -112,20 +112,24 @@ if (gallery) {
   function prefetchAngles() {
     for (const view of ['side', 'angle']) void load(view).catch(() => {});
   }
-  stage.addEventListener('pointerenter', event => {
+  gallery.addEventListener('pointerenter', event => {
     if (event.pointerType === 'mouse' && !reducedMotion.matches) prefetchAngles();
   }, { passive: true });
-  stage.addEventListener('pointermove', event => {
+  // Delegate motion from the whole hero visual: the existing floating information
+  // cards overlap the battery stage but must not create a dead interaction zone.
+  gallery.addEventListener('pointermove', event => {
     if (event.pointerType !== 'mouse' || reducedMotion.matches) return;
+    if (event.target.closest('.hero-view-switcher')) return;
     const bounds = stage.getBoundingClientRect();
-    if (!bounds.width) return;
+    if (!bounds.width || event.clientX < bounds.left || event.clientX > bounds.right ||
+        event.clientY < bounds.top || event.clientY > bounds.bottom) return;
     const relativeX = (event.clientX - bounds.left) / bounds.width;
     const next = relativeX < .34 ? 'side' : relativeX > .66 ? 'angle' : 'front';
     if (hoverTimer) clearTimeout(hoverTimer);
     hoverTimer = null;
     if (next !== current) hoverTimer = setTimeout(() => { hoverTimer = null; void show(next); }, 85);
   }, { passive: true });
-  stage.addEventListener('pointerleave', () => {
+  gallery.addEventListener('pointerleave', () => {
     if (hoverTimer) clearTimeout(hoverTimer);
     hoverTimer = null;
   }, { passive: true });
