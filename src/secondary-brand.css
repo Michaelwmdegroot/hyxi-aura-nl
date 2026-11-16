@@ -1,0 +1,46 @@
+/* Single commercial identity on every HYXI AURA support/knowledge/quote page.
+   Uses typography, not a fabricated TBT graphic logo or an official HYXI badge. */
+.secondary-presenter{
+  display:inline-flex!important;flex-direction:column;align-items:flex-start;justify-content:center;
+  gap:2px;min-width:0;flex-shrink:0;text-decoration:none!important;
+  font:inherit;line-height:1.15;letter-spacing:normal!important;white-space:nowrap;color:#283028!important
+}
+.secondary-presenter-owner{
+  display:block;font:800 17px/1.15 Manrope,system-ui,sans-serif;letter-spacing:-.055em;
+  white-space:nowrap;color:#2b302a
+}
+.secondary-presenter-owner span{font:inherit!important;letter-spacing:inherit;color:#6b8067!important}
+.secondary-presenter-caption{
+  display:flex;width:100%;align-items:baseline;justify-content:space-between;
+  gap:7px;margin-top:1px;white-space:nowrap;
+  color:#697168!important;font:500 10px/1.15 Manrope,system-ui,sans-serif
+}
+.secondary-presenter-caption em{font-size:10px;font-weight:500;font-style:italic;letter-spacing:-.005em;color:#6a7569}
+.secondary-presenter-caption b{font-size:10px;font-weight:850;letter-spacing:.08em;color:#bd5736}
+.secondary-presenter:focus-visible{outline:3px solid #a83e21;outline-offset:5px;border-radius:3px}
+.legal-page .site-header .secondary-presenter,
+.legal-page .legal-footer>.secondary-presenter{font:inherit}
+.legal-page .legal-footer>.secondary-presenter{align-self:flex-start}
+.legal-page .legal-footer>.secondary-presenter .secondary-presenter-owner{font-size:17px}
+.legal-page .legal-footer>.secondary-presenter .secondary-presenter-caption{font-size:9px}
+.site-bar .secondary-presenter .secondary-presenter-owner{font-size:17px}
+.site-bar .secondary-presenter .secondary-presenter-caption{font-size:10px}
+.footer .secondary-presenter{margin-bottom:8px}
+.footer .secondary-presenter .secondary-presenter-owner{font-size:19px}
+.topbar .secondary-presenter{font-size:inherit}
+.topbar .secondary-presenter .secondary-presenter-owner{font-size:17px}
+.quote-page footer .footer-provider{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.quote-page footer .footer-provider strong{font-size:14px;letter-spacing:-.03em;color:#303a31}
+.quote-page footer .footer-provider span{color:#a64f34;font-size:11px;font-weight:750}
+.quote-page footer .footer-provider small{color:#626b61;font-size:11px;line-height:1.7}
+@media(max-width:750px){
+  .secondary-presenter-owner,.site-bar .secondary-presenter .secondary-presenter-owner,
+  .topbar .secondary-presenter .secondary-presenter-owner{font-size:15px}
+  .secondary-presenter-caption,.site-bar .secondary-presenter .secondary-presenter-caption{gap:4px}
+  .secondary-presenter-caption em,.secondary-presenter-caption b{font-size:9px}
+}
+@media(max-width:360px){
+  .secondary-presenter-owner,.site-bar .secondary-presenter .secondary-presenter-owner,
+  .topbar .secondary-presenter .secondary-presenter-owner{font-size:14px}
+  .secondary-presenter-caption em,.secondary-presenter-caption b{font-size:8.4px}
+}
