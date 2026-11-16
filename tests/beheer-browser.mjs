@@ -48,6 +48,20 @@ const fakeAdmin={
     ...(!privacyDeleted?[{id:leadData.id,requestId,status:leadStatus,requestType:'advice',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:'accepted'}]:[]),
     {id:'2c000000-1111-4111-8111-222222222222',requestId:secondId,status:'quote_requested',requestType:'quote',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:notification.status},
   ]};},
+  async leadMetrics(actor){
+    const today=new Date();
+    const start=Date.UTC(today.getUTCFullYear(),today.getUTCMonth(),today.getUTCDate())-13*86400000;
+    const days=Array.from({length:14},(_,i)=>{
+      const day=new Date(start+i*86400000).toISOString().slice(0,10);
+      const isLast=i===13;
+      return {day,total:isLast?(actor.role==='admin'?2:1):0,advice:isLast?1:0,
+        quote:isLast&&actor.role==='admin'?1:0,other:0};
+    });
+    return {period:{from:days[0].day,through:days.at(-1).day,days:14,timezone:'UTC'},
+      scope:actor.role==='admin'?'all':'assigned',
+      totals:actor.role==='admin'?{received:2,advice:1,quote:1,other:0}:{received:1,advice:1,quote:0,other:0},
+      days};
+  },
   async listDueFollowups(_user){
     const base={asOf:'2026-11-16',checked:2,limited:false};
     const first={requestId,dueDate:'2026-11-15',nextAction:'Test vervolgcontact',priority:'overdue',status:leadStatus,requestType:'advice',assignedTo:salesId};
@@ -155,6 +169,14 @@ async function loginAndReview(context,label){
   await page.locator('.due-open').first().click();
   await expect(page.locator('#detailTitle')).toHaveText(requestId);
   await page.locator('#closeDetail').click();
+  await page.locator('#metricsTab').click();
+  await expect(page.locator('#metricsPanel')).toBeVisible();
+  await expect(page.locator('#kpiTotal')).toHaveText('2');
+  await expect(page.locator('#kpiAdvice')).toHaveText('1');
+  await expect(page.locator('#kpiQuote')).toHaveText('1');
+  await expect(page.locator('#kpiDays [role=listitem]')).toHaveCount(14);
+  await accessibility(page,label+'/real-lead-kpis');
+  await layout(page,label+'/real-lead-kpis');
   await page.locator('#leadsTab').click();
 
   await page.locator('.open-lead').first().click();
@@ -271,6 +293,7 @@ async function loginAndReview(context,label){
   await expect(page.locator('#leadRows')).toBeEmpty();
   await expect(page.locator('#outboxItems')).toBeEmpty();
   await expect(page.locator('#dueItems')).toBeEmpty();
+  await expect(page.locator('#kpiDays')).toBeEmpty();
   await expect(page.locator('#currentUser')).toHaveText('Beheerder');
   assert.equal(await page.evaluate(async()=> (await fetch('/api/beheer/leads')).status),401);
   assert.deepEqual(exceptions,[],label+' JavaScript exceptions');
@@ -292,6 +315,9 @@ async function checkSalesAndExpiry(){
   await page.locator('#followupsTab').click();
   await expect(page.locator('.due-item')).toHaveCount(1);
   await expect(page.locator('#dueCount')).toHaveText('1');
+  await page.locator('#metricsTab').click();
+  await expect(page.locator('#kpiTotal')).toHaveText('1');
+  await expect(page.locator('#metricsScope')).toContainText('Mijn toegewezen aanvragen');
   await page.locator('#leadsTab').click();
   await page.locator('.open-lead').first().click();
   await expect(page.locator('#contactFields')).toContainText('Fictieve Browsercontrole');
@@ -317,7 +343,7 @@ try{
   const mobile=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:'nl-NL',isMobile:true,hasTouch:true});
   await loginAndReview(mobile,'mobile');
   await checkSalesAndExpiry();
-  console.log('PASS desktop/mobile Beheer including due worklists, privacy export/deletion, mail review, role assignment, expiry, keyboard, logout and WCAG A/AA');
+  console.log('PASS desktop/mobile Beheer including due tasks, real aggregate KPIs, privacy export/deletion, sales isolation, keyboard, logout and WCAG A/AA');
 } finally {
   // Always release intentionally delayed responses, even if an assertion
   // fails, so CI reports the actual failure instead of timing out in close().
