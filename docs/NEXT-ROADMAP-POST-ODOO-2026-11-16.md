@@ -5,7 +5,7 @@
 
 ## Overname na PR #46 — actuele vertrekpositie
 
-- **Pre-Search Console inhouds- en broncontrole: DONE.** Laatste merge `f1b55681` (PR #46), publiek geteste **14/14 PASS** op 16 november 2026. Bronwaarschuwing HTA2/HSA2 en onzekere `160000W` is live bewaakt; acht zelfstandige routes zijn in de sitemaps/checks opgenomen. Zie [volledige audit](PRE-GSC-CONTENT-FACT-AUDIT-2026-11-16.md).
+- **Pre-Search Console inhouds- en broncontrole: DONE.** Laatste functionele code-/monitor-merge `f1b55681` (PR #46), publiek geteste **14/14 PASS** op 16 november 2026. Bronwaarschuwing HTA2/HSA2 en onzekere `160000W` is live bewaakt; acht zelfstandige routes zijn in de sitemaps/checks opgenomen. Zie [volledige audit](PRE-GSC-CONTENT-FACT-AUDIT-2026-11-16.md).
 - **GSC nog OPEN:** de GSC Wizard-app wees op 16 november 2026 opnieuw zowel accountinformatie als propertylijst af met `payment_required` (geen actieve trial/abonnement). Niet blijven proberen zonder gewijzigde toegang; de eigenaar kan de **gratis** Google Search Console rechtstreeks gebruiken via `https://search.google.com/search-console`. Propertyverificatie en URL-indexatiestatus zijn **niet** geverifieerd.
 - **Commerciële GO nog OPEN:** eigenaarsscore V6 minimaal 9/10 op desktop en echte iPhone Safari; echte sitebezoekers-naar-leadmeting en operationele sales-SLA niet bewezen. Bestaande leadmailimport naar Odoo voor beide typen is reeds getest; stuur geen nieuwe synthetische aanvragen.
 - **Scope:** uitsluitend handoff/documentatie; wijzig geen productcodes, prijzen, registratie, backend, mail, GSAP of officiële voorlopige PDFs zonder afzonderlijke getoetste opdracht.
