@@ -33,7 +33,7 @@ const origin = `http://127.0.0.1:${http.address().port}`;
 let browser;
 try {
   browser = await chromium.launch({headless:true, executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined});
-  for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom']) {
+  for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen']) {
     for (const width of [1440,390,320]) {
       const ctx = await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});
       const page = await ctx.newPage();

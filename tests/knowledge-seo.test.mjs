@@ -6,7 +6,7 @@ import { MODULES, sourceUrls } from '../src/product-data.mjs';
 const root = new URL('../', import.meta.url);
 const file = async path => readFile(new URL(path, root), 'utf8');
 const base = 'https://hyxi-aura.nl';
-const routes = ['bat-q7-vs-bat-q9', 'noodstroom'];
+const routes = ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen'];
 const nl = value => new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2 }).format(value);
 
 test('each knowledge article is independently useful, canonical, sourced and indexable', async () => {
@@ -57,7 +57,7 @@ test('public discovery includes both guides and links back to conversion flows',
     assert.ok(sitemap.includes(`<loc>${base}${path}</loc>`), path);
     assert.ok(config.includes(`'kennis/${slug}/index.html'`), path);
   }
-  assert.equal((sitemap.match(/<loc>/g) || []).length,7);
+  assert.equal((sitemap.match(/<loc>/g) || []).length,8);
 });
 
 test('horizontally scrollable knowledge tables have keyboard focus and accessible names', async () => {

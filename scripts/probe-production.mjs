@@ -6,6 +6,7 @@ const KNOWLEDGE = [
   { path: '/kennis/bat-q7-vs-bat-q9/', title: 'HYXI AURA BAT-Q7 vs BAT-Q9' },
   { path: '/kennis/noodstroom/', title: 'HYXI AURA bij stroomuitval' },
   { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
+  { path: '/kennis/1-fase-of-3-fasen/', title: 'HYXI AURA 1 fase of 3 fasen' },
 ];
 const PATHS = ['/', '/api/health', '/api/config', '/privacy/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
@@ -85,7 +86,8 @@ export async function probeProduction(fetcher = fetch) {
     publicIntakeEnabled: observed['/api/health'].data?.leadEnabled === true &&
       observed['/api/config'].status === 200 && observed['/api/config'].data?.leadEnabled === true,
     privacyDeployed: observed['/privacy/'].status === 200 &&
-      observed['/privacy/'].content.includes('Privacyverklaring · versie 15 november 2026') &&
+      observed['/privacy/'].content.includes('Privacyverklaring · versie 16 november 2026') &&
+      observed['/privacy/'].content.includes('Odoo CRM') &&
       observed['/privacy/'].content.includes('versleuteld op in een beveiligde database'),
     quotePageReady: observed['/offerte/'].status === 200 &&
       observed['/offerte/'].content.includes('id="quoteForm"') &&
@@ -101,6 +103,10 @@ export async function probeProduction(fetcher = fetch) {
       observed['/kennis/noodstroom/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/noodstroom/">`) &&
       observed['/kennis/noodstroom/'].content.includes('HYXI AURA bij stroomuitval') &&
       observed['/kennis/noodstroom/'].content.includes('href="/offerte/"'),
+    phaseComparisonDeployed: observed['/kennis/1-fase-of-3-fasen/'].status === 200 &&
+      observed['/kennis/1-fase-of-3-fasen/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/1-fase-of-3-fasen/">`) &&
+      observed['/kennis/1-fase-of-3-fasen/'].content.includes('HYXI AURA 1 fase of 3 fasen') &&
+      observed['/kennis/1-fase-of-3-fasen/'].content.includes('href="/offerte/"'),
     installationCheckDeployed: observed['/kennis/installatiecheck/'].status === 200 &&
       observed['/kennis/installatiecheck/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/installatiecheck/">`) &&
       observed['/kennis/installatiecheck/'].content.includes('HYXI AURA installatiecheck') &&

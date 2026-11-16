@@ -22,7 +22,7 @@ test('privacyverklaring, database-privacyversie en mailvermelding zijn gelijk', 
   const privacy = file('privacy/index.html');
   const db = file('server/db/store.mjs');
   const mail = file('server/mail.mjs');
-  assert.match(privacy, /Privacyverklaring · versie 15 november 2026/);
-  assert.match(db, /PRIVACY_VERSION = '2026-11-15'/);
-  assert.match(mail, /Privacyversie: 2026-11-15/);
+  assert.match(privacy, /Privacyverklaring · versie 16 november 2026/);
+  assert.match(db, /PRIVACY_VERSION = '2026-11-16'/);
+  assert.match(mail, /Privacyversie: 2026-11-16/);
 });
