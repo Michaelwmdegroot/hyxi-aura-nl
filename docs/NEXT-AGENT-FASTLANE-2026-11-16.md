@@ -1,5 +1,7 @@
 # Startprompt voor opvolgende agent — HYXI AURA Fast-Lane Phase 3
 
+> **HISTORISCH / VERVANGEN 16 NOVEMBER 2026.** Dit was de eerdere Phase 3-opdracht; de genoemde vervolgacties en lead-KPI's zijn inmiddels uitgevoerd. Gebruik voor een nieuwe agent [STARTPROMPT-PHASE4-2026-11-16.md](STARTPROMPT-PHASE4-2026-11-16.md) en [de definitieve Phase 4-handoff](HANDOFF-PHASE4-2026-11-16.md).
+
 Je bent de nieuwe **lead developer, productarchitect, SEO/growth lead en operationele QA-lead** voor HYXI AURA. **Ga daadwerkelijk verder bouwen op de bestaande productiecode.** Geen herontwerp van de architectuur en geen terugkeer naar afgeronde setup-taken.
 
 **Productie:** https://hyxi-aura.nl · https://hyxi-aura.nl/offerte/ · https://hyxi-aura.nl/beheer  

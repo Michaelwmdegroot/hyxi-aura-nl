@@ -6,7 +6,7 @@
 
 > **Deze roadmap is vanaf 16 november 2026 de actuele statusbron.** Documenten van 14–15 november beschrijven grotendeels historische implementatie- en activeringsstappen. Lees deze roadmap vóór je oude TODO's opnieuw uitvoert.
 
-Zie ook [Phase 3-bewijs en exacte productietests](PHASE3-VERIFIED-2026-11-16.md).
+Zie ook [Phase 3-bewijs en exacte productietests](PHASE3-VERIFIED-2026-11-16.md). **Voor de overname na deze afgeronde fase zijn [de definitieve Phase 4-handoff](HANDOFF-PHASE4-2026-11-16.md) en [de volgende agent-startprompt](STARTPROMPT-PHASE4-2026-11-16.md) leidend.**
 
 ## 1. Vaststaande eigenaarbesluiten
 
