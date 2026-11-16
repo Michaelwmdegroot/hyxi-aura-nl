@@ -304,6 +304,29 @@ try {
     await page.goto(`${live.origin}/?utm_source=browser-qa&utm_medium=test`, { waitUntil: 'load' });
     await page.evaluate(async () => { await document.fonts.ready; });
     await assertImages(page, viewport.label);
+    // Premium polish: original product remains, decorative stamps disappear,
+    // and TBT/backup facts are available to a real visitor.
+    await expect(page.locator('.hero-eyebrow, .hero-scroll, .product-label, .section-number, .operator-proof-icon')).toHaveCount(0);
+    await expect(page.locator('.site-footer .footer-presenter .presenter-owner')).toHaveText('Thuisbatterij Team');
+    await expect(page.locator('.site-footer .footer-presenter .presenter-verb')).toHaveText('presenteert');
+    await expect(page.locator('.site-footer .footer-presenter .presenter-product')).toHaveText('HYXI AURA');
+    await expect(page.locator('.site-footer .brand-symbol')).toHaveCount(0);
+    await expect(page.locator('#backup-usp')).toContainText('Back-up ingebouwd');
+    await expect(page.locator('#backup-usp')).toContainText('ATS');
+    await expect(page.locator('.feature-strip')).toContainText('Back-up bij stroomuitval');
+    await expect(page.locator('.benefit-backup h3')).toContainText('Back-up is');
+    await expect(page.locator('.benefit-backup h3')).toContainText('ingebouwd.');
+    await expect(page.locator('.benefit-backup')).toContainText('geïntegreerd');
+    await expect(page.locator('.benefit-backup .backup-learn-link')).toHaveAttribute('href','/kennis/noodstroom/');
+    await expect(page.locator('.benefit-backup .benefit-footnote')).toContainText('geschikte installatie');
+    await expect(page.locator('.config-preview .preview-live')).toHaveText('Indicatieve opstelling');
+    const footerOwner=await page.locator('.site-footer .footer-presenter .presenter-owner').boundingBox();
+    const footerLine=await page.locator('.site-footer .footer-presenter .presenter-subline').boundingBox();
+    assert.ok(footerLine.y >= footerOwner.y + footerOwner.height - 2, 'Footer HYXI credit must sit below TBT owner');
+    assert.ok(footerLine.width <= footerOwner.width + 2, 'Footer credit cannot exceed TBT wordmark width');
+    await page.locator('.site-footer').screenshot({path:resolve(resultsDir,`${viewport.label}-footer-polish.png`)});
+    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+    record(`${viewport.label}: editorial cleanup, TBT-first footer, source-backed ATS USP`);
     // Product stage is the accessible control; no floating selector remains.
     const heroProduct = page.locator('#hero-product-image');
     const productStage = page.locator('#hero-product-stage');
