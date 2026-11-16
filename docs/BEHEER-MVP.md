@@ -83,3 +83,9 @@ Het admin-auditlog en lead-eventlog registreren **wie** een vervolgactie wijzigd
 ## P1 privacyoperaties: geauditeerde export en handmatige HYXI-verwijdering
 
 Vanaf [PR #24](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/24) biedt het bestaande dossier onder **Privacy & dossierbeheer** twee acties exclusief voor actieve beheerders: een gecontroleerde JSON-export en een handmatige, met reden/aanvraagnummer en twee beoordelingen bevestigde databaseverwijdering. De mutatie wordt geaudit; openstaande mailverzendingen en gewonnen klantdossiers worden beschermd. Er is **geen automatische verwijdering op zes maanden** en een HYXI-delete verwijdert geen mailbox-/Odoo-/Hostinger-kopieën. Volledige scope, autorisatie, testbewijs en grenzen: [P1 privacyrunbook](PRIVACY-P1-MANUAL-OPS-2026-11-16.md).
+
+## Phase 3 — vandaag/verlopen en echte lead-KPI's
+
+[PR #26](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/26) heeft de huidige werkbank uitgebreid met een rollenafgeschermd tabblad **Vervolgacties** op basis van Europe/Amsterdam: vandaag/verlopen, zonder nieuwe Odoo-workflow of mailspam. De encrypted due-datum wordt in batches gelezen, maximaal 2.500 actieve dossiers en 100 getoonde acties; bij grotere aantallen toont Beheer een expliciete waarschuwing. [Technische grenzen](P1-DUE-FOLLOWUPS-2026-11-16.md).
+
+[PR #27](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/27) biedt een tabblad **Cijfers** met 14 dagen daadwerkelijke HYXI-registeraanvragen per UTC-dag, advice/quote/overig, voor admin en toegewezen sales. Dit is geen websitebezoek-, funnel-, omzet- of eerste-contactmeting. Er is geen tracker, cookie, nieuwe migratie of externe analytische opslag. [KPI-definities](P2-LEAD-KPIS-2026-11-16.md).

@@ -6,6 +6,8 @@ Je bent de nieuwe **lead developer, productarchitect, SEO/growth lead en operati
 **GitHub:** https://github.com/Michaelwmdegroot/hyxi-aura-nl · `main` → automatische Hostinger-deploy  
 **Masterissue:** https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10
 
+**Nieuw bewijs:** [PHASE3-VERIFIED-2026-11-16.md](PHASE3-VERIFIED-2026-11-16.md) beschrijft PR #26/#27 en de eerste succesvol ontvangen offerteaanvraag.
+
 ## Verplicht bij start
 
 1. Lees **eerst** [de actuele fast-lane roadmap](ROADMAP-FASTLANE-2026-11-16.md), daarna [de bewijsstatus](STATUS-P0-P1-2026-11-16.md), `AGENTS.md`, `README.md`, `docs/BEHEER-MVP.md`, `docs/SEO-STRATEGY.md` en issues #1–#10. Verifieer actuele `main`, open PR's en CI; lees relevante broncode voordat je wijzigingen maakt.
@@ -14,11 +16,11 @@ Je bent de nieuwe **lead developer, productarchitect, SEO/growth lead en operati
 
 ## Concrete uitvoeringsopdracht, in volgorde
 
-**Sprint A — opvolging & ontbrekende retentiedata.** [PR #24](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/24) heeft al veilige handmatige HYXI-dossierexport en delete gerealiseerd, met CSRF, adminrechten en audit: bouw die functie **niet opnieuw**. De zesmaandenretentie kan niet automatisch worden uitgevoerd zonder betrouwbaar vastgelegd laatste klantcontact; onderzoek hoe dat in de bestaande opvolging wordt geregistreerd zonder Odoo dubbel te beheren. Maak 'vandaag/verlopen' op Beheer-vervolgdatums nuttig zichtbaar; voeg desgewenst een idempotente, beperkt verstuurde herinnering toe als het bestaande Odoo-team die niet al levert. Houd externe Odoo-, mailbox- en Hostinger-backupkopieën duidelijk buiten de HYXI-delete-scope. Test in disposable MySQL, met rolgrenzen en mobiele a11y.
+**Sprint A — unieke SEO-pagina's en Search Console.** De kernleadmachine, de P1 privacyexport/delete, de vandaag/verlopen werkvoorraad [PR #26](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/26), de eerste echte KPI's [PR #27](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/27) en de eenmalige quote-HTTP201/mailtest zijn afgerond. Herbouw deze niet. Controleer Search Console met bestaande eigenaarsrechten waar beschikbaar; publiceer daadwerkelijk onderscheidende brongecontroleerde HYXI-pagina's over capaciteit, compatibiliteit, back-up of prijsfactoren, zonder ongeverifieerde prijzen of claims, en met complete canonicals, sitemap en browser/SEO-regressie.
 
-**Sprint B — resterende live-offerteacceptatie.** De `/offerte/` pagina is al live, met groene tests. Voer maximaal één herkenbare synthetische quotecontrole uit als dit voor acceptatie nodig is: ontvangstnummer, `request_type=quote`, juiste modules/nota, teammail en e-mailimport; geen herhaalde fictieve verkoopkansen.
+**Sprint B — premium conversie-UX.** Verhoog de door eigenaar gegeven 7/10 kwaliteit gericht: officiële HYXI-productbeelden, menselijk vertrouwen, heldere keuze voor advies versus offerte, betere mobiele interactie en motion met reduced-motion/SVG-fallback. Vergelijk concrete screenshots voor/na, zonder AI-look en zonder de productiedatabase of bestaande 2 werkende aanvraagroutes te ontregelen.
 
-**Sprint C — groeimetingen.** Bouw kleine, privacyvriendelijke dashboard-KPI's op bestaande echte bronnen (unieke ontvangen leads, advies/offerte, status en eerste opvolging, uitval/uncertain outbox). Geen verzonnen cijfers, geen third-party PII-pixels; leg metricdefinities vast en voeg tests toe.
+**Sprint C — echte salesprocesverbetering.** Onderzoek bij bestaand Odoo-proces of één extra reminder zinvol is en hoe laatste klantcontact betrouwbaar vastligt voor toekomstige automatische retentie; pas bij noodzaak de 2.500-dossiers scanlimiet van de versleutelde due-werkvoorraad aan. Basis-14-daagse lead-KPI's zijn al gebouwd; verzin geen bezoekers/conversiepercentages of eerste-contactmetingen zonder bewezen registratiebron.
 
 **Sprint D — organische groei en UX.** Verifieer Search Console zodra toegangsrechten beschikbaar zijn. Publiceer één of twee originele, volledige HYXI-informatiepagina's op basis van officiële bronnen, met zichtbare meerwaarde, canonicals en sitemaptests. Werk gericht aan visuele conversieverbeteringen vanaf de bestaande eigenaarsscore 7/10; behoud Three.js/SVG-fallback, toegankelijkheid, snelle browserreizen. Daarna maak je een repliceerbare fast-lane starter, niet tientallen kloonsites.
 
