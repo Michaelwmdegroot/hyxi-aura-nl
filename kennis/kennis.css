@@ -8,3 +8,4 @@
 
 .stat-unit{font-size:.42em}
 .cta-panel .eyebrow{color:#e3b3a1}
+.table-wrap:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}

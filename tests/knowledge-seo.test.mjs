@@ -59,3 +59,16 @@ test('public discovery includes both guides and links back to conversion flows',
   }
   assert.equal((sitemap.match(/<loc>/g) || []).length,6);
 });
+
+test('horizontally scrollable knowledge tables have keyboard focus and accessible names', async () => {
+  for (const slug of routes) {
+    const html = await file(`kennis/${slug}/index.html`);
+    const regions = [...html.matchAll(/<div class="table-wrap"([^>]*)>/g)];
+    assert.ok(regions.length > 0, slug);
+    for (const [, attributes] of regions) {
+      assert.match(attributes, /tabindex="0"/);
+      assert.match(attributes, /role="region"/);
+      assert.match(attributes, /aria-label="[^"]+"/);
+    }
+  }
+});
