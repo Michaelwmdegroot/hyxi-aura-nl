@@ -89,6 +89,9 @@ function showLogin(text=''){
   $('outboxItems').replaceChildren();$('mailCount').textContent='0';
   $('dueItems').replaceChildren();$('dueCount').textContent='0';$('dueCount').hidden=true;
   $('dueSummary').textContent='';$('dueLimitWarning').hidden=true;
+  $('kpiDays').replaceChildren();
+  for(const id of ['kpiTotal','kpiAdvice','kpiQuote'])$(id).textContent='—';
+  $('kpiMessage').textContent='';
   $('workbenchViews').hidden=true;
   $('currentUser').textContent='Beheerder';$('currentRole').textContent='Beheer';
   $('password').value='';$('statusFilter').value='';$('requestSearch').value='';currentSearch='';
@@ -110,14 +113,16 @@ function showDashboard(user){
   if(user.role!=='admin')setView('leads');
 }
 function setView(name){
-  activeView=name==='outbox'&&currentUser?.role==='admin'?'outbox':name==='followups'?'followups':'leads';
+  activeView=name==='outbox'&&currentUser?.role==='admin'?'outbox':name==='followups'?'followups':name==='metrics'?'metrics':'leads';
   $('leadsPanel').hidden=activeView!=='leads';
   $('followupsPanel').hidden=activeView!=='followups';
+  $('metricsPanel').hidden=activeView!=='metrics';
   $('outboxPanel').hidden=activeView!=='outbox';
   $('leadsTab').setAttribute('aria-pressed',String(activeView==='leads'));
   $('followupsTab').setAttribute('aria-pressed',String(activeView==='followups'));
+  $('metricsTab').setAttribute('aria-pressed',String(activeView==='metrics'));
   $('outboxTab').setAttribute('aria-pressed',String(activeView==='outbox'));
-  $('dashboardTitle').textContent=activeView==='outbox'?'Mailcontrole':activeView==='followups'?'Vervolgacties':'Aanvragen';
+  $('dashboardTitle').textContent=activeView==='outbox'?'Mailcontrole':activeView==='followups'?'Vervolgacties':activeView==='metrics'?'Cijfers':'Aanvragen';
 }
 async function enterDashboard(user){
   showDashboard(user);
@@ -139,6 +144,7 @@ async function refreshAll(){
     const data=await Promise.all([api('/summary'),loadLeads(version),
       currentUser?.role==='admin'?loadNotifications(version):Promise.resolve(),
       activeView==='followups'?loadDueFollowups(version):Promise.resolve(),
+      activeView==='metrics'?loadLeadMetrics(version):Promise.resolve(),
     ]);
     if(version!==refreshVersion||!currentUser)return;
     const s=data[0];$('statTotal').textContent=String(s.total);
@@ -218,6 +224,41 @@ async function loadDueFollowups(version=refreshVersion){
     extra.textContent='Toont de eerste '+data.items.length+' van '+count+' acties; voor de volledige werkvoorraad is een geïndexeerd overzicht nodig.';
     $('dueItems').append(extra);
   }
+  return data;
+}
+
+async function loadLeadMetrics(version=refreshVersion){
+  $('kpiMessage').textContent='Ontvangen aanvragen laden…';
+  const data=await api('/metrics');
+  if(version!==refreshVersion||!currentUser||activeView!=='metrics')return data;
+  $('kpiTotal').textContent=String(data.totals.received);
+  $('kpiAdvice').textContent=String(data.totals.advice);
+  $('kpiQuote').textContent=String(data.totals.quote);
+  $('metricsScope').textContent='Laatste '+data.period.days+' dagen · UTC · '+
+    (data.scope==='all'?'Alle aanvragen':'Mijn toegewezen aanvragen');
+  const wrapper=$('kpiDays');wrapper.replaceChildren();
+  const max=Math.max(1,...data.days.map(day=>day.total));
+  const fraction=value=>String(Math.round(100*value/max))+'%';
+  for(const day of data.days){
+    const item=document.createElement('div');item.className='kpi-day';item.setAttribute('role','listitem');
+    const labelDate=formatDueDate(day.day);
+    item.setAttribute('aria-label',labelDate+': '+day.total+' ontvangen, '+day.advice+' advies, '+day.quote+' offerte'+
+      (day.other?', '+day.other+' anders':''));
+    const bars=document.createElement('div');bars.className='kpi-bars';bars.setAttribute('aria-hidden','true');
+    for(const [count,kind] of [[day.advice,'advice'],[day.quote,'quote']]){
+      const bar=document.createElement('span');bar.className='kpi-bar '+kind;
+      bar.style.height=fraction(count);bars.append(bar);
+    }
+    const dateLabel=document.createElement('span');dateLabel.className='kpi-date';
+    dateLabel.textContent=new Intl.DateTimeFormat('nl-NL',{timeZone:'UTC',day:'2-digit',month:'2-digit'})
+      .format(new Date(day.day+'T00:00:00Z'));
+    const total=document.createElement('span');total.className='kpi-day-total';
+    total.textContent=String(day.total);
+    item.append(bars,total,dateLabel);wrapper.append(item);
+  }
+  $('kpiMessage').textContent=data.totals.other?
+    data.totals.other+' aanvraag(en) hebben een ander type en tellen wel mee in het totaal.':
+    'Cijfers gebaseerd op het actuele HYXI-dossierregister; geen bezoekersmeting.';
   return data;
 }
 
@@ -393,6 +434,7 @@ $('logoutButton').addEventListener('click',async()=>{
 $('refreshButton').addEventListener('click',refreshAll);
 $('leadsTab').addEventListener('click',()=>setView('leads'));
 $('followupsTab').addEventListener('click',()=>{setView('followups');refreshAll();});
+$('metricsTab').addEventListener('click',()=>{setView('metrics');refreshAll();});
 $('outboxTab').addEventListener('click',()=>setView('outbox'));
 $('outboxPrev').addEventListener('click',()=>{if(outboxPage>1){outboxPage--;refreshAll();}});
 $('outboxNext').addEventListener('click',()=>{outboxPage++;refreshAll();});
