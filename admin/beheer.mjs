@@ -179,7 +179,7 @@ async function loadLeads(version=refreshVersion){
   return data;
 }
 function formatDueDate(value){
-  if(!/^20\\d{2}-\\d{2}-\\d{2}$/.test(value||''))return 'Geen datum';
+  if(!/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(value||''))return 'Geen datum';
   return new Intl.DateTimeFormat('nl-NL',{timeZone:'UTC',day:'numeric',month:'short',year:'numeric'})
     .format(new Date(value+'T00:00:00Z'));
 }
