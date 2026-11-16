@@ -81,6 +81,16 @@ try {
     await expect(page.locator('.site-header .presenter-owner')).toHaveText('Thuisbatterij Team');
     await expect(page.locator('.site-header .presenter-verb')).toHaveText('presenteert');
     await expect(page.locator('.site-header .presenter-product')).toHaveText('HYXI AURA');
+    // Both words on exactly ONE second line, visually contained under the
+    // full 'Thuisbatterij Team' wordmark — even on 320px screens.
+    const owner = await page.locator('.site-header .presenter-owner').boundingBox();
+    const subtitle = await page.locator('.site-header .presenter-subline').boundingBox();
+    const verb = await page.locator('.site-header .presenter-verb').boundingBox();
+    const product = await page.locator('.site-header .presenter-product').boundingBox();
+    assert.ok(subtitle.y >= owner.y + owner.height - 2, 'Presenter subline must sit BELOW the owner name at ' + width);
+    assert.ok(Math.abs(verb.y - product.y) < 4, 'Presenter words must be on the same baseline at ' + width);
+    assert.ok(subtitle.x >= owner.x - 2 && subtitle.x + subtitle.width <= owner.x + owner.width + 2,
+      'Presenter subline must fit within TBT brand width at ' + width);
     await expect(page.locator('.hero-view-switcher')).toBeVisible();
     const brand=await page.locator('.site-header .presenter-brand').boundingBox();
     const cta=await page.locator('.site-header>.button').boundingBox();
@@ -121,13 +131,37 @@ try {
     const page=await context.newPage();
     await page.goto(base+'/');
     const stage=page.locator('#hero-product-stage');
+    await expect(stage).toHaveAttribute('data-gsap-ready','true');
     await stage.scrollIntoViewIfNeeded();
     const box=await stage.boundingBox();
+    // GSAP quickTo must animate through a range, not teleport between three
+    // images as the original sector-based hover listener did.
+    await page.mouse.move(box.x + box.width*.5, box.y + box.height*.5);
+    await page.mouse.move(box.x + box.width*.91, box.y + box.height*.5);
+    await page.waitForTimeout(55);
+    const inFlight=Number(await stage.getAttribute('data-orbit-pose'));
+    assert.ok(inFlight > .015 && inFlight < .99, 'GSAP orbit should be mid-animation, was ' + inFlight);
+    await expect(stage).toHaveAttribute('data-active-view','angle',{timeout:12000});
+    const poseAfter=Number(await stage.getAttribute('data-orbit-pose'));
+    assert.ok(poseAfter > inFlight, 'Orbit must keep easing after initial pointer event');
+    const transformed=await page.locator('#hero-product-pivot').evaluate(node=>getComputedStyle(node).transform);
+    assert.match(transformed,/^matrix3d\(/, 'Visible HYXI photo pivot should use subtle CSS perspective');
     for(const [ratio,view] of [[.12,'side'],[.50,'front'],[.88,'angle']]){
       await page.mouse.move(box.x+box.width*ratio,box.y+box.height*.5,{steps:5});
       await expect(stage).toHaveAttribute('data-active-view',view,{timeout:12000});
+      // The last frame of a completed GSAP dissolve must have exactly one
+      // visible photo (avoid persistent double-exposure).
+      const visiblePhotos = await page.locator('#hero-product-pivot').evaluate(el =>
+        [...el.querySelectorAll('.hero-product')].filter(img => Number(getComputedStyle(img).opacity) > .05).length);
+      assert.equal(visiblePhotos,1,'An orbit position must finish with one full product photo');
     }
-    console.log('PASS natural pointer transitions side → front → angle');
+    // A fast reversal must always finish at the *latest* requested angle,
+    // not a stale image resolved by an earlier load/tween.
+    await page.mouse.move(box.x+box.width*.1,box.y+box.height*.5);
+    await page.mouse.move(box.x+box.width*.9,box.y+box.height*.5);
+    await expect(stage).toHaveAttribute('data-active-view','angle',{timeout:12000});
+    await expect(page.locator('[data-aura-view="angle"]')).toHaveAttribute('aria-pressed','true');
+    console.log('PASS GSAP eased pointer orbit smoothly crosses the three accurate source views');
     await context.close();
   }
   {
@@ -139,6 +173,7 @@ try {
     await page.mouse.move(rect.x+rect.width*.1,rect.y+rect.height*.5);
     await page.waitForTimeout(220);
     await expect(stage).toHaveAttribute('data-active-view','front');
+    assert.equal(await stage.getAttribute('data-orbit-pose'), null, 'Reduced-motion must not animate 2.5D tilt');
     await page.locator('[data-aura-view="side"]').click();
     await expect(stage).toHaveAttribute('data-active-view','side');
     console.log('PASS reduced motion: no mouse rotation, manual button works');
@@ -158,6 +193,35 @@ try {
     await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
     await expect(stage).toHaveAttribute('data-active-view','angle',{timeout:12000});
     console.log('PASS real mobile horizontal swipe: front → angle');
+    await context.close();
+  }
+  // If the locally vendored GSAP is unexpectedly unavailable, users still get
+  // a working native click/swipe product gallery without broken frames.
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    const page=await context.newPage();
+    await page.route('**/vendor/gsap.min.js', route=>route.abort());
+    await page.goto(base+'/');
+    const stage=page.locator('#hero-product-stage');
+    await expect(page.locator('.hero-view-switcher')).toBeVisible();
+    await page.locator('[data-aura-view="angle"]').click();
+    await expect(stage).toHaveAttribute('data-active-view','angle');
+    await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-angle.webp');
+    assert.equal(await stage.getAttribute('data-gsap-ready'),null);
+    console.log('PASS no-GSAP fallback: view buttons still work offline');
+    await context.close();
+  }
+  // Broken photo: preserve the last successful, loaded manufacturer product.
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    const page=await context.newPage();
+    await page.route('**/images/aura-side.webp', route=>route.abort());
+    await page.goto(base+'/');
+    await page.locator('[data-aura-view="side"]').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('#hero-product-stage')).toHaveAttribute('data-active-view','front');
+    await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-front.webp');
+    console.log('PASS image failure: original complete front view remains visible');
     await context.close();
   }
   {

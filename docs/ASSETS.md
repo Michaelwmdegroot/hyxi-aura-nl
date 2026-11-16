@@ -91,3 +91,7 @@ De nieuwe homepageweergave in `src/product-gallery.mjs` schakelt uitsluitend tus
 ## Phase 5 — merk-presentatie en nauwkeurige bronbeeldkalibratie
 
 Nieuwe headertekst op de homepage: **Thuisbatterij Team / presenteert / HYXI AURA**. Het is een typografische woordmerkcombinatie, geen geclaimd officieel dealerlogo. De productviewer toont de **bestaande ongewijzigde** `aura-front.webp`, `aura-angle.webp` en `aura-side.webp`. Omdat de bronframes verschillende transparante marges hebben, normaliseert `src/hero-viewer.css` de **zichtbare silhouettehoogte, top/voetlijn en het centrale x-anker** met exact gemeten oorspronkelijke alfa-bounds. Geen stretch, geen nieuw gerenderde/productgefingeerde camerahoek. Zie [Hero V3 specificatie](PHASE5-HERO-VIEWER-2026-11-16.md) voor de bronpixelmetingen en technische kwaliteitslat. Binnenkomst toont standaard het frontbeeld. JS laadt extra hoekbeelden pas na intentie en decodering. No-JS behoudt een volwaardig frontbeeld.
+
+
+## Hero V4 — GSAP (16 november 2026)
+Officiële GSAP core **3.15.1** als lokaal `public/vendor/gsap.min.js` ingesloten via exact `greensock/GSAP` `dist/gsap.min.js`, blob `c6d5f8578c41d46a6624e94aaa44b8b9ef779461`. **Alle originele auteurs-/licentietekst behouden**; standaard commerciële websitevergunning zie https://gsap.com/standard-license/. Productfoto's, fabrikantbron, afmetingen en oorspronkelijke V3 CSS-kalibratie zijn **ongewijzigd**; GSAP animeert een aparte binnenste pivot en overgangsopaciteit en maakt dus geen nieuwe camerafoto's of 3D-model. Zie `docs/PHASE5-HERO-V4-GSAP-2026-11-16.md`.

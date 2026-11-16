@@ -1,140 +1,238 @@
 /**
- * Premium three-angle HYXI showroom built on real, unchanged manufacturer images.
- * NOT a 360-degree / 3D view. No external requests, storage, pixels or lead writes.
- * The first official front view remains usable without JavaScript.
+ * HYXI AURA Hero V4 — GSAP inertial three-angle showroom, NOT a 360° model.
+ * Official photos and mathematically calibrated V3 silhouette bounds unchanged.
+ * GSAP core is pinned and served locally; no third-party runtime requests.
+ * No PII, analytics, cookies or lead API interactions.
  */
 const gallery = document.querySelector('[data-product-gallery]');
+
 if (gallery) {
   const stage = gallery.querySelector('#hero-product-stage');
+  const pivot = gallery.querySelector('#hero-product-pivot');
+  const halo = gallery.querySelector('.aura-halo');
+  const plinth = gallery.querySelector('.product-plinth');
   const controls = gallery.querySelector('.hero-view-switcher');
   const caption = gallery.querySelector('#hero-image-caption');
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const front = stage.querySelector('#hero-product-image');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const gsap = window.gsap?.quickTo && window.gsap?.timeline ? window.gsap : null;
+
   const views = Object.freeze({
     side: {
       src: '/images/aura-side.webp', width: 1875, height: 1000,
-      alt: 'HYXI AURA thuisbatterij, officieel schuin productaanzicht met zichtbare linkerzijde',
+      alt: 'HYXI AURA thuisbatterij vanuit de linkerhoek, officiële fabrikantfoto',
       caption: 'Officieel HYXI-productbeeld · linkerhoek'
     },
     front: {
       src: '/images/aura-front.webp', width: 699, height: 1000,
-      alt: 'HYXI AURA thuisbatterij met modulaire opslag, vooraanzicht en ronde statusindicator',
+      alt: 'HYXI AURA modulair thuisbatterijsysteem met ronde statusindicator, vooraanzicht',
       caption: 'Officieel HYXI-productbeeld · vooraanzicht'
     },
     angle: {
       src: '/images/aura-angle.webp', width: 2078, height: 1000,
-      alt: 'HYXI AURA thuisbatterij, officieel schuin productaanzicht met zichtbare rechterzijde',
+      alt: 'HYXI AURA thuisbatterij vanuit de rechterhoek, officiële fabrikantfoto',
       caption: 'Officieel HYXI-productbeeld · rechterhoek'
     }
   });
+
   const order = ['side', 'front', 'angle'];
   const buttons = [...controls.querySelectorAll('[data-aura-view]')];
-  const loaded = new Map([['front', Promise.resolve(front)]]);
-  let current = 'front';
-  let requestId = 0;
-  let hoverTimer = null;
+  const photoCache = new Map([['front', Promise.resolve(stage.querySelector('#hero-product-image'))]]);
+  let active = 'front';
+  let desired = 'front';
+  let generation = 0;
+  let dissolve = null;
+  let returnTimer = null;
   let touchStart = null;
-  stage.dataset.activeView = current;
+  let manualHold = false;
+  const orbit = { yaw: 0 };
 
-  // Deliberately defer both additional angle downloads until interaction intent.
-  function load(view) {
-    if (loaded.has(view)) return loaded.get(view);
-    const info = views[view];
-    if (!info) return Promise.reject(new Error('Unknown product angle'));
-    const promise = new Promise((resolve, reject) => {
+  stage.dataset.activeView = active;
+  if (gsap) stage.dataset.gsapReady = 'true';
+
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  function loadPhoto(view) {
+    if (photoCache.has(view)) return photoCache.get(view);
+    const meta = views[view];
+    if (!meta) return Promise.reject(new Error('Unknown HYXI product angle'));
+    const load = new Promise((resolve, reject) => {
       const image = new Image();
       image.className = 'hero-product';
       image.dataset.auraAngle = view;
       image.alt = '';
       image.setAttribute('aria-hidden', 'true');
       image.decoding = 'async';
-      image.width = info.width;
-      image.height = info.height;
+      image.width = meta.width;
+      image.height = meta.height;
       image.onload = async () => {
-        try { await image.decode(); } catch { /* onload already confirmed usable pixels */ }
+        try { await image.decode(); } catch { /* onload already validated image bytes */ }
         resolve(image);
       };
-      image.onerror = () => reject(new Error('Product image unavailable'));
-      image.src = info.src;
+      image.onerror = () => reject(new Error('Product angle unavailable'));
+      image.src = meta.src;
     }).catch(error => {
-      loaded.delete(view); // Later manual selections may retry safely.
+      photoCache.delete(view);
       throw error;
     });
-    loaded.set(view, promise);
-    return promise;
+    photoCache.set(view, load);
+    return load;
+  }
+
+  function prefetch() {
+    for (const view of ['side', 'angle']) void loadPhoto(view).catch(() => {});
+  }
+
+  function present(view, image) {
+    active = view;
+    desired = view;
+    stage.dataset.activeView = view;
+    stage.setAttribute('aria-label', 'HYXI AURA · ' + views[view].caption);
+    caption.textContent = views[view].caption;
+    for (const button of buttons) {
+      button.setAttribute('aria-pressed', String(button.dataset.auraView === view));
+    }
+    for (const photo of pivot.querySelectorAll('.hero-product')) {
+      const selected = photo === image;
+      photo.classList.toggle('is-active', selected);
+      if (selected) {
+        photo.id = 'hero-product-image';
+        photo.alt = views[view].alt;
+        photo.removeAttribute('aria-hidden');
+      } else {
+        photo.removeAttribute('id');
+        photo.alt = '';
+        photo.setAttribute('aria-hidden', 'true');
+      }
+      if (gsap) gsap.set(photo, { opacity: selected ? 1 : 0 });
+      else photo.style.opacity = selected ? '1' : '0';
+    }
   }
 
   async function show(view) {
-    if (!views[view]) return;
-    const token = ++requestId;
-    if (view === current) return;
+    if (!views[view] || desired === view) return;
+    desired = view;
+    const request = ++generation;
     let incoming;
     try {
-      incoming = await load(view);
+      incoming = await loadPhoto(view);
     } catch {
-      // Never replace the last good photo with a failed/empty image.
+      if (request === generation) desired = active;
+      return; // Keep the last complete photo visible on network failure.
+    }
+    if (request !== generation) return;
+    if (!pivot.contains(incoming)) pivot.append(incoming);
+
+    dissolve?.kill();
+    dissolve = null;
+    const photos = [...pivot.querySelectorAll('.hero-product')];
+    const outgoing = photos.reduce((best, candidate) =>
+      !best || Number(getComputedStyle(candidate).opacity) > Number(getComputedStyle(best).opacity)
+        ? candidate : best, null);
+
+    // Even a fast reverse keeps one unbroken, fully opaque manufacturer photo.
+    for (const photo of photos) {
+      if (gsap) gsap.killTweensOf(photo);
+      if (photo !== outgoing) {
+        if (gsap) gsap.set(photo, { opacity: 0 });
+        else photo.style.opacity = '0';
+      }
+      photo.classList.remove('is-active');
+      photo.removeAttribute('id');
+      photo.alt = '';
+      photo.setAttribute('aria-hidden', 'true');
+    }
+    if (!gsap || reduced.matches || incoming === outgoing) {
+      present(view, incoming);
       return;
     }
-    if (token !== requestId) return;
-    if (!stage.contains(incoming)) {
-      stage.append(incoming);
-      incoming.getBoundingClientRect(); // establish opacity=0 before cross-dissolve
+
+    incoming.id = 'hero-product-image';
+    incoming.alt = views[view].alt;
+    incoming.removeAttribute('aria-hidden');
+    incoming.classList.add('is-active');
+    gsap.set(outgoing, { opacity: 1 });
+    gsap.set(incoming, { opacity: 0 });
+    dissolve = gsap.timeline({
+      onComplete() {
+        if (request === generation) present(view, incoming);
+      }
+    })
+      .to(outgoing, { opacity: 0, duration: 0.19, ease: 'sine.inOut' }, 0)
+      .to(incoming, { opacity: 1, duration: 0.24, ease: 'sine.out' }, 0);
+  }
+
+  // Prevent flicker when the pointer hovers near a view boundary.
+  function chooseView(position) {
+    if (desired === 'side' && position < -0.29) return 'side';
+    if (desired === 'angle' && position > 0.29) return 'angle';
+    if (position < -0.56) return 'side';
+    if (position > 0.56) return 'angle';
+    return 'front';
+  }
+
+  function renderOrbit() {
+    if (!gsap || reduced.matches) return;
+    const v = orbit.yaw;
+    // A small physical hint — real photos remain photographs, NOT model textures.
+    gsap.set(pivot, { rotationY: v * 5.2, rotationX: -Math.abs(v) * 0.75, x: v * 5, force3D: true });
+    gsap.set(halo, { x: -v * 12 });
+    gsap.set(plinth, { x: v * 5 });
+    stage.dataset.orbitPose = v.toFixed(3); // inspectable non-identifying QA state
+    if (!manualHold) {
+      const view = chooseView(v);
+      if (view !== desired) void show(view);
     }
-    requestAnimationFrame(() => {
-      if (token !== requestId) return;
-      const outgoing = stage.querySelector('.hero-product.is-active');
-      if (outgoing && outgoing !== incoming) {
-        outgoing.classList.remove('is-active');
-        outgoing.alt = '';
-        outgoing.setAttribute('aria-hidden', 'true');
-        outgoing.removeAttribute('id');
-      }
-      incoming.classList.add('is-active');
-      incoming.id = 'hero-product-image';
-      incoming.alt = views[view].alt;
-      incoming.removeAttribute('aria-hidden');
-      current = view;
-      stage.dataset.activeView = current;
-      stage.setAttribute('aria-label', 'HYXI AURA · ' + views[view].caption);
-      caption.textContent = views[view].caption;
-      for (const button of buttons) {
-        button.setAttribute('aria-pressed', String(button.dataset.auraView === view));
-      }
-    });
+  }
+
+  // GSAP quickTo reuses one optimized tween for hundreds of pointer samples.
+  // Native controls and no-GSAP fallback work without this optional effect.
+  const orbitTo = gsap
+    ? gsap.quickTo(orbit, 'yaw', { duration: 0.56, ease: 'power3.out', onUpdate: renderOrbit })
+    : null;
+
+  function resetOrbit() {
+    if (orbitTo && !reduced.matches) orbitTo(0);
   }
 
   for (const button of buttons) {
-    button.addEventListener('click', () => { void show(button.dataset.auraView); });
-    button.addEventListener('focus', () => { void load(button.dataset.auraView).catch(() => {}); });
+    button.addEventListener('click', () => {
+      manualHold = true;
+      resetOrbit();
+      void show(button.dataset.auraView);
+    });
+    button.addEventListener('focus', () => {
+      void loadPhoto(button.dataset.auraView).catch(() => {});
+    });
   }
   controls.hidden = false;
 
-  function prefetchAngles() {
-    for (const view of ['side', 'angle']) void load(view).catch(() => {});
-  }
   gallery.addEventListener('pointerenter', event => {
-    if (event.pointerType === 'mouse' && !reducedMotion.matches) prefetchAngles();
+    if (event.pointerType !== 'mouse' || reduced.matches) return;
+    returnTimer?.kill();
+    returnTimer = null;
+    prefetch();
   }, { passive: true });
-  // Delegate motion from the whole hero visual: the existing floating information
-  // cards overlap the battery stage but must not create a dead interaction zone.
+
   gallery.addEventListener('pointermove', event => {
-    if (event.pointerType !== 'mouse' || reducedMotion.matches) return;
+    if (event.pointerType !== 'mouse' || reduced.matches || !orbitTo) return;
     if (event.target.closest('.hero-view-switcher')) return;
     const bounds = stage.getBoundingClientRect();
     if (!bounds.width || event.clientX < bounds.left || event.clientX > bounds.right ||
         event.clientY < bounds.top || event.clientY > bounds.bottom) return;
-    const relativeX = (event.clientX - bounds.left) / bounds.width;
-    const next = relativeX < .34 ? 'side' : relativeX > .66 ? 'angle' : 'front';
-    if (hoverTimer) clearTimeout(hoverTimer);
-    hoverTimer = null;
-    if (next !== current) hoverTimer = setTimeout(() => { hoverTimer = null; void show(next); }, 85);
-  }, { passive: true });
-  gallery.addEventListener('pointerleave', () => {
-    if (hoverTimer) clearTimeout(hoverTimer);
-    hoverTimer = null;
+    manualHold = false;
+    returnTimer?.kill();
+    returnTimer = null;
+    const ratio = (event.clientX - bounds.left) / bounds.width;
+    orbitTo(clamp((ratio - 0.5) * 2.25, -1, 1));
   }, { passive: true });
 
-  // Gesture recognition remains passive: vertical page scrolling is never hijacked.
+  gallery.addEventListener('pointerleave', event => {
+    if (event.pointerType !== 'mouse' || reduced.matches || !gsap || manualHold) return;
+    returnTimer?.kill();
+    returnTimer = gsap.delayedCall(0.14, resetOrbit);
+  }, { passive: true });
+
+  // Passive touch handling: horizontal swipe only; vertical scrolling is untouched.
   gallery.addEventListener('touchstart', event => {
     if (event.touches.length !== 1 || event.target.closest('.hero-view-switcher')) return;
     const point = event.touches[0];
@@ -142,16 +240,20 @@ if (gallery) {
     if (point.clientX < bounds.left || point.clientX > bounds.right ||
         point.clientY < bounds.top || point.clientY > bounds.bottom) return;
     touchStart = { x: point.clientX, y: point.clientY };
-    prefetchAngles();
+    prefetch();
   }, { passive: true });
+
   gallery.addEventListener('touchend', event => {
     if (!touchStart || !event.changedTouches.length) return;
     const dx = event.changedTouches[0].clientX - touchStart.x;
     const dy = event.changedTouches[0].clientY - touchStart.y;
     touchStart = null;
     if (Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
-    const next = Math.max(0, Math.min(2, order.indexOf(current) + (dx < 0 ? 1 : -1)));
+    manualHold = true;
+    resetOrbit();
+    const next = clamp(order.indexOf(desired) + (dx < 0 ? 1 : -1), 0, 2);
     void show(order[next]);
   }, { passive: true });
+
   gallery.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
 }
