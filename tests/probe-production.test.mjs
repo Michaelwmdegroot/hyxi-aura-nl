@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { probeProduction } from '../scripts/probe-production.mjs';
 
 const good = {
-  '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage"><div id="hero-product-pivot"></div></div><button data-aura-view="front"></button><button data-aura-view="angle"></button><button data-aura-view="side"></button></div>'],
+  '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span></div>'],
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
   '/privacy/': [200, 'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database'],
@@ -79,6 +79,13 @@ test('public production readiness verifies the TBT-first hero actually deployed 
 
 test('production readiness rejects V3 when locally hosted GSAP V4 markup is not deployed',async()=>{
   const previous=good['/'][1].replace('presenter-subline','old-three-line-brand').replace('id="hero-product-pivot"','id="old-photos"').replace('src="/vendor/gsap.min.js"','src="/legacy/gallery.js"');
+  const stale=await probeProduction(mock({...good,'/':[200,previous]}));
+  assert.equal(stale.checks.heroTbtShowroomDeployed,false);
+  assert.equal(stale.ok,false);
+});
+
+test('V5 public readiness rejects the old left floating angle selector and missing product zone',async()=>{
+  const previous=good['/'][1].replace('data-aura-zone-viewer','data-old-gallery').replace('<span id="aura-viewer-help">Kijkhoeken</span>','<div class="hero-view-switcher">Voorzijde / Schuin / Andere hoek</div>');
   const stale=await probeProduction(mock({...good,'/':[200,previous]}));
   assert.equal(stale.checks.heroTbtShowroomDeployed,false);
   assert.equal(stale.ok,false);

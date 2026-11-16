@@ -37,12 +37,15 @@ export async function probeProduction(fetcher = fetch) {
       }
       // The homepage title was already correct in V3. Keep retrying during a
       // Hostinger deploy until the actual V4 local-GSAP + two-line hero lands.
-      const rootV4 = path !== '/' || (observed[path].content.includes('presenter-subline') &&
+      const rootV5 = path !== '/' || (observed[path].content.includes('presenter-subline') &&
         observed[path].content.includes('id="hero-product-pivot"') &&
+        observed[path].content.includes('data-aura-zone-viewer') &&
+        observed[path].content.includes('id="aura-viewer-help"') &&
+        !observed[path].content.includes('class="hero-view-switcher"') &&
         observed[path].content.includes('src="/vendor/gsap.min.js"'));
       if (!guide || (observed[path].status === 200 &&
         observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
-        observed[path].content.includes(guide.title) && rootV4)) break;
+        observed[path].content.includes(guide.title) && rootV5)) break;
       if (attempt + 1 < attempts) await new Promise(resolve => setTimeout(resolve, 10000));
     }
   }
@@ -61,9 +64,9 @@ export async function probeProduction(fetcher = fetch) {
       observed['/'].content.includes('src="/vendor/gsap.min.js"') &&
       observed['/'].content.includes('id="hero-product-stage"') &&
       observed['/'].content.includes('data-product-gallery') &&
-      observed['/'].content.includes('data-aura-view="front"') &&
-      observed['/'].content.includes('data-aura-view="angle"') &&
-      observed['/'].content.includes('data-aura-view="side"'),
+      observed['/'].content.includes('data-aura-zone-viewer') &&
+      observed['/'].content.includes('id="aura-viewer-help"') &&
+      !observed['/'].content.includes('class="hero-view-switcher"'),
     healthReachable: observed['/api/health'].status === 200 && observed['/api/health'].data?.ok === true,
     publicIntakeEnabled: observed['/api/health'].data?.leadEnabled === true &&
       observed['/api/config'].status === 200 && observed['/api/config'].data?.leadEnabled === true,
