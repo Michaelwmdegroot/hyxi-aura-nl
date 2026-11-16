@@ -77,7 +77,7 @@ test('installation check is an original semantic information route with a native
   const [html,sitemap,quote,js]=await Promise.all([
     file('kennis/installatiecheck/index.html'),file('public/sitemap.xml'),file('offerte/index.html'),file('kennis/installatiecheck/installatiecheck.mjs')
   ]);
-  assert.equal((html.match(/<h1(?:\\s|>)/g)||[]).length,1);
+  assert.equal((html.match(/<h1(?:\s|>)/g)||[]).length,1);
   assert.ok(html.includes('<form class="check-form" id="installation-check-form" action="/offerte/" method="get">'));
   assert.ok(sitemap.includes('<loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc>'));
   assert.match(html,/Preliminary/);

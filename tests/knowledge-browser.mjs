@@ -69,10 +69,9 @@ try {
     assert.equal(response.status(),200);
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('#installation-check-form')).toBeVisible();
-    const solar=page.locator('input[name="solar"][value="yes"]');
-    await solar.check();
-    await page.locator('input[name="phase"][value="three"]').check();
-    await page.locator('input[name="goal"][value="backup"]').check();
+    await page.locator('label:has(input[name="solar"][value="yes"])').click();
+    await page.locator('label:has(input[name="phase"][value="three"])').click();
+    await page.locator('label:has(input[name="goal"][value="backup"])').click();
     await expect(page.locator('#check-preview-summary')).toContainText('Bestaande zonnepanelen');
     await expect(page.locator('#check-preview-summary')).toContainText('3-fasenaansluiting');
     await expect(page.locator('#check-preview-summary')).toContainText('noodstroom');
