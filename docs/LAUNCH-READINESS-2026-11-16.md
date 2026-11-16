@@ -19,6 +19,9 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 
 ## 2. P0 — DESIGN circa 7/10 → minimaal 9/10 [HARD COMMERCIAL LAUNCH GATE]
 
+**Hero V5 is technisch gereed en live:** [PR #39](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/39) verwijdert het linker instructieblok volledig. De foto wisselt direct op linker-, middelste (32%) en rechterdeel van de **zichtbare batterijbreedte**, met GSAP-microbeweging; mobiele swipe/tap en toetsenbord zijn behouden. [Releasebewijs en technische regels](PHASE5-HERO-V5-ZONES-2026-11-16.md), [3/3 CI](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929956182) en [11/11 productiereadiness](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929956171). **Nog open:** eigenaarreview van V5 op desktop en echte mobiele Safari, volledige 9/10-lanceereis en overige sales/SEO/privacy-gates.
+
+
 **Hero V4 is technisch gereed en live:** [PR #37](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/37), merklockup op twee regels, GSAP-gebaseerde vloeiende microbeweging, drie nauwkeurig gekalibreerde officiële productfoto's, mobile swipe, toegankelijkheidsfallback; [releasebewijs](PHASE5-HERO-V4-GSAP-2026-11-16.md). **Nog open:** eigenaarsscore van de nieuwe V4 en echte Safari-review; geen automatische commerciële GO.
 **Eigenaar beslist pas GO na review van echte voor-/na-views**, desktop en mobiel. Niet volstaan met een technisch groene CI.
 
