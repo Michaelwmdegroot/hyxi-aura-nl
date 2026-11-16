@@ -150,6 +150,10 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
       res.json({ok:true});
     }catch(error){ backendError(res,error); }
   });
+  app.get(prefix+'/metrics',authenticated,async(req,res)=>{
+    try{res.json({ok:true,...await adminStore.leadMetrics(req.beheerUser)});}
+    catch(error){backendError(res,error);}
+  });
   app.get(prefix+'/summary',authenticated,async(req,res)=>{
     try {res.json({ok:true,...await adminStore.summary(req.beheerUser)});}
     catch(error){backendError(res,error);}
