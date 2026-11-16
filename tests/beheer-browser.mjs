@@ -21,7 +21,7 @@ let signedIn=false, leadStatus='new', statusChanges=0;
 let role='admin', assignedTo=null, assignmentChanges=0, notificationChanges=0, clockOffset=0;
 let followupUpdates=0,followUp={nextAction:'',dueDate:null,notes:[]};
 let privacyExports=0,privacyDeletes=0,privacyDeleted=false;
-let forceNotificationConflict=false;
+let forceNotificationConflict=false, failNextNotificationList=false;
 let deferredDetail=null, releaseDetail=null, deferredList=null, releaseList=null;
 let waitingDetails=0,waitingLists=0;
 const now = new Date().toISOString();
@@ -87,7 +87,12 @@ const fakeAdmin={
   async listAssignees(actor){assert.equal(actor.role,'admin');return {items:[{id:salesId,email:'sales@example.test',role:'sales'}]};},
   async assignLead(actor,id,userId){assert.equal(actor.role,'admin');assert.equal(id,requestId);assignedTo=userId;assignmentChanges++;return {requestId:id,assignedTo,changed:true};},
   async listNotifications(actor,{page}){
-    assert.equal(actor.role,'admin');const items=['uncertain','failed'].includes(notification.status)?[notification]:[];
+    assert.equal(actor.role,'admin');
+    if(failNextNotificationList){
+      failNextNotificationList=false;
+      throw Object.assign(new Error('Synthetic admin-only outbox outage'),{code:'TEMPORARY_UNAVAILABLE'});
+    }
+    const items=['uncertain','failed'].includes(notification.status)?[notification]:[];
     return {items,total:items.length,page};
   },
   async resolveNotification(actor,id,{action,expectedStatus,expectedAttempt,confirmed}){
@@ -135,7 +140,7 @@ async function layout(page,label){
   assert.ok(sizes.width<=expected+1,label+' layout viewport incorrectly expanded: '+JSON.stringify(sizes));
 }
 async function loginAndReview(context,label){
-  notification=makeNotification();clockOffset=0;
+  notification=makeNotification();clockOffset=0;failNextNotificationList=false;
   const page=await context.newPage();
   const exceptions=[];
   page.on('pageerror',error=>exceptions.push(error.message));
@@ -153,6 +158,25 @@ async function loginAndReview(context,label){
   await expect(page.locator('#dashboardView')).toBeVisible();
   await expect(page.locator('#statTotal')).toHaveText('2');
   await expect(page.locator('#statMail')).toHaveText('1');
+  await expect(page.locator('#mailMetric')).toBeVisible();
+  await expect(page.locator('#mailIncidentAlert')).toBeVisible();
+  await expect(page.locator('#mailIncidentTitle')).toContainText('1 mailmelding');
+  await expect(page.locator('#mailIncidentDescription')).toContainText('1 onzeker');
+  await page.locator('#openMailIncidents').click();
+  await expect(page.locator('#outboxPanel')).toBeVisible();
+  await expect(page.locator('#outboxTitle')).toBeFocused();
+  await page.locator('#leadsTab').click();
+  if(label==='desktop'){
+    // A failed admin-only list does not erase a verified incident summary.
+    failNextNotificationList=true;
+    await page.locator('#refreshButton').click();
+    await expect(page.locator('#dashboardMessage')).toContainText('Niet alle Beheer-gegevens');
+    await expect(page.locator('#mailIncidentAlert')).toBeVisible();
+    await expect(page.locator('#outboxMessage')).toContainText('tijdelijk niet bereikbaar');
+    assert.equal(notificationChanges,0,'Refreshing never sends or confirms mail');
+    await page.locator('#refreshButton').click();
+    await expect(page.locator('#dashboardMessage')).toBeEmpty();
+  }
   await page.evaluate(async()=>document.fonts.ready);
   await accessibility(page,label+'/dashboard');
   await layout(page,label+'/dashboard');
@@ -251,6 +275,8 @@ async function loginAndReview(context,label){
   await page.locator('#resolveButton').click();
   await expect(page.locator('#mailDialog')).not.toBeVisible();
   await expect(page.locator('.outbox-item')).toHaveCount(0);
+  await expect(page.locator('#mailIncidentAlert')).toBeHidden();
+  await expect(page.locator('#statMail')).toHaveText('0');
   assert.equal(notification.status,label==='desktop'?'confirmed':'pending');
   await page.locator('#leadsTab').click();
   if(label==='mobile'){
@@ -292,6 +318,8 @@ async function loginAndReview(context,label){
   if(deferredList){releaseList();deferredList=null;await page.waitForTimeout(75);}
   await expect(page.locator('#leadRows')).toBeEmpty();
   await expect(page.locator('#outboxItems')).toBeEmpty();
+  await expect(page.locator('#mailIncidentAlert')).toBeHidden();
+  await expect(page.locator('#mailIncidentTitle')).toBeEmpty();
   await expect(page.locator('#dueItems')).toBeEmpty();
   await expect(page.locator('#kpiDays')).toBeEmpty();
   await expect(page.locator('#currentUser')).toHaveText('Beheerder');
@@ -312,6 +340,8 @@ async function checkSalesAndExpiry(){
   await expect(page.locator('#dashboardView')).toBeVisible();
   await expect(page.locator('#workbenchViews')).toBeVisible();
   await expect(page.locator('#outboxTab')).not.toBeVisible();
+  await expect(page.locator('#mailMetric')).not.toBeVisible();
+  await expect(page.locator('#mailIncidentAlert')).not.toBeVisible();
   await page.locator('#followupsTab').click();
   await expect(page.locator('.due-item')).toHaveCount(1);
   await expect(page.locator('#dueCount')).toHaveText('1');
@@ -343,7 +373,7 @@ try{
   const mobile=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:'nl-NL',isMobile:true,hasTouch:true});
   await loginAndReview(mobile,'mobile');
   await checkSalesAndExpiry();
-  console.log('PASS desktop/mobile Beheer including due tasks, real aggregate KPIs, privacy export/deletion, sales isolation, keyboard, logout and WCAG A/AA');
+  console.log('PASS desktop/mobile Beheer with admin-only mail incident triage, safe list failures, sales isolation, due tasks, KPI, privacy, keyboard and logout');
 } finally {
   // Always release intentionally delayed responses, even if an assertion
   // fails, so CI reports the actual failure instead of timing out in close().
