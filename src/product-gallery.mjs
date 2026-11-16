@@ -1,5 +1,5 @@
 /**
- * HYXI AURA Hero V4 — GSAP inertial three-angle showroom, NOT a 360° model.
+ * HYXI AURA Hero V5 — direct spatial zones with GSAP-eased micro orbit, NOT a 360° model.
  * Official photos and mathematically calibrated V3 silhouette bounds unchanged.
  * GSAP core is pinned and served locally; no third-party runtime requests.
  * No PII, analytics, cookies or lead API interactions.
@@ -11,7 +11,6 @@ if (gallery) {
   const pivot = gallery.querySelector('#hero-product-pivot');
   const halo = gallery.querySelector('.aura-halo');
   const plinth = gallery.querySelector('.product-plinth');
-  const controls = gallery.querySelector('.hero-view-switcher');
   const caption = gallery.querySelector('#hero-image-caption');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const gsap = window.gsap?.quickTo && window.gsap?.timeline ? window.gsap : null;
@@ -35,7 +34,6 @@ if (gallery) {
   });
 
   const order = ['side', 'front', 'angle'];
-  const buttons = [...controls.querySelectorAll('[data-aura-view]')];
   const photoCache = new Map([['front', Promise.resolve(stage.querySelector('#hero-product-image'))]]);
   let active = 'front';
   let desired = 'front';
@@ -46,7 +44,18 @@ if (gallery) {
   let manualHold = false;
   const orbit = { yaw: 0 };
 
+  // Without JavaScript the original official front product remains a static image.
+  // With JavaScript the image itself becomes an accessible three-position control.
   stage.dataset.activeView = active;
+  stage.dataset.activeZone = 'center';
+  stage.setAttribute('role', 'slider');
+  stage.tabIndex = 0;
+  stage.setAttribute('aria-label', 'HYXI AURA kijkhoek');
+  stage.setAttribute('aria-describedby', 'aura-viewer-help');
+  stage.setAttribute('aria-valuemin', '0');
+  stage.setAttribute('aria-valuemax', '2');
+  stage.setAttribute('aria-valuenow', '1');
+  stage.setAttribute('aria-valuetext', 'Vooraanzicht');
   if (gsap) stage.dataset.gsapReady = 'true';
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -86,11 +95,10 @@ if (gallery) {
     active = view;
     desired = view;
     stage.dataset.activeView = view;
-    stage.setAttribute('aria-label', 'HYXI AURA · ' + views[view].caption);
+    stage.dataset.activeZone = view === 'side' ? 'left' : view === 'angle' ? 'right' : 'center';
+    stage.setAttribute('aria-valuenow', String(order.indexOf(view)));
+    stage.setAttribute('aria-valuetext', view === 'side' ? 'Linkerhoek' : view === 'angle' ? 'Rechterhoek' : 'Vooraanzicht');
     caption.textContent = views[view].caption;
-    for (const button of buttons) {
-      button.setAttribute('aria-pressed', String(button.dataset.auraView === view));
-    }
     for (const photo of pivot.querySelectorAll('.hero-product')) {
       const selected = photo === image;
       photo.classList.toggle('is-active', selected);
@@ -161,13 +169,33 @@ if (gallery) {
       .to(incoming, { opacity: 1, duration: 0.24, ease: 'sine.out' }, 0);
   }
 
-  // Prevent flicker when the pointer hovers near a view boundary.
-  function chooseView(position) {
-    if (desired === 'side' && position < -0.29) return 'side';
-    if (desired === 'angle' && position > 0.29) return 'angle';
-    if (position < -0.56) return 'side';
-    if (position > 0.56) return 'angle';
+  // Three real viewing zones are measured against the *visible front battery*,
+  // not the much wider stage or manufacturer source canvas's transparent margins.
+  // The middle strip is 32% of visible battery width: neither a 1px threshold
+  // nor an accidental jump through the front view.
+  const MIDDLE_START = 0.34;
+  const MIDDLE_END = 0.66;
+  const HYSTERESIS = 0.025;
+
+  function normalizedProductX(clientX) {
+    const bounds = stage.getBoundingClientRect();
+    const height = parseFloat(getComputedStyle(gallery).getPropertyValue('--aura-body-height'));
+    const bodyWidth = Math.min(bounds.width, (Number.isFinite(height) && height > 0 ? height : bounds.height - 5) * 699 / 1000);
+    if (!bodyWidth) return 0.5;
+    return clamp((clientX - bounds.left - (bounds.width - bodyWidth) / 2) / bodyWidth, 0, 1);
+  }
+
+  function viewFromProductX(value, previous = desired) {
+    // 2.5% hysteresis around the two boundaries prevents rapid image flicker.
+    if (previous === 'side' && value < MIDDLE_START + HYSTERESIS) return 'side';
+    if (previous === 'angle' && value > MIDDLE_END - HYSTERESIS) return 'angle';
+    if (value < MIDDLE_START - HYSTERESIS) return 'side';
+    if (value > MIDDLE_END + HYSTERESIS) return 'angle';
     return 'front';
+  }
+
+  function viewOnTap(value) {
+    return value < MIDDLE_START ? 'side' : value > MIDDLE_END ? 'angle' : 'front';
   }
 
   function renderOrbit() {
@@ -178,10 +206,8 @@ if (gallery) {
     gsap.set(halo, { x: -v * 12 });
     gsap.set(plinth, { x: v * 5 });
     stage.dataset.orbitPose = v.toFixed(3); // inspectable non-identifying QA state
-    if (!manualHold) {
-      const view = chooseView(v);
-      if (view !== desired) void show(view);
-    }
+    // The photo is selected from the CURRENT pointer zone, not from the
+    // eased orbit value. The GSAP pose controls only restrained micro-parallax.
   }
 
   // GSAP quickTo reuses one optimized tween for hundreds of pointer samples.
@@ -194,17 +220,19 @@ if (gallery) {
     if (orbitTo && !reduced.matches) orbitTo(0);
   }
 
-  for (const button of buttons) {
-    button.addEventListener('click', () => {
-      manualHold = true;
-      resetOrbit();
-      void show(button.dataset.auraView);
-    });
-    button.addEventListener('focus', () => {
-      void loadPhoto(button.dataset.auraView).catch(() => {});
-    });
-  }
-  controls.hidden = false;
+  // The on-product stage replaces the old floating control box entirely.
+  stage.addEventListener('focus', prefetch);
+  stage.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    manualHold = true;
+    resetOrbit();
+    const index = order.indexOf(desired);
+    const next = event.key === 'Home' ? 0 :
+      event.key === 'End' ? 2 :
+      clamp(index + (event.key === 'ArrowLeft' ? -1 : 1), 0, 2);
+    void show(order[next]);
+  });
 
   gallery.addEventListener('pointerenter', event => {
     if (event.pointerType !== 'mouse' || reduced.matches) return;
@@ -214,27 +242,34 @@ if (gallery) {
   }, { passive: true });
 
   gallery.addEventListener('pointermove', event => {
-    if (event.pointerType !== 'mouse' || reduced.matches || !orbitTo) return;
-    if (event.target.closest('.hero-view-switcher')) return;
+    if (event.pointerType !== 'mouse' || reduced.matches) return;
     const bounds = stage.getBoundingClientRect();
     if (!bounds.width || event.clientX < bounds.left || event.clientX > bounds.right ||
         event.clientY < bounds.top || event.clientY > bounds.bottom) return;
     manualHold = false;
     returnTimer?.kill();
     returnTimer = null;
-    const ratio = (event.clientX - bounds.left) / bounds.width;
-    orbitTo(clamp((ratio - 0.5) * 2.25, -1, 1));
+    const ratio = normalizedProductX(event.clientX);
+    const next = viewFromProductX(ratio);
+    if (next !== desired) void show(next);
+    if (orbitTo) orbitTo(clamp((ratio - 0.5) * 2.0, -1, 1));
   }, { passive: true });
 
   gallery.addEventListener('pointerleave', event => {
-    if (event.pointerType !== 'mouse' || reduced.matches || !gsap || manualHold) return;
-    returnTimer?.kill();
-    returnTimer = gsap.delayedCall(0.14, resetOrbit);
+    if (event.pointerType !== 'mouse' || reduced.matches || manualHold) return;
+    returnTimer?.kill?.();
+    resetOrbit();
+    // Outside the product the default is the front view again. On touch or
+    // keyboard the explicitly chosen view stays until the next interaction.
+    returnTimer = gsap
+      ? gsap.delayedCall(0.24, () => { void show('front'); })
+      : { kill: () => clearTimeout(returnTimer.timer),
+          timer: setTimeout(() => { void show('front'); }, 240) };
   }, { passive: true });
 
   // Passive touch handling: horizontal swipe only; vertical scrolling is untouched.
   gallery.addEventListener('touchstart', event => {
-    if (event.touches.length !== 1 || event.target.closest('.hero-view-switcher')) return;
+    if (event.touches.length !== 1) return;
     const point = event.touches[0];
     const bounds = stage.getBoundingClientRect();
     if (point.clientX < bounds.left || point.clientX > bounds.right ||
@@ -248,11 +283,18 @@ if (gallery) {
     const dx = event.changedTouches[0].clientX - touchStart.x;
     const dy = event.changedTouches[0].clientY - touchStart.y;
     touchStart = null;
-    if (Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    // Vertical movements are native scrolling, never a photo change.
+    if (Math.abs(dy) > Math.abs(dx) * 0.8 && Math.abs(dy) > 14) return;
     manualHold = true;
     resetOrbit();
-    const next = clamp(order.indexOf(desired) + (dx < 0 ? 1 : -1), 0, 2);
-    void show(order[next]);
+    if (Math.abs(dx) >= 42 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      const next = clamp(order.indexOf(desired) + (dx < 0 ? 1 : -1), 0, 2);
+      void show(order[next]);
+    } else if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+      // A tap on left/center/right maps to the same visible battery zones.
+      const next = viewOnTap(normalizedProductX(event.changedTouches[0].clientX));
+      void show(next);
+    }
   }, { passive: true });
 
   gallery.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
