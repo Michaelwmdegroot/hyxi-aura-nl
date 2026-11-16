@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4ee">
+  <title>HYXI AURA capaciteit: BAT-Q7 en Q9 vergelijken</title>
+  <meta name="description" content="Vergelijk de nominale en bruikbare HYXI AURA batterijcapaciteit voor BAT-Q7 en BAT-Q9, van één tot zes modules. Met overzicht, rekenhulp en officiële bronnen.">
+  <link rel="canonical" href="https://hyxi-aura.nl/capaciteit/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/images/aura-front.webp" as="image" fetchpriority="high">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="nl_NL">
+  <meta property="og:site_name" content="HYXI AURA · Thuisbatterij Team">
+  <meta property="og:title" content="Hoeveel kWh heeft jouw HYXI AURA? BAT-Q7 vs. BAT-Q9">
+  <meta property="og:description" content="Nominaal is niet hetzelfde als bruikbaar. Vergelijk de batterijmodules en stel vrijblijvend een configuratie samen.">
+  <meta property="og:url" content="https://hyxi-aura.nl/capaciteit/">
+  <meta property="og:image" content="https://hyxi-aura.nl/images/og-aura.jpg">
+  <link rel="stylesheet" href="/offerte/offerte.css">
+  <link rel="stylesheet" href="/capaciteit/capaciteit.css">
+  <script type="module" src="/capaciteit/capaciteit.mjs"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"HYXI AURA batterijcapaciteit vergelijken","url":"https://hyxi-aura.nl/capaciteit/","inLanguage":"nl-NL","isPartOf":{"@id":"https://hyxi-aura.nl/#website"},"about":{"@type":"Thing","name":"HYXI AURA BAT-Q7 en BAT-Q9 batterijmodules"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"HYXI AURA","item":"https://hyxi-aura.nl/"},{"@type":"ListItem","position":2,"name":"Capaciteit vergelijken","item":"https://hyxi-aura.nl/capaciteit/"}]}]}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Direct naar inhoud</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="HYXI AURA — naar de homepage"><span class="brand-icon" aria-hidden="true"></span> HYXI <span class="light">AURA</span></a>
+    <nav aria-label="Hoofdnavigatie"><a href="/">De productervaring</a><a href="/bronnen/">Officiële bronnen</a></nav>
+    <a class="top-cta" href="/offerte/">Offerte aanvragen <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main">
+    <div class="page-head capacity-head">
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span> PRAKTISCHE UITLEG · HYXI AURA</span>
+      <h1>Hoeveel opslag?<br><em>Maak de kWh begrijpelijk.</em></h1>
+      <p>Een batterij van 9 kWh heeft niet automatisch 9 kWh beschikbaar voor je apparaten. Bekijk het verschil tussen nominale en bruikbare opslag bij de BAT-Q7 en BAT-Q9, voordat je een samenstelling kiest.</p>
+      <a class="jump" href="#samenstellen">Vergelijk jouw samenstelling <span aria-hidden="true">↓</span></a>
+    </div>
+    <section id="samenstellen" class="capacity-grid" aria-labelledby="chooseTitle">
+      <div class="capacity-display">
+        <div class="capacity-visual">
+          <div class="capacity-orbit" aria-hidden="true"></div>
+          <img src="/images/aura-front.webp" width="699" height="1000" alt="Officieel productbeeld van de modulaire HYXI AURA thuisbatterij" fetchpriority="high">
+          <span class="capacity-caption">HYXI AURA · officieel productbeeld</span>
+        </div>
+        <p>Een grotere batterij is niet altijd een betere keuze. Kijk eerst naar het overschot van je zonnepanelen, je avondverbruik en de functies die je werkelijk wilt gebruiken.</p>
+      </div>
+      <div class="capacity-calculator" aria-labelledby="chooseTitle">
+        <span class="eyebrow">01 / ZELF VERGELIJKEN</span>
+        <h2 id="chooseTitle">Van één module<br>tot een complete stack.</h2>
+        <p class="capacity-lead">Vul alleen je gewenste module en aantal in. We slaan geen keuzes of persoonsgegevens op; alleen als je zelf een offerte aanvraagt, gaan je gekozen modules mee.</p>
+        <div class="capacity-inputs">
+          <div class="field">
+            <label for="capacityType">Kies batterijmodule</label>
+            <select id="capacityType" aria-describedby="capacitySource">
+              <option value="7">BAT-Q7 · 7,03 kWh nominaal</option>
+              <option value="9" selected>BAT-Q9 · 9,04 kWh nominaal</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="capacityCount">Aantal modules <output id="capacityCountLabel" for="capacityCount">2</output></label>
+            <input id="capacityCount" type="range" min="1" max="6" step="1" value="2" aria-describedby="capacityRangeHint">
+            <p id="capacityRangeHint" class="capacity-hint">Eén tot maximaal zes modules per controller volgens de voorlopige fabrikantdatasheet.</p>
+          </div>
+        </div>
+        <div class="capacity-results" aria-live="polite" aria-atomic="true">
+          <span class="result-label" id="capacitySelection">2 × BAT-Q9</span>
+          <div class="capacity-result-grid">
+            <div><small>Totale nominale opslag</small><strong><output id="capacityNominal">18,08</output> <span>kWh</span></strong></div>
+            <div><small>Bruikbare opslag volgens datasheet</small><strong><output id="capacityUsable">17,2</output> <span>kWh</span></strong></div>
+          </div>
+        </div>
+        <p id="capacitySource" class="capacity-hint">Berekening: modules × nominale of bruikbare capaciteit per module. Bij de woning spelen omzettingsverliezen, instellingen en eventuele back-upreserve mee. Dit is geen verbruiksanalyse of installatieadvies.</p>
+        <a id="capacityQuoteLink" class="submit capacity-quote" href="/offerte/?moduleType=9&amp;moduleCount=2">Vraag een voorstel voor deze opstelling <span aria-hidden="true">→</span></a>
+        <p class="smallprint">Vrijblijvend. Thuisbatterij Team beoordeelt de werkelijke technische geschiktheid, beschikbaarheid en actuele prijs.</p>
+      </div>
+    </section>
+    <section class="capacity-section" aria-labelledby="tableTitle">
+      <span class="eyebrow">02 / ALLE SAMENSTELLINGEN</span>
+      <h2 id="tableTitle">De getallen naast elkaar.</h2>
+      <p>Dit zijn rekenkundige totalen per serie van één tot zes modules. De uiteindelijke bruikbare energie op je aansluiting kan afwijken door systeeminstellingen, reserve en omzettingsverliezen. Het nominale modulevermogen is bovendien niet hetzelfde als het leverbare systeemvermogen.</p>
+      <div class="capacity-table-scroller" role="region" tabindex="0" aria-label="Vergelijking van twaalf HYXI AURA samenstellingen, horizontaal scrollbaar">
+        <table class="capacity-table">
+          <caption>HYXI AURA BAT-Q7 en BAT-Q9 volgens datasheet V2.1 van 26 oktober 2026 (voorlopig)</caption>
+          <thead><tr><th scope="col">Samenstelling</th><th scope="col">Nominaal (kWh)</th><th scope="col">Bruikbaar (kWh)</th><th scope="col">Modulevermogen* (kW)</th></tr></thead>
+          <tbody>
+<!-- CAPACITY_TABLE_START -->
+<!-- CAPACITY_TABLE_END -->
+          </tbody>
+        </table>
+      </div>
+      <p class="capacity-footnote">* Rekenkundige som van het modulevermogen, niet het gegarandeerde AC-vermogen van de hele installatie. De omvormer en installatie begrenzen het systeem. <a href="/bronnen/">Bekijk de officiële datasheets en toelichting.</a></p>
+    </section>
+    <section class="capacity-section" aria-labelledby="explainTitle">
+      <span class="eyebrow">03 / WAT BETEKENT HET?</span>
+      <h2 id="explainTitle">Drie getallen. Drie verschillende vragen.</h2>
+      <div class="capacity-explain-grid">
+        <article><span class="capacity-index">01</span><h3>Nominale capaciteit</h3><p>De totale energie-inhoud van de opgegeven modules. Dit getal wordt vaak gebruikt om een batterij aan te duiden, maar is niet hetzelfde als de energie die je uiteindelijk kunt gebruiken.</p></article>
+        <article><span class="capacity-index">02</span><h3>Bruikbare capaciteit</h3><p>Het gedeelte dat volgens de fabrikant onder de gespecificeerde voorwaarden beschikbaar is. Dit is vóór eventuele extra omzettingsverliezen of een ingestelde reserve voor noodstroom.</p></article>
+        <article><span class="capacity-index">03</span><h3>Laad- en ontlaadvermogen</h3><p>De snelheid waarmee energie kan worden geladen of geleverd, uitgedrukt in kW. De beschikbare prestatie hangt ook af van de controller, omvormer en elektrische aansluiting van je woning.</p></article>
+      </div>
+    </section>
+    <section class="capacity-section capacity-questions" aria-labelledby="questionsTitle">
+      <span class="eyebrow">04 / VEELGESTELDE VRAGEN</span>
+      <h2 id="questionsTitle">Welke capaciteit past bij mij?</h2>
+      <details><summary>Is één BAT-Q9 beter dan één BAT-Q7?</summary><p>Dat hangt af van je doel. De BAT-Q9 heeft meer nominale én bruikbare opslag, maar meer kWh is niet automatisch de voordeligste of passendste keuze. Een adviseur kijkt naar je verbruik, opwek, netaansluiting en de gewenste functies.</p></details>
+      <details><summary>Kan ik de batterij later uitbreiden?</summary><p>De fabrikant beschrijft een modulair systeem met één tot zes batterijmodules en de mogelijkheid om 7- en 9-kWh-modules te combineren. Controleer vóór uitbreiding de compatibiliteit, veiligheidsvoorwaarden en leverbaarheid van jouw specifieke systeem.</p></details>
+      <details><summary>Hoe lang geeft een batterij stroom bij een storing?</summary><p>Dat is niet rechtstreeks af te leiden uit alleen het aantal kWh. Het hangt onder meer af van de geladen hoeveelheid, de stroomvraag, de aangesloten back-upgroepen, systeemverliezen en de ingestelde reserve. Er is daarom geen vaste noodstroomduur op deze pagina berekend.</p></details>
+      <p class="capacity-footnote">Bronnen: <a href="/downloads/hyxi-aura-1-fase-datasheet.pdf" target="_blank" rel="noopener">1-fase datasheet V2.1</a>, <a href="/downloads/hyxi-aura-3-fasen-datasheet.pdf" target="_blank" rel="noopener">3-fasen datasheet V2.1</a> en de <a href="/bronnen/">bronverantwoording</a>. De datasheets zijn voorlopig en worden bij een voorstel opnieuw bevestigd.</p>
+    </section>
+    <section class="capacity-contact" aria-labelledby="contactTitle">
+      <span class="eyebrow">PERSOONLIJKE VOLGENDE STAP</span>
+      <h2 id="contactTitle">Niet zomaar meer kWh.<br>Wel een passende keuze.</h2>
+      <p>Wij vergelijken jouw elektriciteitsverbruik, zonnepanelen, aansluiting en gewenste back-upfunctie. Daarna ontvang je een persoonlijk voorstel met gecontroleerde specificaties en voorwaarden.</p>
+      <div class="capacity-contact-actions"><a href="/offerte/" class="submit">Vraag een vrijblijvende HYXI AURA-offerte aan <span aria-hidden="true">→</span></a><a href="/" class="capacity-text-link">Terug naar de productervaring</a></div>
+    </section>
+  </main>
+  <footer><span>HYXI AURA · NIVO Groep Holland B.V. / Thuisbatterij Team. Geen officiële HYXI-fabrikantwebsite.</span><div><a href="/">Productervaring</a><a href="/offerte/">Offerte</a><a href="/bronnen/">Bronnen</a><a href="/privacy/">Privacy</a></div></footer>
+</body>
+</html>
