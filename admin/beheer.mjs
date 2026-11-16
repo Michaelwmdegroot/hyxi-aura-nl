@@ -87,6 +87,8 @@ function showLogin(text=''){
   closeMailReview();outboxPage=1;setView('leads');
   $('leadRows').replaceChildren();lastItems=[];
   $('outboxItems').replaceChildren();$('mailCount').textContent='0';
+  $('dueItems').replaceChildren();$('dueCount').textContent='0';$('dueCount').hidden=true;
+  $('dueSummary').textContent='';$('dueLimitWarning').hidden=true;
   $('workbenchViews').hidden=true;
   $('currentUser').textContent='Beheerder';$('currentRole').textContent='Beheer';
   $('password').value='';$('statusFilter').value='';$('requestSearch').value='';currentSearch='';
@@ -103,15 +105,19 @@ function showDashboard(user){
   $('loginView').hidden=true;$('dashboardView').hidden=false;
   $('currentUser').textContent=user.email||'Beheerder';
   $('currentRole').textContent=user.role==='admin'?'Beheerder':'Sales';
-  $('workbenchViews').hidden=user.role!=='admin';
+  $('workbenchViews').hidden=false;
+  $('outboxTab').hidden=user.role!=='admin';
   if(user.role!=='admin')setView('leads');
 }
 function setView(name){
-  activeView=name==='outbox'&&currentUser?.role==='admin'?'outbox':'leads';
-  $('leadsPanel').hidden=activeView!=='leads';$('outboxPanel').hidden=activeView!=='outbox';
+  activeView=name==='outbox'&&currentUser?.role==='admin'?'outbox':name==='followups'?'followups':'leads';
+  $('leadsPanel').hidden=activeView!=='leads';
+  $('followupsPanel').hidden=activeView!=='followups';
+  $('outboxPanel').hidden=activeView!=='outbox';
   $('leadsTab').setAttribute('aria-pressed',String(activeView==='leads'));
+  $('followupsTab').setAttribute('aria-pressed',String(activeView==='followups'));
   $('outboxTab').setAttribute('aria-pressed',String(activeView==='outbox'));
-  $('dashboardTitle').textContent=activeView==='outbox'?'Mailcontrole':'Aanvragen';
+  $('dashboardTitle').textContent=activeView==='outbox'?'Mailcontrole':activeView==='followups'?'Vervolgacties':'Aanvragen';
 }
 async function enterDashboard(user){
   showDashboard(user);
@@ -132,6 +138,7 @@ async function refreshAll(){
   try{
     const data=await Promise.all([api('/summary'),loadLeads(version),
       currentUser?.role==='admin'?loadNotifications(version):Promise.resolve(),
+      activeView==='followups'?loadDueFollowups(version):Promise.resolve(),
     ]);
     if(version!==refreshVersion||!currentUser)return;
     const s=data[0];$('statTotal').textContent=String(s.total);
@@ -171,6 +178,49 @@ async function loadLeads(version=refreshVersion){
   $('prevPage').disabled=currentPage===1;$('nextPage').disabled=lastItems.length<20;
   return data;
 }
+function formatDueDate(value){
+  if(!/^20\\d{2}-\\d{2}-\\d{2}$/.test(value||''))return 'Geen datum';
+  return new Intl.DateTimeFormat('nl-NL',{timeZone:'UTC',day:'numeric',month:'short',year:'numeric'})
+    .format(new Date(value+'T00:00:00Z'));
+}
+async function loadDueFollowups(version=refreshVersion){
+  $('dueSummary').textContent='Vervolgacties laden…';
+  const data=await api('/followups');
+  if(version!==refreshVersion||!currentUser||activeView!=='followups')return data;
+  $('dueItems').replaceChildren();
+  const count=data.overdue+data.todayCount;
+  $('dueCount').textContent=String(count);
+  $('dueCount').hidden=count===0;
+  const totals=data.overdue+' verlopen · '+data.todayCount+' voor vandaag';
+  $('dueSummary').textContent=count?totals:'Geen vervolgacties die vandaag of eerder gepland staan.';
+  $('dueLimitWarning').hidden=!data.limited;
+  for(const item of data.items){
+    const article=document.createElement('article');article.className='due-item';
+    const content=document.createElement('div');content.className='due-copy';
+    const head=document.createElement('div');head.className='due-item-head';
+    const status=document.createElement('span');
+    status.className='tag '+(item.priority==='overdue'?'failed':'contact_planned');
+    status.textContent=item.priority==='overdue'?'Verlopen':'Vandaag';
+    const time=document.createElement('time');
+    time.dateTime=item.dueDate;time.textContent=formatDueDate(item.dueDate);
+    head.append(status,time);
+    const title=document.createElement('strong');title.className='due-item-id';title.textContent=item.requestId;
+    const action=document.createElement('p');
+    action.textContent=item.nextAction||'Vervolgactie zonder omschrijving';
+    content.append(head,title,action);
+    const open=document.createElement('button');open.className='secondary small due-open';open.type='button';
+    open.textContent='Open dossier';open.setAttribute('aria-label','Bekijk vervolgactie '+item.requestId);
+    open.addEventListener('click',()=>openDetail(item.requestId));
+    article.append(content,open);$('dueItems').append(article);
+  }
+  if(count>data.items.length){
+    const extra=document.createElement('p');extra.className='due-warning';
+    extra.textContent='Toont de eerste '+data.items.length+' van '+count+' acties; voor de volledige werkvoorraad is een geïndexeerd overzicht nodig.';
+    $('dueItems').append(extra);
+  }
+  return data;
+}
+
 async function loadNotifications(version=refreshVersion){
   message('outboxMessage','Mailnotificaties laden…');
   const data=await api('/outbox?page='+outboxPage);
@@ -342,6 +392,7 @@ $('logoutButton').addEventListener('click',async()=>{
 });
 $('refreshButton').addEventListener('click',refreshAll);
 $('leadsTab').addEventListener('click',()=>setView('leads'));
+$('followupsTab').addEventListener('click',()=>{setView('followups');refreshAll();});
 $('outboxTab').addEventListener('click',()=>setView('outbox'));
 $('outboxPrev').addEventListener('click',()=>{if(outboxPage>1){outboxPage--;refreshAll();}});
 $('outboxNext').addEventListener('click',()=>{outboxPage++;refreshAll();});
