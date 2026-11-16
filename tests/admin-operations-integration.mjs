@@ -8,6 +8,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { createLeadPool } from '../server/db/pool.mjs';
 import { createMysqlLeadStore } from '../server/db/store.mjs';
 import { createAdminStore } from '../server/auth/store.mjs';
+import { todayInAmsterdam } from '../server/auth/due-followups.mjs';
 import { createApp } from '../server/app.mjs';
 import { loadConfig } from '../server/config.mjs';
 import { hashAdminPassword } from '../server/auth/security.mjs';
@@ -168,7 +169,17 @@ try {
   await once(server, 'listening');
   const base = 'http://127.0.0.1:' + server.address().port;
   assert.equal((await fetch(base + '/api/beheer/outbox')).status, 401);
+  assert.equal((await fetch(base + '/api/beheer/followups')).status,401);
   const salesHeaders = await login(base, sales), adminHeaders = await login(base, admin);
+  await store.updateFollowup(admin,lead.requestId,{nextAction:'Bel vandaag',dueDate:todayInAmsterdam(),note:''});
+  const adminDueResponse=await fetch(base+'/api/beheer/followups',{headers:adminHeaders});
+  assert.equal(adminDueResponse.status,200);
+  assert.equal(adminDueResponse.headers.get('cache-control'),'no-store');
+  const adminDue=await adminDueResponse.json();
+  assert.ok(adminDue.items.some(item=>item.requestId===lead.requestId));
+  const salesDue=await (await fetch(base+'/api/beheer/followups',{headers:salesHeaders})).json();
+  assert.ok(!salesDue.items.some(item=>item.requestId===lead.requestId));
+
   assert.equal((await fetch(base + '/api/beheer/outbox', { headers: salesHeaders })).status, 403);
   assert.equal((await fetch(base + '/api/beheer/assignees', { headers: salesHeaders })).status, 403);
   const privacyUrl=base+'/api/beheer/leads/'+other.requestId;
