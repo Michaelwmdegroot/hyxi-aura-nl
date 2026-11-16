@@ -44,7 +44,7 @@ try {
       await expect(page.locator('h1')).toHaveCount(1);
       await expect(page.locator('main article')).toHaveCount(1);
       await expect(page.locator('a[href="/offerte/"]').first()).toBeVisible();
-      await expect(page.locator('a[href="/#samenstellen"]').first()).toBeVisible();
+      await expect(page.locator('.hero-actions a[href="/#samenstellen"]')).toBeVisible();
       const photo = page.locator('.product-stage img');
       await expect.poll(() => photo.evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
       const sizes = await page.evaluate(() => ({innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth}));
