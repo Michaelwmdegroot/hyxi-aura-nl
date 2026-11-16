@@ -91,7 +91,9 @@ try {
     assert.ok(Math.abs(verb.y - product.y) < 4, 'Presenter words must be on the same baseline at ' + width);
     assert.ok(subtitle.x >= owner.x - 2 && subtitle.x + subtitle.width <= owner.x + owner.width + 2,
       'Presenter subline must fit within TBT brand width at ' + width);
-    await expect(page.locator('.hero-view-switcher')).toBeVisible();
+    await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
+    await expect(page.locator('.hero-view-instruction')).toHaveCount(0);
+    await expect(page.locator('#hero-product-stage')).toHaveAttribute('role','slider');
     const brand=await page.locator('.site-header .presenter-brand').boundingBox();
     const cta=await page.locator('.site-header>.button').boundingBox();
     assert.ok(brand.x+brand.width<=cta.x+1,'header brand/CTA overlap at '+width);
@@ -100,13 +102,16 @@ try {
     assert.equal(initial.loaded,true);
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:resolve(screenshots,'phase5-hero-'+width+'-page.png')});
-    for(const [name,source] of [
-      ['side','/images/aura-side.webp'],['front','/images/aura-front.webp'],['angle','/images/aura-angle.webp']
+    const stage=page.locator('#hero-product-stage');
+    await stage.focus();
+    for(const [key,name,source,ordinal] of [
+      ['Home','side','/images/aura-side.webp','0'],
+      ['ArrowRight','front','/images/aura-front.webp','1'],
+      ['End','angle','/images/aura-angle.webp','2']
     ]){
-      const button=page.locator('[data-aura-view="'+name+'"]');
-      await button.click();
-      await expect(button).toHaveAttribute('aria-pressed','true');
-      await expect(page.locator('#hero-product-stage')).toHaveAttribute('data-active-view',name);
+      await stage.press(key);
+      await expect(stage).toHaveAttribute('data-active-view',name);
+      await expect(stage).toHaveAttribute('aria-valuenow',ordinal);
       const image=page.locator('#hero-product-image');
       await expect(image).toHaveAttribute('src',source);
       await expect(image).toHaveAttribute('alt',/HYXI AURA/);
@@ -134,10 +139,12 @@ try {
     await expect(stage).toHaveAttribute('data-gsap-ready','true');
     await stage.scrollIntoViewIfNeeded();
     const box=await stage.boundingBox();
-    // GSAP quickTo must animate through a range, not teleport between three
-    // images as the original sector-based hover listener did.
-    await page.mouse.move(box.x + box.width*.5, box.y + box.height*.5);
-    await page.mouse.move(box.x + box.width*.91, box.y + box.height*.5);
+    // Zones are measured against the visible FRONT silhouette, not the stage.
+    const bodyHeight=await stage.evaluate(el=>Number.parseFloat(getComputedStyle(el.parentElement).getPropertyValue('--aura-body-height')));
+    const bodyWidth=bodyHeight*.699,bodyLeft=box.x+(box.width-bodyWidth)/2;
+    const moveTo=async u=>page.mouse.move(bodyLeft+bodyWidth*u,box.y+box.height*.5,{steps:5});
+    await moveTo(.50);
+    await moveTo(.90);
     await page.waitForTimeout(55);
     const inFlight=Number(await stage.getAttribute('data-orbit-pose'));
     assert.ok(inFlight > .015 && inFlight < .99, 'GSAP orbit should be mid-animation, was ' + inFlight);
@@ -146,8 +153,8 @@ try {
     assert.ok(poseAfter > inFlight, 'Orbit must keep easing after initial pointer event');
     const transformed=await page.locator('#hero-product-pivot').evaluate(node=>getComputedStyle(node).transform);
     assert.match(transformed,/^matrix3d\(/, 'Visible HYXI photo pivot should use subtle CSS perspective');
-    for(const [ratio,view] of [[.12,'side'],[.50,'front'],[.88,'angle']]){
-      await page.mouse.move(box.x+box.width*ratio,box.y+box.height*.5,{steps:5});
+    for(const [ratio,view] of [[.10,'side'],[.40,'front'],[.60,'front'],[.90,'angle'],[.50,'front']]){
+      await moveTo(ratio);
       await expect(stage).toHaveAttribute('data-active-view',view,{timeout:12000});
       // The last frame of a completed GSAP dissolve must have exactly one
       // visible photo (avoid persistent double-exposure).
@@ -157,11 +164,13 @@ try {
     }
     // A fast reversal must always finish at the *latest* requested angle,
     // not a stale image resolved by an earlier load/tween.
-    await page.mouse.move(box.x+box.width*.1,box.y+box.height*.5);
-    await page.mouse.move(box.x+box.width*.9,box.y+box.height*.5);
+    await moveTo(.1);
+    await moveTo(.9);
     await expect(stage).toHaveAttribute('data-active-view','angle',{timeout:12000});
-    await expect(page.locator('[data-aura-view="angle"]')).toHaveAttribute('aria-pressed','true');
-    console.log('PASS GSAP eased pointer orbit smoothly crosses the three accurate source views');
+    await expect(stage).toHaveAttribute('data-active-zone','right');
+    await page.mouse.move(100,300);
+    await expect(stage).toHaveAttribute('data-active-view','front',{timeout:12000});
+    console.log('PASS left/middle/right product zones, GSAP orbit, center band and front reset');
     await context.close();
   }
   {
