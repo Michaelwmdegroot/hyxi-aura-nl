@@ -183,9 +183,11 @@ try {
     await page.waitForTimeout(220);
     await expect(stage).toHaveAttribute('data-active-view','front');
     assert.equal(await stage.getAttribute('data-orbit-pose'), null, 'Reduced-motion must not animate 2.5D tilt');
-    await page.locator('[data-aura-view="side"]').click();
+    await stage.focus();
+    await stage.press('ArrowLeft');
     await expect(stage).toHaveAttribute('data-active-view','side');
-    console.log('PASS reduced motion: no mouse rotation, manual button works');
+    await expect(stage).toHaveAttribute('aria-valuetext','Linkerhoek');
+    console.log('PASS reduced motion: mouse ignored, keyboard product control works');
     await context.close();
   }
   {
@@ -201,7 +203,15 @@ try {
     await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x-110,y:y+2}]});
     await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
     await expect(stage).toHaveAttribute('data-active-view','angle',{timeout:12000});
-    console.log('PASS real mobile horizontal swipe: front → angle');
+    const visibleHeight=await stage.evaluate(el=>Number.parseFloat(getComputedStyle(el.parentElement).getPropertyValue('--aura-body-height')));
+    const visibleWidth=visibleHeight*.699,visibleLeft=rect.x+(rect.width-visibleWidth)/2;
+    for(const [fraction,view] of [[.1,'side'],[.5,'front'],[.9,'angle']]){
+      const tapX=visibleLeft+visibleWidth*fraction;
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:tapX,y}]});
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+      await expect(stage).toHaveAttribute('data-active-view',view,{timeout:12000});
+    }
+    console.log('PASS mobile swipe and left/middle/right tapping on the product itself');
     await context.close();
   }
   // If the locally vendored GSAP is unexpectedly unavailable, users still get
@@ -212,12 +222,13 @@ try {
     await page.route('**/vendor/gsap.min.js', route=>route.abort());
     await page.goto(base+'/');
     const stage=page.locator('#hero-product-stage');
-    await expect(page.locator('.hero-view-switcher')).toBeVisible();
-    await page.locator('[data-aura-view="angle"]').click();
+    await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
+    await stage.focus();
+    await stage.press('End');
     await expect(stage).toHaveAttribute('data-active-view','angle');
     await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-angle.webp');
     assert.equal(await stage.getAttribute('data-gsap-ready'),null);
-    console.log('PASS no-GSAP fallback: view buttons still work offline');
+    console.log('PASS no-GSAP fallback: keyboard product slider remains functional');
     await context.close();
   }
   // Broken photo: preserve the last successful, loaded manufacturer product.
@@ -226,7 +237,8 @@ try {
     const page=await context.newPage();
     await page.route('**/images/aura-side.webp', route=>route.abort());
     await page.goto(base+'/');
-    await page.locator('[data-aura-view="side"]').click();
+    await page.locator('#hero-product-stage').focus();
+    await page.locator('#hero-product-stage').press('Home');
     await page.waitForTimeout(300);
     await expect(page.locator('#hero-product-stage')).toHaveAttribute('data-active-view','front');
     await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-front.webp');
@@ -239,7 +251,8 @@ try {
     await page.goto(base+'/');
     await expect(page.locator('#hero-product-image')).toBeVisible();
     await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-front.webp');
-    await expect(page.locator('.hero-view-switcher')).toBeHidden();
+    await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
+    await expect(page.locator('#hero-product-stage')).not.toHaveAttribute('role','slider');
     await expect(page.locator('.presenter-brand')).toContainText('Thuisbatterij');
     console.log('PASS no-JS front fallback');
     await context.close();
