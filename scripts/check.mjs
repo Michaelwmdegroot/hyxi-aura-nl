@@ -150,9 +150,24 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 4 && new Set(sitemapUrls).size === 4, 'sitemap lists the four distinct public pages');
+ensure(sitemapUrls.length === 6 && new Set(sitemapUrls).size === 6, 'sitemap lists the six distinct public pages');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+
+
+// Knowledge pages must remain real, indexable static HTML and part of the user journey.
+for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom']) {
+  const filename = resolve(dist, 'kennis', slug, 'index.html');
+  const article = documentCache.get(filename) || '';
+  const url = `${origin}/kennis/${slug}/`;
+  ensure(Boolean(article), `Knowledge ${slug}: included in production Vite build`);
+  ensure(article.includes('href="/offerte/"') && article.includes('href="/#samenstellen"'), `Knowledge ${slug}: real conversion and configuration links`);
+  ensure(article.includes('Preliminary') && article.includes('/downloads/hyxi-aura-1-fase-datasheet.pdf'), `Knowledge ${slug}: preliminary source disclosure`);
+  const schema = [...article.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].flatMap(match => { try { const json = JSON.parse(match[1]); return json['@graph'] || [json]; } catch { return []; } });
+  ensure(schema.some(item => item['@type'] === 'Article' && item.mainEntityOfPage?.['@id'] === url), `Knowledge ${slug}: valid matching Article JSON-LD`);
+  ensure(schema.some(item => item['@type'] === 'BreadcrumbList'), `Knowledge ${slug}: breadcrumb JSON-LD`);
+  ensure(home.includes(`href="/kennis/${slug}/"`), `Knowledge ${slug}: homepage links to new resource`);
+}
 
 for (const file of built) {
   const publicPath = relative(dist, file).split(sep).join('/');
