@@ -2,6 +2,7 @@ import { createHmac } from 'node:crypto';
 import { verifyAdminPassword, hashAdminPassword, newSessionToken, hashSessionToken } from './security.mjs';
 import { openLead, parseEncryptionKey, sealLead } from '../db/crypto.mjs';
 import { normalizeFollowup, parseFollowupInput } from './followup.mjs';
+import { todayInAmsterdam, classifyFollowup } from './due-followups.mjs';
 import { assertAdminStructure, assertMigrationChecksum } from '../db/schema-check.mjs';
 import { createAdminOperations } from './operations.mjs';
 import { createPrivacyOperations } from './privacy.mjs';
@@ -158,6 +159,58 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
     }))};
   }
 
+  // Read-only, bounded scan of currently active encrypted dossiers.
+  // No new migration or plaintext due-date column. A cap prevents expensive
+  // full-table decrypts; a visible warning must be shown if results are partial.
+  async function listDueFollowups(actor,{now=new Date()}={}){
+    const today=todayInAmsterdam(now);
+    const MAX_SCAN=2500, BATCH=200, MAX_RESULTS=100;
+    let cursor='',checked=0,limited=false;
+    const matches=[];
+    while(checked<=MAX_SCAN){
+      const count=Math.min(BATCH,MAX_SCAN+1-checked);
+      const assigned=actor.role==='admin'?'':' AND l.assigned_user_id=?';
+      const params=actor.role==='admin'?[cursor,count]:[actor.id,cursor,count];
+      const [rows]=await pool.query(
+        "SELECT l.id,l.request_id,l.status,l.request_type,l.assigned_user_id,l.encrypted_payload,l.encryption_key_id FROM aura_leads l "+
+        "WHERE l.status NOT IN ('won','lost','not_suitable')"+assigned+
+        " AND l.id > ? ORDER BY l.id ASC LIMIT ?", params,
+      );
+      if(!rows.length)break;
+      for(const row of rows){
+        if(checked===MAX_SCAN){limited=true;break;}
+        checked++;
+        const payload=openLead(row.encrypted_payload,row.id,leadKey,row.encryption_key_id);
+        const followup=normalizeFollowup(payload.followUp);
+        const priority=classifyFollowup(followup.dueDate,row.status,today);
+        if(priority)matches.push({
+          requestId:row.request_id,
+          dueDate:followup.dueDate,
+          nextAction:followup.nextAction,
+          priority,
+          status:row.status,
+          requestType:row.request_type,
+          assignedTo:row.assigned_user_id,
+        });
+      }
+      if(limited||rows.length<count)break;
+      cursor=rows.at(-1).id;
+    }
+    matches.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)||a.requestId.localeCompare(b.requestId));
+    // The list may contain free-form action text: record access without copying text into audit.
+    await pool.execute(
+      "INSERT INTO aura_admin_audit (actor_user_id,action,result_code) VALUES (?,'followups_view','ok')",
+      [actor.id],
+    );
+    return {
+      asOf:today,checked,limited,
+      overdue:matches.filter(item=>item.priority==='overdue').length,
+      todayCount:matches.filter(item=>item.priority==='today').length,
+      visible:Math.min(MAX_RESULTS,matches.length),
+      items:matches.slice(0,MAX_RESULTS),
+    };
+  }
+
   async function getLead(actor,requestId) {
     if(!VALID_ID.test(requestId)) throw new AdminNotFoundError();
     const [rows]=await pool.execute(
@@ -258,5 +311,5 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
     }finally{conn.release();}
   }
 
-  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus,updateFollowup,...createAdminOperations({pool}),...createPrivacyOperations({pool,leadEncryptionKey})};
+  return {login,currentSession,logout,summary,listLeads,listDueFollowups,getLead,changeStatus,updateFollowup,...createAdminOperations({pool}),...createPrivacyOperations({pool,leadEncryptionKey})};
 }
