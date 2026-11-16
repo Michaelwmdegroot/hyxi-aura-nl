@@ -61,3 +61,19 @@ Een puur hover-gedreven viewer sluit toetsenbordgebruikers uit. Maak daarom de *
 ## Verificatie
 
 Vul na implementatie exacte GitHub-PR, commit, CI-screenshots, browserlog, production probe en eventuele acceptatiegrenzen hier aan. Commerciële launch blijft losstaand NO-GO tot volledige eigenaar- en salesbeoordeling.
+
+## Feitelijke release en acceptatie — 16 november 2026
+
+**Gebouwd, getest en live:** [PR #39](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/39) is gemerged op `main` als **`2b1e3332ac30989a459c68417f76d1ea217dc11e`**. De zelfstandige kijkhoekselector, de drie knoppen én alle zichtbare muisinstructies zijn uit de homepage-HTML verwijderd; de foto is nu zélf de driezone-bediening. De instructietekst voor een schermlezer is verborgen, de daadwerkelijke batterij is een focusbare aria-slider voor toetsenbordgebruik.
+
+**Exact technisch bewijs:**
+- [Finale PR-head Build & verify 43929039718](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929039718) **3/3 groen**: Hostinger-only install, Node 24, alle unit/static checks, isolated MySQL/outbox, volledige adviezen-/offerte-/Beheer-browserjourneys, Three.js/SVG fallback, nieuwe 3-zone browser-QA en Lighthouse.
+- [Post-merge main Build & verify 43929956182](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929956182) eveneens **3/3 groen**.
+- [Publieke Hostinger-readiness 43929956171](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929956171): na een eerste **10/11** tijdens uitrol (oude V4) een read-only rerun van **11/11 PASS**, inclusief `heroTbtShowroomDeployed` met **`data-aura-zone-viewer`**, `aura-viewer-help` en **afwezigheid `.hero-view-switcher`**. Geen live testlead of mail verzonden.
+- [Browser screenshots bij PR-head 43929039718](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929039718): `phase5-hero-1440-page.png`, `phase5-hero-390-page.png`, kalibratiefoto's voor 1440/768/390/320 en alle drie hoeken. Visuele review bevestigt dat het linker blok **volledig verdwenen** is en dat de bestaande hero-compositie, TBT-tweeregel en officiële productfotografie behouden zijn.
+- Browserlog: `PASS left/middle/right product zones, GSAP orbit, center band and front reset`, `PASS mobile swipe and left/middle/right tapping`, `PASS reduced motion`, `PASS no-GSAP fallback`, `PASS image failure` en `PASS no-JS front fallback`. Vier breedtes houden de zichtbare top, midden, voetlijn en producthoogte binnen de bestaande **3,5px-tolerantie**, zonder documentoverflow en met WCAG A/AA.
+- Synthetische CI-Lighthouse: **desktop en mobiel 100/100/100/100** (performance/toegankelijkheid/best practices/SEO). Dit is **geen** echte Safari-field-data of kwalitatieve eigenaarsscore.
+
+**Open kwaliteitsreview:** opdrachtgever heeft V4 als **beter maar nog onvoldoende** beoordeeld; de nieuw gebouwde V5 wacht op de eerste eigenaarbeoordeling op desktop én iPhone Safari. De commercieel afgesproken **≥9/10** is niet bewezen of afgevinkt. Aanpassingen in de exacte breedte van het middengebied alleen na eigenaarreview; géén zichtbare selector of nieuwe 3D-claim introduceren.
+
+**Behoud:** GSAP 3.15.1 blijft lokaal gepind, alle originele WebP-batterijbeelden en hun kalibratie intact, alle CTA's, kleuren, overige secties, privacy, database, e-mail, Odoo-import en Beheer ongewijzigd. Rollback van deze feature met een revert van de #39 squash; geen migraties.
