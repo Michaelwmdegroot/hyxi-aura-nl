@@ -6,12 +6,13 @@ const good = {
   '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
-  '/privacy/': [200, 'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database'],
+  '/privacy/': [200, 'Privacyverklaring · versie 16 november 2026; versleuteld op in een beveiligde database; Odoo CRM'],
   '/offerte/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/offerte/"><form id="quoteForm"></form>'],
   '/kennis/bat-q7-vs-bat-q9/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/"><title>HYXI AURA BAT-Q7 vs BAT-Q9</title><a href="/offerte/">'],
   '/kennis/noodstroom/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/noodstroom/"><title>HYXI AURA bij stroomuitval</title><a href="/offerte/">'],
   '/kennis/installatiecheck/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/installatiecheck/"><title>HYXI AURA installatiecheck</title><form id="installation-check-form" action="/offerte/" method="get">'],
-  '/sitemap.xml': [200, '<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc>'],
+  '/kennis/1-fase-of-3-fasen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/"><title>HYXI AURA 1 fase of 3 fasen</title><a href="/offerte/">'],
+  '/sitemap.xml': [200, '<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc>'],
   '/robots.txt': [200, 'Sitemap: https://hyxi-aura.nl/sitemap.xml'],
   '/api/beheer/leads': [401, '{}'],
 };
@@ -24,7 +25,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,12);
+  assert.equal(Object.keys(result.checks).length,13);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -100,4 +101,17 @@ test('read-only public probe detects editorial regression, old corporate footer 
   const generic=good['/'][1].replace('id="backup-usp"','id="backup-usp" class="hero-eyebrow"');
   const oldEyebrow=await probeProduction(mock({...good,'/':[200,generic]}));
   assert.equal(oldEyebrow.checks.editorialBrandAndBackupDeployed,false);
+});
+
+test('the source-backed one-/three-phase guide is live and in the sitemap',async()=>{
+  const missing=await probeProduction(mock({...good,'/kennis/1-fase-of-3-fasen/':[404,'']}));
+  assert.equal(missing.checks.phaseComparisonDeployed,false);
+  assert.equal(missing.ok,false);
+  const oldMap=await probeProduction(mock({...good,'/sitemap.xml':[200,good['/sitemap.xml'][1].replace('<loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc>','')]}));
+  assert.equal(oldMap.checks.sitemapPresent,false);
+  assert.equal(oldMap.ok,false);
+});
+test('public privacy page must name the actual Odoo CRM email-import processor',async()=>{
+  const stale=await probeProduction(mock({...good,'/privacy/':[200,'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database']}));
+  assert.equal(stale.checks.privacyDeployed,false);
 });

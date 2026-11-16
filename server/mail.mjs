@@ -54,7 +54,7 @@ export function buildLeadMail(config, lead, requestId, now) {
     ...(quote && lead.projectDetails ? ['', 'Aanvullende wensen (door de aanvrager aangeleverd)', lead.projectDetails] : []),
     '',
     'De bezoeker heeft expliciet verzocht om contact over deze aanvraag.',
-    'Privacyversie: 2026-11-15. Geen toestemming voor nieuwsbrieven of andere marketing gevraagd.',
+    'Privacyversie: 2026-11-16. Geen toestemming voor nieuwsbrieven of andere marketing gevraagd.',
   ];
   if (lead.attribution && Object.values(lead.attribution).some(Boolean)) {
     lines.push('', 'Campagneherkomst (door de bezoeker aangeleverde UTM-waarden)');

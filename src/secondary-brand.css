@@ -1,0 +1,79 @@
+/* Single commercial identity on every HYXI AURA support/knowledge/quote page.
+   Uses typography, not a fabricated TBT graphic logo or an official HYXI badge. */
+.secondary-presenter{
+  display:inline-flex!important;flex-direction:column;align-items:flex-start;justify-content:center;
+  gap:2px;min-width:0;flex-shrink:0;text-decoration:none!important;
+  font:inherit;line-height:1.15;letter-spacing:normal!important;white-space:nowrap;color:#283028!important
+}
+.secondary-presenter-owner{
+  display:block;font:800 17px/1.15 Manrope,system-ui,sans-serif;letter-spacing:-.055em;
+  white-space:nowrap;color:#2b302a
+}
+.secondary-presenter-owner span{font:inherit!important;letter-spacing:inherit;color:#4f694c!important}
+.secondary-presenter-caption{
+  display:flex;width:100%;align-items:baseline;justify-content:space-between;
+  gap:7px;margin-top:1px;white-space:nowrap;
+  color:#52604e!important;font:500 10px/1.15 Manrope,system-ui,sans-serif
+}
+.secondary-presenter-caption em{font-size:10px;font-weight:500;font-style:italic;letter-spacing:-.005em;color:#53604f}
+.secondary-presenter-caption b{font-size:10px;font-weight:850;letter-spacing:.08em;color:#a64528}
+.secondary-presenter:focus-visible{outline:3px solid #a83e21;outline-offset:5px;border-radius:3px}
+.legal-page .site-header .secondary-presenter,
+.legal-page .legal-footer>.secondary-presenter{font:inherit}
+.legal-page .legal-footer>.secondary-presenter{align-self:flex-start}
+.legal-page .legal-footer>.secondary-presenter .secondary-presenter-owner{font-size:17px}
+.legal-page .legal-footer>.secondary-presenter .secondary-presenter-caption{font-size:9px}
+.site-bar .secondary-presenter .secondary-presenter-owner{font-size:17px}
+.site-bar .secondary-presenter .secondary-presenter-caption{font-size:10px}
+.footer .secondary-presenter{margin-bottom:8px}
+.footer .secondary-presenter .secondary-presenter-owner{font-size:19px}
+.topbar .secondary-presenter{font-size:inherit}
+.topbar .secondary-presenter .secondary-presenter-owner{font-size:17px}
+body>footer .footer-provider{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+body>footer .footer-provider strong{font-size:14px;letter-spacing:-.03em;color:#303a31}
+body>footer .footer-provider span{color:#a64f34;font-size:11px;font-weight:750}
+body>footer .footer-provider small{color:#626b61;font-size:11px;line-height:1.7}
+@media(max-width:750px){
+  .secondary-presenter-owner,.site-bar .secondary-presenter .secondary-presenter-owner,
+  .topbar .secondary-presenter .secondary-presenter-owner{font-size:15px}
+  .secondary-presenter-caption,.site-bar .secondary-presenter .secondary-presenter-caption{gap:4px}
+  .secondary-presenter-caption em,.secondary-presenter-caption b{font-size:9px}
+}
+@media(max-width:360px){
+  .secondary-presenter-owner,.site-bar .secondary-presenter .secondary-presenter-owner,
+  .topbar .secondary-presenter .secondary-presenter-owner{font-size:14px}
+  .secondary-presenter-caption em,.secondary-presenter-caption b{font-size:8.4px}
+}
+
+/* Source transparency for preliminary HTA2 model/table inconsistencies. */
+.datasheet-caveat{margin:26px 0;padding:24px 27px;background:#f0f1ea;border:1px solid #dbe2d6;border-left:3px solid #889c80;border-radius:12px}
+.datasheet-caveat h3{font-size:18px;font-weight:700;line-height:1.45;letter-spacing:-.03em;margin:0 0 12px;color:#28362b}
+.datasheet-caveat p{font-size:13px!important;line-height:1.8!important;margin:0 0 12px!important;color:#4c574f!important}
+.datasheet-caveat p:last-child{margin-bottom:0!important}
+.datasheet-caveat code{font-size:.92em;font-weight:700;color:#6e4231}
+.legal-page .legal-footer>.secondary-presenter{flex:0 0 auto}
+@media(max-width:700px){.datasheet-caveat{padding:20px 18px}.datasheet-caveat h3{font-size:16px}}
+
+/* The new editorial phase guide uses a semantic figure; remove browser default
+   figure margins, otherwise 320px visitors lose usable width. */
+.hero figure.product-stage{margin:0;min-width:0}
+.legal-page .legal-header .secondary-presenter{max-width:55vw}
+@media(max-width:580px){
+  .legal-page .legal-header{gap:8px}
+  .legal-page .legal-back{font-size:10px}
+  .legal-page .legal-footer>.secondary-presenter{max-width:100%}
+}
+@media(max-width:360px){
+  .legal-page .legal-header{padding-inline:14px}
+}
+
+/* Phase-guide official product photo: reserve its own caption row below the
+   visible battery feet. Never put informational text across the product. */
+.hero figure.phase-product-stage{min-height:440px;padding:23px 21px 75px}
+.hero figure.phase-product-stage img{max-height:310px;max-width:100%}
+.hero figure.phase-product-stage .stage-caption{bottom:19px;line-height:1.6}
+@media(max-width:650px){
+  .hero figure.phase-product-stage{min-height:355px;max-height:355px;padding:20px 16px 64px}
+  .hero figure.phase-product-stage img{max-height:245px}
+  .hero figure.phase-product-stage .stage-caption{bottom:16px;font-size:10px}
+}

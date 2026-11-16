@@ -150,13 +150,13 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 7 && new Set(sitemapUrls).size === 7, 'sitemap lists the seven distinct public pages');
+ensure(sitemapUrls.length === 8 && new Set(sitemapUrls).size === 8, 'sitemap lists the eight distinct public pages');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
 
 
 // Knowledge pages must remain real, indexable static HTML and part of the user journey.
-for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom']) {
+for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen']) {
   const filename = resolve(dist, 'kennis', slug, 'index.html');
   const article = documentCache.get(filename) || '';
   const url = `${origin}/kennis/${slug}/`;

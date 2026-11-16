@@ -41,3 +41,7 @@
 @media(max-width:360px){
   .site-footer .footer-presenter .presenter-owner{font-size:21px}
 }
+
+/* Semantic contextual link to the separate one-phase/three-phase decision guide. */
+.knowledge-phase-note{margin-top:14px;margin-bottom:15px;font-size:13px;line-height:1.75;color:#52604f}
+.knowledge-phase-note a{color:#9b492f;font-weight:750;text-underline-offset:4px}
