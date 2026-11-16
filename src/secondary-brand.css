@@ -9,14 +9,14 @@
   display:block;font:800 17px/1.15 Manrope,system-ui,sans-serif;letter-spacing:-.055em;
   white-space:nowrap;color:#2b302a
 }
-.secondary-presenter-owner span{font:inherit!important;letter-spacing:inherit;color:#6b8067!important}
+.secondary-presenter-owner span{font:inherit!important;letter-spacing:inherit;color:#4f694c!important}
 .secondary-presenter-caption{
   display:flex;width:100%;align-items:baseline;justify-content:space-between;
   gap:7px;margin-top:1px;white-space:nowrap;
-  color:#697168!important;font:500 10px/1.15 Manrope,system-ui,sans-serif
+  color:#52604e!important;font:500 10px/1.15 Manrope,system-ui,sans-serif
 }
-.secondary-presenter-caption em{font-size:10px;font-weight:500;font-style:italic;letter-spacing:-.005em;color:#6a7569}
-.secondary-presenter-caption b{font-size:10px;font-weight:850;letter-spacing:.08em;color:#bd5736}
+.secondary-presenter-caption em{font-size:10px;font-weight:500;font-style:italic;letter-spacing:-.005em;color:#53604f}
+.secondary-presenter-caption b{font-size:10px;font-weight:850;letter-spacing:.08em;color:#a64528}
 .secondary-presenter:focus-visible{outline:3px solid #a83e21;outline-offset:5px;border-radius:3px}
 .legal-page .site-header .secondary-presenter,
 .legal-page .legal-footer>.secondary-presenter{font:inherit}
