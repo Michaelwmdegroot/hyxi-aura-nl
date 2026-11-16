@@ -26,7 +26,7 @@ De gebruiker heeft op **16 november 2026** via twee screenshots van de echte Odo
 
 | Volgorde | Werkpakket | Wie | Definition of Done |
 | --- | --- | --- | --- |
-| 0 | **Design finale review V6** | Eigenaar | Live desktop én echte iPhone Safari gecontroleerd; eigenaar geeft ≥9/10 (of exact de laatste verbeterpunten) voor commerciële promotie. 12/12 publieke checks is geen visuele score |
+| 0 | **Design finale review V6** | Eigenaar | Live desktop én echte iPhone Safari gecontroleerd; eigenaar geeft ≥9/10 (of exact de laatste verbeterpunten) voor commerciële promotie. 14/14 publieke checks is geen visuele score |
 | 1 | **Search Console & indexatie** | Growth + eigenaar bij accountverificatie | Domein geverifieerd; `/sitemap.xml` bekend bij GSC; indexatiestatus van alle 8 publieke URLs per URL geverifieerd; eventuele fouten gelogd met bron en datum. Niet beweren dat sites geïndexeerd zijn zonder GSC |
 | 2 | **Privacyvriendelijke funnelmeting** | Developer/growth met privacybesluit eigenaar | Rechtmatige, minimaal noodzakelijke definitie van page/session, configurator-/formulierstart, serveraccepted lead en bron; geen PII in URL/events of ongeautoriseerde pixels/cookies; dashboard met **echte bezoekers-denominator**, pas dan conversiepercentage |
 | 3 | **Zoekintentie-SEO voor aankooporiëntatie** | Growth + development | 1–2 originele, publiek nuttige gidsen gericht op prijsfactoren/installatie/bestaande PV of capaciteit op basis van bronnen, niet duplicaten; interne links naar `/offerte/`, bron-/schema-check, 3/3 CI, live GET |
