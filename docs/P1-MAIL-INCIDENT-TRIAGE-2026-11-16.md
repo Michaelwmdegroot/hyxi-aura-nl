@@ -38,3 +38,16 @@ Nog open: een beheerder kan in het dagelijkse werkoverzicht een mislukte/onzeker
 Geen productie-testleads, bulkmail, auto-retention, automatische statusmutaties of Odoo-schrijfoperaties. Rollback via revert van geïsoleerde feature-PR. Als de bestaande flow afwijkend blijkt, hoogstens een interne UI-read-only verandering behouden, niet de operationele SMTP-worker aanraken.
 
 **Open vóór volledige commerciële launch:** owner & vervanger, duidelijke follow-up-SLA, Odoo-quote recordcontrole, inboxdeliverability (SPF/DKIM/DMARC/bounces), privacykopieën en echte visuele 9/10-eigenaarsscore.
+
+## Uitvoering en gecontroleerd PR-head-bewijs — 16 november 2026
+
+**[PR #43](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/43)** bouwt de signalering als een kleine toevoeging aan de al bestaande login, summary en Mailcontrole. Geen nieuwe endpoint of SQL en geen nieuwe mailtransportactie. Beheeradmin krijgt boven de tabs een melding met aantallen `failed` en `uncertain`, de route `Open mailcontrole` en een directe focusverplaatsing naar de bestaande kop. De bestaande, geauditeerde afhandeling met expliciete mailboxbevestiging blijft ongewijzigd.
+
+**[PR-head CI 43954892389](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43954892389): 3/3 succesvol.** Getest in een geïsoleerde omgeving zonder productieaccounts/leads:
+- Beheerdashboard desktop 1440 en mobiel 390: een onderbouwde incidentmelding bij 1 `uncertain`, knopnavigatie + focus, bij nul incidenten verdwijnt de melding, logout verwijdert staat en sales ziet geen admin-only mailmetriek of incidentmelding.
+- Gesimuleerde fout van alleen `GET /api/beheer/outbox`: de geslaagde `GET /summary` toont de melding **toch**, met afzonderlijke foutstatus over de mailcontrole; geen SMTP-heraanbieding door refresh.
+- Bestaande beveiliging (auth/RBAC/CSRF, concurrency/sent-attempt, GDPR export/delete), geïsoleerde MySQL8, configurator, beide offerte-/adviesjourneys, Three.js/SVG, bron-SEO en twee Lighthouse-profielen blijven intact.
+- Handmatige screenshotreview `beheer-desktop-dashboard.png` en `beheer-mobile-dashboard.png`: melding past in bestaande werkbank en veroorzaakt geen horizontale overflow. [Browserartifact uit CI](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43954892389).
+- Synthetische Lighthouse op de **publieke homepage** desktop én mobiel 100/100/100/100 (geen bewijs voor interne Beheerprestatie of echte velddatameting).
+
+**Releasevoorwaarde:** PR-head en na de merge `main` CI 3/3 groen; publieke GET-ready 12/12. Die externe monitor **meet de interne mailincidenten niet**; dit is bewust een sessiebeveiligde Beheerfunctie. Volledige automatisering vereist nog een gekozen verantwoordelijke en veilig proactief kanaal.
