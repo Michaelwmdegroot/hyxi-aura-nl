@@ -87,3 +87,7 @@ Bewaar bron-URL, controledatum en afgeleide webbestandsnaam bij nieuwe assets. H
 
 ## Phase 4 — interactieve productaanzichten (16 november 2026)
 De nieuwe homepageweergave in `src/product-gallery.mjs` schakelt uitsluitend tussen de reeds aanwezige, geoptimaliseerde officiële beelden `aura-front.webp`, `aura-angle.webp` en `aura-side.webp`. Dit is geen gegenereerd product, 3D-specificatie, klantinstallatie of nieuw licensed asset. De frontversie blijft als HTML aanwezig zonder JavaScript; de andere twee beelden worden pas bij een klik aangevraagd. Originele bronnen staan hierboven; laatste herkomstcontrole 14 november 2026.
+
+## Phase 5 — merk-presentatie en nauwkeurige bronbeeldkalibratie
+
+Nieuwe headertekst op de homepage: **Thuisbatterij Team / presenteert / HYXI AURA**. Het is een typografische woordmerkcombinatie, geen geclaimd officieel dealerlogo. De productviewer toont de **bestaande ongewijzigde** `aura-front.webp`, `aura-angle.webp` en `aura-side.webp`. Omdat de bronframes verschillende transparante marges hebben, normaliseert `src/hero-viewer.css` de **zichtbare silhouettehoogte, top/voetlijn en het centrale x-anker** met exact gemeten oorspronkelijke alfa-bounds. Geen stretch, geen nieuw gerenderde/productgefingeerde camerahoek. Zie [Hero V3 specificatie](PHASE5-HERO-VIEWER-2026-11-16.md) voor de bronpixelmetingen en technische kwaliteitslat. Binnenkomst toont standaard het frontbeeld. JS laadt extra hoekbeelden pas na intentie en decodering. No-JS behoudt een volwaardig frontbeeld.
