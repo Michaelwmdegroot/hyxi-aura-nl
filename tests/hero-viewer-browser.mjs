@@ -106,7 +106,10 @@ try {
       await page.locator('.hero-visual').screenshot({path:resolve(screenshots,'phase5-view-'+width+'-'+name+'.png')});
       await noOverflow(page,'hero '+width+'px '+name);
     }
-    const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+    // The pre-existing white 'AURA' wordmark is explicitly aria-hidden and purely
+    // decorative backdrop art; WCAG 1.4.3 expressly exempts such text from
+    // contrast. Test every meaningful foreground element without this false positive.
+    const axe=await new AxeBuilder({page}).exclude('.hero-watermark').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
     assert.deepEqual(axe.violations.map(x=>({id:x.id,nodes:x.nodes.map(y=>y.target)})),[],'WCAG A/AA violations '+width);
     console.log('PASS hero '+width+'px: TBT brand, all views precisely aligned, no overflow, WCAG A/AA');
     await context.close();
