@@ -14,12 +14,12 @@
 
 De **drie bestaande productbestanden** zijn verschillend gekadreerd. Daardoor lijkt de batterij momenteel plots van formaat te veranderen. Deze fase gebruikt een vaste, **visueel genormaliseerde frame/stage** met per-perspectief gecorrigeerde bronafmetingen en beeldcentra, zonder het originele fabrikantproduct te vervormen of uitsnijden aan de zichtbare silhouetgrenzen.
 
-De volgende gegevens zijn rechtstreeks bepaald op de aan de eigenaar getoonde WebP-bronbestanden (alfa-gebaseerde zichtbare silhouette-bounds; `A >= 220`):
+De volgende gegevens zijn bepaald op de aangeleverde WebP-bronnen en de daadwerkelijke GitHub-webbestanden. **Let op:** het geoptimaliseerde `aura-angle.webp` in GitHub heeft **2078×1000 px** en 151.042 bytes; de aangeleverde versie heeft **2048×985 px**. De productvorm is uniform geschaald, wat ook de silhouettecoördinaten verandert. De overige webbeelden hebben dezelfde dimensies als de uploads. Bounds zijn alfa-gebaseerd (`A >= 220`, afgerond):
 
 | Aanzicht | Intrinsieke bron | Product x-bounds | Product y-bounds | Producthoogte | Hoogte-factor bronframe | Corrigeer afbeelding x t.o.v. bronmidden |
 | :-- | :-- | :-- | :-- | --: | --: | --: |
 | Front | 699×1000 | 0–699 | 0–999 | ≈1000 | 1.0000 | 0 |
-| Schuin (rechterkant) | 2048×985 | 778–1295 | 1–852 | 851 | **985/851 = 1.1575** | **−0.0147 × zichtbare producthoogte** |
+| Schuin (rechterkant) | **2078×1000 web-asset** (bronupload 2048×985) | ≈790–1315 | ≈1–865 | ≈864 | **1000/864 ≈ 1.1574** | **−0.0147 × zichtbare producthoogte** |
 | Andere hoek (linkerkant) | 1875×1000 | 514–1082 | 1–931 | 930 | **1000/930 = 1.0753** | **+0.1500 × zichtbare producthoogte** |
 
 **Renderrecept:** één vaste `hero-product-stage` met hoogte `H`; alle drie zichtbare product-silhouetten krijgen hoogte `H` (en dus dezelfde boven- en voetlijn); de bronafbeelding krijgt `height: H × hoogte-factor`, `width: auto`, positionering `left: 50%` en verschuiving `transform: translateX(calc(-50% + delta × H))`. De `stage` knipt uitsluitend overtollige **transparante broncanvas-marges**, niet de zichtbare batterij. Dit is geometrische normalisatie bij het renderen; de originele pixels blijven intact. Geen aspectratio-stretch; perspectief geeft natuurlijke breedteverschillen.

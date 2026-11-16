@@ -22,7 +22,7 @@ if (gallery) {
       caption: 'Officieel HYXI-productbeeld · vooraanzicht'
     },
     angle: {
-      src: '/images/aura-angle.webp', width: 2048, height: 985,
+      src: '/images/aura-angle.webp', width: 2078, height: 1000,
       alt: 'HYXI AURA thuisbatterij, officieel schuin productaanzicht met zichtbare rechterzijde',
       caption: 'Officieel HYXI-productbeeld · rechterhoek'
     }

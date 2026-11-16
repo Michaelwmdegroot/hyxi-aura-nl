@@ -40,7 +40,7 @@ async function productMetrics(page) {
   return page.locator('#hero-product-image').evaluate(image => {
     const sourceBounds = {
       front:{l:0,r:699,t:0,b:999},
-      angle:{l:778,r:1295,t:1,b:852},
+      angle:{l:790,r:1315,t:1,b:865},
       side:{l:514,r:1082,t:1,b:931}
     };
     const bounds = sourceBounds[image.dataset.auraAngle];
