@@ -441,7 +441,7 @@ $('privacyDeleteForm').addEventListener('submit',async event=>{
     if(!result.deleted||version!==detailVersion||currentLead!==lead)return;
     closeDetail();
     await refreshAll();
-    if(currentUser)message('dashboardMessage','Het HYXI-dossier is verwijderd. Controleer mailbox- en Odoo-kopieën afzonderlijk.');
+    if(currentUser)message('dashboardMessage','Het dossier is uit de HYXI-database verwijderd. Controleer mailbox- en Odoo-kopieën afzonderlijk.');
   }catch(error){
     if(!isInterrupted(error)&&version===detailVersion)message('privacyDeleteMessage',error.message);
   }finally{setLoading(button,false);}

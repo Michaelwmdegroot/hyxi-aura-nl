@@ -222,7 +222,7 @@ async function loginAndReview(context,label){
     await page.locator('#privacyDeleteButton').click();
     await expect(page.locator('#detailPane')).not.toBeVisible();
     await expect(page.locator('#leadRows tr')).toHaveCount(1);
-    await expect(page.locator('#dashboardMessage')).toContainText('uit HYXI');
+    await expect(page.locator('#dashboardMessage')).toContainText('HYXI-database verwijderd');
     assert.equal(privacyDeletes,1);
   }
   if(label==='desktop'){
