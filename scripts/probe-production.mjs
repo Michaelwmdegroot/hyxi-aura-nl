@@ -2,27 +2,42 @@
 import { fileURLToPath } from 'node:url';
 
 const BASE = 'https://hyxi-aura.nl';
-const PATHS = ['/api/health', '/api/config', '/privacy/', '/offerte/', '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const KNOWLEDGE = [
+  { path: '/kennis/bat-q7-vs-bat-q9/', title: 'HYXI AURA BAT-Q7 vs BAT-Q9' },
+  { path: '/kennis/noodstroom/', title: 'HYXI AURA bij stroomuitval' },
+];
+const PATHS = ['/api/health', '/api/config', '/privacy/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
   for (const path of PATHS) {
-    try {
-      const response = await fetcher(BASE + path, {
-        method: 'GET',
-        redirect: 'manual',
-        signal: AbortSignal.timeout(12000),
-        headers: { Accept: path.startsWith('/api/') ? 'application/json' : 'text/html, */*' },
-      });
-      // Do not expose response bodies or any headers; API/config includes an anti-CSRF token.
-      const text = path === '/api/beheer/leads' ? '' : await response.text();
-      let parsed = null;
-      if (path === '/api/health' || path === '/api/config') {
-        try { parsed = JSON.parse(text); } catch { /* response will fail validation */ }
+    const guide = KNOWLEDGE.find(item => item.path === path);
+    // Hostinger deploy may finish after GitHub's push event. Only public guide
+    // GETs receive a short bounded retry; API/privacy checks retain their
+    // original strict immediate behavior. Unit test mocks never wait.
+    const attempts = guide && fetcher === fetch ? 8 : 1;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        const response = await fetcher(BASE + path, {
+          method: 'GET',
+          redirect: 'manual',
+          signal: AbortSignal.timeout(12000),
+          headers: { Accept: path.startsWith('/api/') ? 'application/json' : 'text/html, */*' },
+        });
+        // Never return or print response bodies/headers. API/config has a CSRF token.
+        const text = path === '/api/beheer/leads' ? '' : await response.text();
+        let parsed = null;
+        if (path === '/api/health' || path === '/api/config') {
+          try { parsed = JSON.parse(text); } catch { /* treated as failed check */ }
+        }
+        observed[path] = { status: response.status, data: parsed, content: path.startsWith('/api/') ? '' : text };
+      } catch {
+        observed[path] = { status: 0, data: null, content: '' };
       }
-      observed[path] = { status: response.status, data: parsed, content: path.startsWith('/api/') ? '' : text };
-    } catch {
-      observed[path] = { status: 0, data: null, content: '' };
+      if (!guide || (observed[path].status === 200 &&
+        observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
+        observed[path].content.includes(guide.title))) break;
+      if (attempt + 1 < attempts) await new Promise(resolve => setTimeout(resolve, 10000));
     }
   }
   const checks = {
@@ -36,7 +51,16 @@ export async function probeProduction(fetcher = fetch) {
       observed['/offerte/'].content.includes('id="quoteForm"') &&
       observed['/offerte/'].content.includes('href="https://hyxi-aura.nl/offerte/"'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
-      observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/'),
+      observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/') &&
+      KNOWLEDGE.every(item => observed['/sitemap.xml'].content.includes(`<loc>${BASE}${item.path}</loc>`)),
+    q7ComparisonDeployed: observed['/kennis/bat-q7-vs-bat-q9/'].status === 200 &&
+      observed['/kennis/bat-q7-vs-bat-q9/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/bat-q7-vs-bat-q9/">`) &&
+      observed['/kennis/bat-q7-vs-bat-q9/'].content.includes('HYXI AURA BAT-Q7 vs BAT-Q9') &&
+      observed['/kennis/bat-q7-vs-bat-q9/'].content.includes('href="/offerte/"'),
+    backupGuideDeployed: observed['/kennis/noodstroom/'].status === 200 &&
+      observed['/kennis/noodstroom/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/noodstroom/">`) &&
+      observed['/kennis/noodstroom/'].content.includes('HYXI AURA bij stroomuitval') &&
+      observed['/kennis/noodstroom/'].content.includes('href="/offerte/"'),
     robotsPresent: observed['/robots.txt'].status === 200 &&
       observed['/robots.txt'].content.includes('Sitemap: https://hyxi-aura.nl/sitemap.xml'),
     unauthenticatedLeadsBlocked: observed['/api/beheer/leads'].status === 401,

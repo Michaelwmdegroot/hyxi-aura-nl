@@ -7,7 +7,9 @@ const good = {
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
   '/privacy/': [200, 'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database'],
   '/offerte/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/offerte/"><form id="quoteForm"></form>'],
-  '/sitemap.xml': [200, '<loc>https://hyxi-aura.nl/offerte/</loc>'],
+  '/kennis/bat-q7-vs-bat-q9/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/"><title>HYXI AURA BAT-Q7 vs BAT-Q9</title><a href="/offerte/">'],
+  '/kennis/noodstroom/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/noodstroom/"><title>HYXI AURA bij stroomuitval</title><a href="/offerte/">'],
+  '/sitemap.xml': [200, '<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc>'],
   '/robots.txt': [200, 'Sitemap: https://hyxi-aura.nl/sitemap.xml'],
   '/api/beheer/leads': [401, '{}'],
 };
@@ -20,7 +22,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,7);
+  assert.equal(Object.keys(result.checks).length,9);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -38,4 +40,18 @@ test('productieprobe detecteert ontbrekende publieke offertepagina',async()=>{
   const result=await probeProduction(mock({...good,'/offerte/':[404,'']}));
   assert.equal(result.checks.quotePageReady,false);
   assert.equal(result.ok,false);
+});
+
+test('public readiness detects missing or mismatched live knowledge content', async () => {
+  const missing = await probeProduction(mock({...good,'/kennis/noodstroom/':[404,'']}));
+  assert.equal(missing.checks.backupGuideDeployed,false);
+  assert.equal(missing.ok,false);
+  const wrong = await probeProduction(mock({...good,'/kennis/bat-q7-vs-bat-q9/':[200,good['/offerte/'][1]]}));
+  assert.equal(wrong.checks.q7ComparisonDeployed,false);
+  assert.equal(wrong.ok,false);
+});
+test('public readiness checks that both distinct guide URLs occur in live sitemap', async () => {
+  const old = await probeProduction(mock({...good,'/sitemap.xml':[200,'<loc>https://hyxi-aura.nl/offerte/</loc>']}));
+  assert.equal(old.checks.sitemapPresent,false);
+  assert.equal(old.ok,false);
 });
