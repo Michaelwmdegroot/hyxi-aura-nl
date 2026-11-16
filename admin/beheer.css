@@ -127,3 +127,15 @@
 .kpi-legend span{display:inline-flex;align-items:center;gap:7px}
 .kpi-dot{width:10px;height:10px;display:inline-block;border-radius:3px}.kpi-dot.kpi-advice{background:#587861}.kpi-dot.kpi-quote{background:#ce8052}
 @media(max-width:680px){.kpi-stats{gap:6px;padding:15px}.kpi-stat{padding:10px}.kpi-stat span{font-size:9px}.kpi-stat strong{font-size:23px}.kpi-chart-scroller{padding:10px 16px 0}.kpi-legend{margin-left:16px}}
+
+/* P1 incident visibility for authenticated administrators; zero public lead data. */
+.mail-incident-alert{display:flex;align-items:center;justify-content:space-between;gap:18px 25px;background:#fdf2ec;border:1px solid #ecd2c3;border-left:4px solid #bb5c39;border-radius:15px;padding:16px 20px;margin:-4px 0 23px}
+.mail-incident-alert[hidden],.metric[hidden]{display:none!important}
+.mail-incident-copy{min-width:0;flex:1}
+.mail-incident-copy strong{display:block;color:#793d29;font-weight:800;font-size:13px;line-height:1.45}
+.mail-incident-copy p{color:#625348;font-size:11px;line-height:1.7;margin:5px 0 0}
+.mail-incident-alert .secondary{flex-shrink:0;white-space:normal}
+.outbox-explanation{display:grid;gap:8px}
+.outbox-explanation p{font-size:11px;line-height:1.75;color:#536359}
+.outbox-explanation p strong{font-weight:850;color:#37493c}
+@media(max-width:680px){.mail-incident-alert{flex-direction:column;align-items:flex-start;padding:16px 17px;margin-top:0}.mail-incident-alert .secondary{width:auto}.outbox-explanation{gap:7px}}
