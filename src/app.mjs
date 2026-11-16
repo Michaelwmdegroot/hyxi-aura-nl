@@ -39,7 +39,6 @@ function updateScenario() {
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', String(active));
   });
-  $('#scenario-index').textContent = `SCENARIO ${stories[mode].index} / 03`;
   const title = $('#scenario-title');
   title.replaceChildren();
   story.title.split('\n').forEach((line, index) => { if (index) title.append(document.createElement('br'), document.createTextNode(' ')); title.append(document.createTextNode(line)); });

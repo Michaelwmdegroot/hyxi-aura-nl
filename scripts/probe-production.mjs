@@ -37,19 +37,33 @@ export async function probeProduction(fetcher = fetch) {
       }
       // The homepage title was already correct in V3. Keep retrying during a
       // Hostinger deploy until the actual V4 local-GSAP + two-line hero lands.
-      const rootV5 = path !== '/' || (observed[path].content.includes('presenter-subline') &&
+      const rootV6 = path !== '/' || (observed[path].content.includes('presenter-subline') &&
         observed[path].content.includes('id="hero-product-pivot"') &&
         observed[path].content.includes('data-aura-zone-viewer') &&
         observed[path].content.includes('id="aura-viewer-help"') &&
         !observed[path].content.includes('class="hero-view-switcher"') &&
+        !observed[path].content.includes('class="hero-eyebrow"') &&
+        observed[path].content.includes('id="backup-usp"') &&
+        observed[path].content.includes('footer-presenter') &&
         observed[path].content.includes('src="/vendor/gsap.min.js"'));
       if (!guide || (observed[path].status === 200 &&
         observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
-        observed[path].content.includes(guide.title) && rootV5)) break;
+        observed[path].content.includes(guide.title) && rootV6)) break;
       if (attempt + 1 < attempts) await new Promise(resolve => setTimeout(resolve, 10000));
     }
   }
   const checks = {
+    // Dedicated read-only release gate for the editorial clean-up and
+    // authentic TBT-first footer/backup presentation.
+    editorialBrandAndBackupDeployed: observed['/'].status === 200 &&
+      observed['/'].content.includes('footer-presenter') &&
+      observed['/'].content.includes('id="backup-usp"') &&
+      observed['/'].content.includes('Automatische ATS-omschakeling') &&
+      observed['/'].content.includes('Back-up is') &&
+      observed['/'].content.includes('href="/kennis/noodstroom/"') &&
+      !observed['/'].content.includes('class="hero-eyebrow"') &&
+      !observed['/'].content.includes('class="section-number"') &&
+      !observed['/'].content.includes('operator-proof-icon'),
     // Distinct from generic health/readiness: this verifies the new TBT-first
     // homepage is actually on Hostinger, not only committed to GitHub.
     heroTbtShowroomDeployed: observed['/'].status === 200 &&

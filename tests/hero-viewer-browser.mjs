@@ -253,7 +253,7 @@ try {
     await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-front.webp');
     await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
     await expect(page.locator('#hero-product-stage')).not.toHaveAttribute('role','slider');
-    await expect(page.locator('.presenter-brand')).toContainText('Thuisbatterij');
+    await expect(page.locator('.site-header .presenter-brand')).toContainText('Thuisbatterij');
     console.log('PASS no-JS front fallback');
     await context.close();
   }
