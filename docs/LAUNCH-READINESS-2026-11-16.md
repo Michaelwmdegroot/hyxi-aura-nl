@@ -19,6 +19,8 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 
 ## 2. P0 — DESIGN circa 7/10 → minimaal 9/10 [HARD COMMERCIAL LAUNCH GATE]
 
+**Visuele V6-polish technisch afgerond en live:** [feature PR #41](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/41) verwijdert AI-achtige micro-labels/bolletjes en nummerstempels, maakt het footerwoordmerk TBT-first zoals de header en benadrukt de fabrikantbevestigde ingebouwde ATS-back-up, zonder overclaim. [V6-releasebewijs](PHASE5-EDITORIAL-POLISH-2026-11-16.md), [PR-head CI 3/3](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43938494028), [Hostinger **12/12** GET-check](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43939496350). **Nog open:** de subjectieve eigenaarsscore van V6, echte Safari-review en commerciële sales/SEO/privacy GO/NO-GO. Geen 9/10 of conversie-uplift zonder bewijs.
+
 **Hero V5 is technisch gereed en live:** [PR #39](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/39) verwijdert het linker instructieblok volledig. De foto wisselt direct op linker-, middelste (32%) en rechterdeel van de **zichtbare batterijbreedte**, met GSAP-microbeweging; mobiele swipe/tap en toetsenbord zijn behouden. [Releasebewijs en technische regels](PHASE5-HERO-V5-ZONES-2026-11-16.md), [3/3 CI](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929956182) en [11/11 productiereadiness](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43929956171). **Nog open:** eigenaarreview van V5 op desktop en echte mobiele Safari, volledige 9/10-lanceereis en overige sales/SEO/privacy-gates.
 
 

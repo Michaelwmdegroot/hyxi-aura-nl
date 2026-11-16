@@ -95,3 +95,6 @@ Nieuwe headertekst op de homepage: **Thuisbatterij Team / presenteert / HYXI AUR
 
 ## Hero V4 — GSAP (16 november 2026)
 Officiële GSAP core **3.15.1** als lokaal `public/vendor/gsap.min.js` ingesloten via exact `greensock/GSAP` `dist/gsap.min.js`, blob `c6d5f8578c41d46a6624e94aaa44b8b9ef779461`. **Alle originele auteurs-/licentietekst behouden**; standaard commerciële websitevergunning zie https://gsap.com/standard-license/. Productfoto's, fabrikantbron, afmetingen en oorspronkelijke V3 CSS-kalibratie zijn **ongewijzigd**; GSAP animeert een aparte binnenste pivot en overgangsopaciteit en maakt dus geen nieuwe camerafoto's of 3D-model. Zie `docs/PHASE5-HERO-V4-GSAP-2026-11-16.md`.
+
+## Hero V6 — geen verzonnen nieuw logo (16 november 2026)
+Het footerlogo is, net als de header, een typografische **Thuisbatterij Team / presenteert HYXI AURA**-merkcombinatie in de bestaande huisstijl. Er is **geen** nieuw grafisch logo geüpload, geen HYXI-fabrikantlogo veranderd of onofficiële dealerstatus geclaimd. De oorspronkelijke HYXI-productfoto's, merklicenties en GSAP-component zijn ongewijzigd. De verandering aan de USP is gebaseerd op de officiële HYXI Aura-productpagina: ingebouwde ATS zonder aparte back-upgateway (bron: https://www.hyxipower.com/nl/ProductsDetail/hyxi-aura); uiteindelijke geschiktheid voor groepen/vermogen wordt door de installateur beoordeeld.
