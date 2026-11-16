@@ -4,6 +4,7 @@ import { openLead, parseEncryptionKey, sealLead } from '../db/crypto.mjs';
 import { normalizeFollowup, parseFollowupInput } from './followup.mjs';
 import { assertAdminStructure, assertMigrationChecksum } from '../db/schema-check.mjs';
 import { createAdminOperations } from './operations.mjs';
+import { createPrivacyOperations } from './privacy.mjs';
 
 const STATUSES = new Set(['new','contact_planned','in_progress','quote_requested','quote_sent','won','lost','not_suitable']);
 const VALID_ID = /^AURA-[a-f0-9-]{36}$/;
@@ -257,5 +258,5 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
     }finally{conn.release();}
   }
 
-  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus,updateFollowup,...createAdminOperations({pool})};
+  return {login,currentSession,logout,summary,listLeads,getLead,changeStatus,updateFollowup,...createAdminOperations({pool}),...createPrivacyOperations({pool,leadEncryptionKey})};
 }
