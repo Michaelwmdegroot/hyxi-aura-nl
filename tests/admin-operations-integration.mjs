@@ -68,6 +68,19 @@ try {
   await assert.rejects(() => store.assignLead(admin, lead.requestId, disabled.id), { code: 'BAD_ASSIGNEE' });
   assert.equal((await store.assignLead(admin, lead.requestId, sales.id)).changed, true);
   assert.equal((await store.assignLead(admin, lead.requestId, sales.id)).changed, false);
+  // Aggregate KPI source of truth: only committed lead rows, sales sees own assignment.
+  const adminMetrics=await store.leadMetrics(admin);
+  assert.equal(adminMetrics.period.days,14);
+  assert.equal(adminMetrics.days.length,14);
+  assert.equal(adminMetrics.scope,'all');
+  assert.ok(adminMetrics.totals.received>=2);
+  const salesMetrics=await store.leadMetrics(sales);
+  assert.equal(salesMetrics.scope,'assigned');
+  assert.equal(salesMetrics.totals.received,1);
+  assert.equal(salesMetrics.totals.advice,1);
+  assert.equal(salesMetrics.totals.quote,0);
+  assert.doesNotMatch(JSON.stringify(salesMetrics),/operations@example|Fictional Operations Applicant/);
+
   assert.equal((await store.getLead(sales, lead.requestId)).contact.fullName, 'Fictional Operations Applicant');
   const followUpPayload={nextAction:'Afspraak bevestigen',dueDate:'2026-11-24',note:'Volgende week bellen'};
   assert.equal((await store.updateFollowup(sales,lead.requestId,followUpPayload)).changed,true);
@@ -170,7 +183,16 @@ try {
   const base = 'http://127.0.0.1:' + server.address().port;
   assert.equal((await fetch(base + '/api/beheer/outbox')).status, 401);
   assert.equal((await fetch(base + '/api/beheer/followups')).status,401);
+  assert.equal((await fetch(base+'/api/beheer/metrics')).status,401);
   const salesHeaders = await login(base, sales), adminHeaders = await login(base, admin);
+  const metricResponse=await fetch(base+'/api/beheer/metrics',{headers:adminHeaders});
+  assert.equal(metricResponse.status,200);
+  assert.equal(metricResponse.headers.get('cache-control'),'no-store');
+  const metricBody=await metricResponse.json();
+  assert.equal(metricBody.period.timezone,'UTC');
+  assert.ok(metricBody.totals.received>=2);
+  assert.equal((await (await fetch(base+'/api/beheer/metrics',{headers:salesHeaders})).json()).totals.received,0);
+
   await store.updateFollowup(admin,lead.requestId,{nextAction:'Bel vandaag',dueDate:todayInAmsterdam(),note:''});
   const adminDueResponse=await fetch(base+'/api/beheer/followups',{headers:adminHeaders});
   assert.equal(adminDueResponse.status,200);
