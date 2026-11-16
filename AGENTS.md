@@ -24,3 +24,8 @@
 - Browser dashboard must stay within a 390px viewport without document expansion; the mobile list uses responsive cards while maintaining semantic table cells.
 
 - Privacy-export en handmatige delete zijn voor admin via /beheer beschikbaar. Een delete verwijdert uitsluitend de HYXI-databaselead en cascaderijen; stel nooit voor dat daarmee mail/Odoo/Hostinger-back-ups ook verwijderd zijn. Zie [P1 privacyhandboek](docs/PRIVACY-P1-MANUAL-OPS-2026-11-16.md). Gebruik niet de publieke lead-API voor privacyoperaties.
+
+
+## Phase 4 kennis- en UX-pagina's
+
+Zie [Phase 4 SEO-uitvoering](docs/PHASE4-SEO-RELEASE-2026-11-16.md) en [SEO-strategie](docs/SEO-STRATEGY.md). Houd de twee kennispagina's onder `kennis/` originele, source-backed voorlichting en geen duplicate marketingpagina's. Leg de productwaarden naast `src/product-data.mjs`; geen nieuw claims zonder `docs/PRODUCT-SOURCES.md` bij te werken. De nieuwe Playwright-controle op 1440, 390 en 320 px, axe en sitemapgates hoort bij CI. 

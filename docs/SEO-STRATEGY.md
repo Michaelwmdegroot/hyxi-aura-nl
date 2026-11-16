@@ -58,3 +58,18 @@ Elke uitbreiding moet een bezoekersvraag beantwoorden die de bestaande pagina no
 - [Google Search Essentials](https://developers.google.com/search/docs/essentials)
 
 Deze strategie is onderbouwd met de bovenstaande richtlijnen, gelezen op 14 november 2026. De uiteindelijke indexering en ranking blijven beslissingen van zoekmachines.
+
+## Phase 4 — gerichte contentuitbreiding (16 november 2026)
+
+Uitvoering onder [PR #30](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/30), issue [#7](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/7):
+
+| Canonieke URL | Unieke bezoekersvraag | Inhoudelijke waarde |
+| --- | --- | --- |
+| `/kennis/bat-q7-vs-bat-q9/` | BAT-Q7 of BAT-Q9: welke capaciteit past? | Officiële modulegegevens, bruikbare versus nominale kWh, opbouwtabellen (1/2/3/6 modules) en keuzevragen zonder fictief rendement |
+| `/kennis/noodstroom/` | Wat blijft bij een HYXI AURA-stroomuitval werken? | 0 ms omschakeling, ATS, verschil tussen 63 A doorlaatstroom en geleverd noodvermogen, verbruikers, faseverdeling en voorbereidende checklist |
+
+**Ontwerpbesluit:** geen derde generiek blogartikel totdat vraag, zoekintentie en betrouwbare productinformatie een nieuwe pagina rechtvaardigen. Beide pagina's zijn nieuwe Vite-ingangen (HTML al leesbaar vóór JavaScript) met eigen title/meta/canonical/OG, `Article` en `BreadcrumbList` in JSON-LD, links uit de bestaande homepage en terug naar configurator en offerte. Sitemap heeft nu zes bedoelde publieke URL's. Structured data bevat geen Offer/price/review.
+
+**Broncontrole:** officiële Nederlandse HYXI AURA-productpagina opnieuw gelezen op 16 november 2026. De lokaal vastgelegde V2.1-datasheets van 26 oktober blijven expliciet `Preliminary`; geen nieuwe afwijkende specs overgenomen. Zie [productbronnen](PRODUCT-SOURCES.md).
+
+**Echte SEO-meting:** niet beschikbaar. De bestaande gekoppelde GSC Wizard-verbinding reageert met `payment_required` (geen geldig abonnement), zodat Search Console-eigendom, URL-indexatie, klikken en posities **niet** bewezen zijn. Dit is geen reden om contentpublicatie te blokkeren of fictieve GSC-gegevens te tonen. Zodra geautoriseerde GSC-toegang beschikbaar is: eigendom verifiëren, de canonieke sitemap indienen, URL Inspectie gebruiken en per intentie echte query- en pagina-impressies beoordelen. Geen rankings, deadlines of indexatie garanderen.

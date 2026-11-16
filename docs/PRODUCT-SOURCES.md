@@ -67,3 +67,13 @@ De batterijcycluswaarde is 10.000 onder de gespecificeerde testcondities, met 60
 ## Onderhoud
 
 Bij wijziging van brondata: download de nieuwe fabrikantdocumenten, vergelijk de verschillen, werk de gegevensmodule en zichtbare toelichting samen bij en noteer de nieuwe controledatum. Bewaar oudere bronverwijzingen in Git. Laat de installateur het uiteindelijke ontwerp en de offerte toetsen aan de daadwerkelijk leverbare uitvoering.
+
+## Aanvullende broncheck voor Phase 4 — 16 november 2026
+
+De [officiële HYXI AURA-pagina (NL)](https://www.hyxipower.com/nl/ProductsDetail/hyxi-aura) is opnieuw gecontroleerd. Daarop worden de geïntegreerde ATS, 0 ms omschakeling, 63 A doorlaatstroom per fase en modulaire uitbreiding nog beschreven. Dit herbevestigt de kwalitatieve uitleg in de nieuwe kennisgidsen, niet de geschiktheid van een specifieke woning.
+
+De in deze repository bewaarde datasheets blijven **V2.1 van 26 oktober 2026, Preliminary**. Er is bij deze sprint **geen nieuwe definitieve datasheet geclaimd**, geen garantie in de bronmodule gewijzigd en geen prijzen of beschikbaarheid toegevoegd. Gebruik dezelfde brondata voor de nieuwe inhoud:
+- `/kennis/bat-q7-vs-bat-q9/`: per module BAT-Q7 7,03/6,7 kWh en 3,5 kW / 68 kg; BAT-Q9 9,04/8,6 kWh en 4,6 kW / 79 kg; geaggregeerde kWh zijn rekenkundige illustraties.
+- `/kennis/noodstroom/`: geïntegreerde ATS en fabrikantvermelde 0 ms, 63 A **doorlaatstroom** expliciet niet gelijkgesteld aan geleverd noodvermogen; installateur bepaalt groepen, reserve en aansluiting.
+
+Inzichtelijk bronlog: [Phase 4 SEO-release](PHASE4-SEO-RELEASE-2026-11-16.md). Controleer beide fabrikantdocumenten opnieuw vóór een bindende klantofferte.
