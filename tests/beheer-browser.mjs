@@ -48,6 +48,13 @@ const fakeAdmin={
     ...(!privacyDeleted?[{id:leadData.id,requestId,status:leadStatus,requestType:'advice',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:'accepted'}]:[]),
     {id:'2c000000-1111-4111-8111-222222222222',requestId:secondId,status:'quote_requested',requestType:'quote',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:notification.status},
   ]};},
+  async listDueFollowups(_user){
+    const base={asOf:'2026-11-16',checked:2,limited:false};
+    const first={requestId,dueDate:'2026-11-15',nextAction:'Test vervolgcontact',priority:'overdue',status:leadStatus,requestType:'advice',assignedTo:salesId};
+    const second={requestId:secondId,dueDate:'2026-11-16',nextAction:'Offerte bespreken',priority:'today',status:'quote_requested',requestType:'quote',assignedTo:null};
+    return role==='admin'?{...base,overdue:1,todayCount:1,items:[first,second]}:
+      {...base,overdue:1,todayCount:0,items:[first]};
+  },
   async getLead(_user,id){assert.equal(id,requestId);if(deferredDetail){waitingDetails++;await deferredDetail;}return {...leadData,status:leadStatus,assignedTo,followUp};},
   async updateFollowup(_user,id,input){assert.equal(id,requestId);followupUpdates++;followUp={nextAction:input.nextAction,dueDate:input.dueDate,notes:input.note?[...followUp.notes,{text:input.note,createdAt:now,authorId:'1'}]:followUp.notes};return {requestId:id,changed:true,followUp};},
   async changeStatus(_user,id,status){assert.equal(id,requestId);leadStatus=status;statusChanges++;return {requestId:id,status,changed:true};},
@@ -136,6 +143,20 @@ async function loginAndReview(context,label){
   await accessibility(page,label+'/dashboard');
   await layout(page,label+'/dashboard');
   await page.screenshot({path:resolve(output,'beheer-'+label+'-dashboard.png')});
+  await expect(page.locator('#followupsTab')).toBeVisible();
+  await page.locator('#followupsTab').click();
+  await expect(page.locator('#followupsPanel')).toBeVisible();
+  await expect(page.locator('.due-item')).toHaveCount(2);
+  await expect(page.locator('#dueSummary')).toContainText('1 verlopen');
+  await expect(page.locator('#dueSummary')).toContainText('1 voor vandaag');
+  await expect(page.locator('#dueCount')).toHaveText('2');
+  await accessibility(page,label+'/due-worklist');
+  await layout(page,label+'/due-worklist');
+  await page.locator('.due-open').first().click();
+  await expect(page.locator('#detailTitle')).toHaveText(requestId);
+  await page.locator('#closeDetail').click();
+  await page.locator('#leadsTab').click();
+
   await page.locator('.open-lead').first().click();
   await expect(page.locator('#detailPane')).toBeVisible();
   await expect(page.locator('#detailTitle')).toHaveText(requestId);
@@ -249,6 +270,7 @@ async function loginAndReview(context,label){
   if(deferredList){releaseList();deferredList=null;await page.waitForTimeout(75);}
   await expect(page.locator('#leadRows')).toBeEmpty();
   await expect(page.locator('#outboxItems')).toBeEmpty();
+  await expect(page.locator('#dueItems')).toBeEmpty();
   await expect(page.locator('#currentUser')).toHaveText('Beheerder');
   assert.equal(await page.evaluate(async()=> (await fetch('/api/beheer/leads')).status),401);
   assert.deepEqual(exceptions,[],label+' JavaScript exceptions');
@@ -265,7 +287,12 @@ async function checkSalesAndExpiry(){
   await page.locator('#password').fill('FictiefEnVeiligWachtwoord2026!');
   await page.locator('#loginButton').click();
   await expect(page.locator('#dashboardView')).toBeVisible();
-  await expect(page.locator('#workbenchViews')).not.toBeVisible();
+  await expect(page.locator('#workbenchViews')).toBeVisible();
+  await expect(page.locator('#outboxTab')).not.toBeVisible();
+  await page.locator('#followupsTab').click();
+  await expect(page.locator('.due-item')).toHaveCount(1);
+  await expect(page.locator('#dueCount')).toHaveText('1');
+  await page.locator('#leadsTab').click();
   await page.locator('.open-lead').first().click();
   await expect(page.locator('#contactFields')).toContainText('Fictieve Browsercontrole');
   await expect(page.locator('#assignmentForm')).not.toBeVisible();
@@ -290,7 +317,7 @@ try{
   const mobile=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:'nl-NL',isMobile:true,hasTouch:true});
   await loginAndReview(mobile,'mobile');
   await checkSalesAndExpiry();
-  console.log('PASS desktop/mobile Beheer, privacy export/manual delete, mail incident review/retry, assignment, expired CSRF renewal, sales isolation, keyboard, logout and WCAG A/AA');
+  console.log('PASS desktop/mobile Beheer including due worklists, privacy export/deletion, mail review, role assignment, expiry, keyboard, logout and WCAG A/AA');
 } finally {
   // Always release intentionally delayed responses, even if an assertion
   // fails, so CI reports the actual failure instead of timing out in close().
