@@ -304,20 +304,30 @@ try {
     await page.goto(`${live.origin}/?utm_source=browser-qa&utm_medium=test`, { waitUntil: 'load' });
     await page.evaluate(async () => { await document.fonts.ready; });
     await assertImages(page, viewport.label);
-    // Three source-backed product views are reachable without sacrificing the
-    // existing interactive energy, configurator or lead-form journey.
+    // Product stage is the accessible control; no floating selector remains.
     const heroProduct = page.locator('#hero-product-image');
-    await expect(page.locator('.hero-view-switcher')).toBeVisible();
-    for (const [view, src] of [['angle', '/images/aura-angle.webp'], ['side', '/images/aura-side.webp'], ['front', '/images/aura-front.webp']]) {
-      const control = page.locator(`[data-aura-view="${view}"]`);
-      await control.click();
-      await expect(control).toHaveAttribute('aria-pressed', 'true');
+    const productStage = page.locator('#hero-product-stage');
+    await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
+    await expect(productStage).toHaveAttribute('role', 'slider');
+    await productStage.focus();
+    for (const [key, view, src, value] of [
+      ['ArrowRight', 'angle', '/images/aura-angle.webp', '2'],
+      ['ArrowLeft', 'front', '/images/aura-front.webp', '1'],
+      ['ArrowLeft', 'side', '/images/aura-side.webp', '0'],
+      ['Home', 'side', '/images/aura-side.webp', '0'],
+      ['End', 'angle', '/images/aura-angle.webp', '2'],
+      ['ArrowLeft', 'front', '/images/aura-front.webp', '1']
+    ]) {
+      await productStage.press(key);
+      await expect(productStage).toHaveAttribute('data-active-view', view);
+      await expect(productStage).toHaveAttribute('aria-valuenow', value);
       await expect(heroProduct).toHaveAttribute('src', src);
       await expect(heroProduct).toHaveAttribute('alt', /HYXI AURA/);
-      await expect.poll(() => heroProduct.evaluate(image => image.complete && image.naturalWidth > 0), {timeout:10000}).toBe(true);
-      await assertNoOverflow(page, `${viewport.label}/hero-${view}`);
+      await expect.poll(() => heroProduct.evaluate(img => img.complete && img.naturalWidth > 0), { timeout: 10000 }).toBe(true);
+      await assertNoOverflow(page, viewport.label + '/hero-' + view);
     }
-    record(`${viewport.label}: three official HYXI gallery views load and remain accessible`);
+    await productStage.evaluate(node => node.blur());
+    record(viewport.label + ': all three HYXI product views accessible from an invisible-zone keyboard slider');
     await assertNoOverflow(page, viewport.label);
     await accessibility(page, `${viewport.label}/initial-page`);
     await page.screenshot({ path: resolve(resultsDir, `${viewport.label}-page.png`), fullPage: true });
