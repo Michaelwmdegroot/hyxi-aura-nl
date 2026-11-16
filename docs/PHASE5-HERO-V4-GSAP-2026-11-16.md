@@ -44,7 +44,7 @@ Hero V3 wordt duidelijk beter gevonden, maar **de beweging van de batterij voelt
 
 ## Bewijslog / QA
 
-**Alle testresultaten, corrections, PR, merge-SHA en productiecontrole worden na uitvoering ingevuld.**
+**Feitelijke test-, PR- en productiegegevens staan hieronder; eerdere planpunten worden als historisch bewaard.**
 
 ## 16 november 2026 — eerste geslaagde implementatie- en browsercontrole
 
@@ -56,4 +56,20 @@ De browser-output bewijst:
 - `PASS reduced motion`, `PASS real mobile horizontal swipe`, `PASS no-GSAP fallback`, `PASS image failure` en `PASS no-JS front fallback`.
 - Actuele CI-Lighthouse: desktop **100/100/100/100**, mobiel **99/100/100/100** (performance/a11y/best practices/SEO); geen opvallende regressie. Geen claim over echte mobiele Safari, veldervaring of gebruikerstevredenheid.
 
-De repository heeft nu het officiële **GSAP 3.15.1** core-bestand lokaal onder `public/vendor/gsap.min.js`, inclusief originele licentiekop, Git-object gelijk aan de gecontroleerde GreenSock GitHub-versie. De bestaande afbeeldingen blijven ongewijzigd. Deze eerste QA wordt gevolgd door een extra assertie op GSAP's laatste beeldkeuze en de publieke V4-herkenning; **merge + publieke readiness zijn hier nog niet als afgerond aangemerkt**.
+De repository heeft nu het officiële **GSAP 3.15.1** core-bestand lokaal onder `public/vendor/gsap.min.js`, inclusief originele licentiekop, Git-object gelijk aan de gecontroleerde GreenSock GitHub-versie. De bestaande afbeeldingen blijven ongewijzigd. Deze eerste QA wordt gevolgd door een extra assertie op GSAP's laatste beeldkeuze en de publieke V4-herkenning; **deze regel beschrijft uitsluitend de eerste vóór-merge QA; de actuele merge- en productieacceptatie staan hier direct onder**.
+
+## Definitieve Hero V4-release — 16 november 2026
+
+**Live en gemerged:** [PR #37](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/37) is met squash gemerged in `main` als **`031b557f216867e32332d2950018c3f136a0b2a8`**. Werkelijke demo: **https://hyxi-aura.nl/**.
+
+**Volledige testgates:**
+- [Finale PR-head Build & verify 43922330047](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43922330047) **3/3 groen**; bron-/admin-/API-, Node24/Hostinger, MySQL8, hele website/browser, echte browsergestures, WCAG en Lighthouse.
+- [Post-merge Build & verify 43923021215](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43923021215) **3/3 groen**.
+- [Public production readiness 43923021021](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43923021021), poging 2 **11/11 PASS** inclusief **`heroTbtShowroomDeployed`**, nu expliciet getoetst op `presenter-subline`, `hero-product-pivot` en lokaal `/vendor/gsap.min.js`. Eerste poging faalde uitsluitend op die hero-check (10/11) omdat Hostinger nog V3 serveerde. De bestaande lead- en securitychecks bleven groen; de tweede run heeft de werkelijke V4 HTML bevestigd zonder lead of mail te versturen.
+- Browser op 1440, 768, 390 en 320px: tweede merkregel past onder het hoofdwoordmerk, foto's behouden oorspronkelijke V3-geometrie <3,5px afwijking, geen overflow, A/AA. GSAP `quickTo` geverifieerd via **tussenpose** en complete linker-, front-, rechteraanzichten; snelle pointeromkering blijft bij juiste eindhoek. Mobiele swipe/tap, reduced motion, geblokkeerde GSAP, foutief hoekbeeld en no-JS zijn geslaagd.
+- [Finale screenshotartifact bij CI](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43922330047): `phase5-hero-1440-page.png`, `phase5-hero-390-page.png` en alle drie kalibreerde views op vier breedtes. Handmatige inspectie: rustige compositie blijft behouden; de tweede regel vormt één rustige lockup, geen zichtbaar gewijzigd productmodel.
+- Final PR-head Lighthouse (synthetische Chromium-test): **desktop 100/100/100/100**, **mobiel 100/100/100/100** voor performance/a11y/best practices/SEO. **Geen** claim van echte veldprestatie of iPhone Safari QA.
+
+**Acceptatie verwerkt in de checklist:** alle functionele, meetbare ontwikkelpunten uit de sectie "Acceptatie en release-gates" zijn via bovenstaande CI en publieke probe afgerond. **Uitzondering blijft de eigenaar-review op een echte iPhone Safari, en de commerciële 9/10-score.** Geen onafhankelijke volledige 3D-opname: officiële driehoekweergave met beperkte 2.5D microbeweging, geen 360° mesh.
+
+**Geen wijziging** aan originele HYXI-fabrikantfoto's, MariaDB, login/Beheer, SMTP/outbox, mail→Odoo, echte klantdossiers of Hostinger-backups. Externe scripts/cookies niet toegevoegd: de originele GSAP-core wordt lokaal geserveerd. Voor rollbacks revert de squash van #37; geen schema-/mail-/beheermutaties nodig.
