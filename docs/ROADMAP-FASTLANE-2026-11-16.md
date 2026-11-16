@@ -37,7 +37,7 @@ De bestaande proef gebruikte correlatie-ID `AURA-5c724b2b-2f4a-40f3-849e-41c7f42
 
 ### Eerst: P1 — afmaken wat bestaande leads oplevert
 
-**A. Bewaartermijn en privacyverzoeken daadwerkelijk uitvoerbaar maken ([#2](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/2), [#9](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/9)).** De openbare privacytekst noemt zes maanden na laatste contact voor afgesloten niet-klantaanvragen, maar de applicatie handhaaft dit **niet automatisch**. Maak een eenvoudig, gecontroleerd verwijder-/exportproces voor admingebruik dat de versleutelde lead, gekoppelde outbox, indien nodig aanvraagcodes, events en interne notities omvat. Houd mailboxkopieën en eventuele Odoo-records expliciet als afzonderlijke verwerking; verwijder deze niet alsof één SQL-delete alles wist. Verzoekauthenticatie, juridische uitzonderingen en audit moeten kloppen. Geen destructieve bulkcleanup zonder review; test uitsluitend op fictieve CI-data.
+**A. Privacy & bewaartermijnen ([#2](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/2), [#9](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/9)).** **GEREALISEERD in [PR #24](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/24):** actieve HYXI-beheerders kunnen één dossier inclusief versleutelde notities geauditeerd exporteren en via een dubbele handmatige, streng gevalideerde bevestiging uit de HYXI-database verwijderen. Een lopende mailverzending of gewonnen klantdossier wordt niet stilzwijgend verwijderd; audit behoudt een niet-herleidbaar actie-/redenbewijs. **OPEN:** de zesmaandenbewaarafspraak wordt nog **niet automatisch** afgedwongen, omdat een betrouwbare datum van laatste klantcontact ontbreekt. Het rechtmatige verwijderproces voor e-mail- en Odoo-kopieën vergt aparte uitvoering; Hostinger-backups volgen het door eigenaar geaccepteerde hostingschema. Niet opnieuw de handmatige export/delete-flow bouwen. Lees [de P1 privacy-uitvoeringsdocumentatie](PRIVACY-P1-MANUAL-OPS-2026-11-16.md).
 
 **B. Opvolgacties in Beheer nuttig maken ([#4](https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/4)).** Volgende actie en vervolgdatum bestaan al, maar een overzicht 'vandaag/verlopen' en betrouwbare, idempotente opvolgherinnering ontbreken. Voeg die lichtgewicht toe; controleer of Odoo-opvolging al volstaat voor het team om dubbele werkstromen te voorkomen. Geen nieuw CRM of directe Portal-infrastructuur. Onderzoek een dagelijkse operationele samenvatting naar `leads@` of een beveiligd takenoverzicht, zonder klantgegevens in logs en zonder herinneringsspam.
 
@@ -64,7 +64,7 @@ De bestaande proef gebruikte correlatie-ID `AURA-5c724b2b-2f4a-40f3-849e-41c7f42
 | GitHub-issue | Feitelijke status | Wat nog nodig is |
 | --- | --- | --- |
 | #1 SMTP/livegang/privacy | **Kern gereed en productiebewezen** | Restpunten mailoperatie kunnen naar #9; niet opnieuw de leadflow bouwen |
-| #2 MySQL/outbox | **Engine gereed** | Privacybewaartermijn, verwijdering/export |
+| #2 MySQL/outbox | **Engine plus handmatige privacyexport/delete gereed** | Betrouwbare laatste-contactdatum, automatische bewaartermijn en externe kopieën blijven open |
 | #3 Beheer-login/auth | **Afgerond voor eigenaarsscope** | Optionele uitnodigingen geen huidige afhankelijkheid |
 | #4 Werkbank | **Zoeken/notities/takenvelden gereed** | Vervallen-takenoverzicht en reminder, eventueel veilige export |
 | #5 Offerte | **Pagina live, CI groen** | Eén aparte live quotecontrole, daarna verdere conversieoptimalisatie |
@@ -79,4 +79,4 @@ De bestaande proef gebruikte correlatie-ID `AURA-5c724b2b-2f4a-40f3-849e-41c7f42
 - Voor elke wijziging: gericht op bestaande `main`, test en PR; volledige CI groen vóór merge. Publieke monitor na productiepush, maar niet verwarren met echte maildelivery.
 - Geen geheimen, echte persoonlijke data of onbeschermde SQL-export in bronbeheer. Geen onverwachte bulkmail, automatische verwijderactie of directe Odoo-manipulatie.
 - Track `DONE / OPEN / DEFERRED` met controleerbaar bewijs; geen percentage 'project af' verzinnen.
-- De eerstvolgende agent **begint met P1 privacy- en opvolgfunctionaliteit**, niet met herbouw van fundamenten of Hostinger-back-ups.
+- De eerstvolgende agent **begint met P1 opvolgwerkbak, betrouwbare laatste-contactregistratie en monitoring**, niet met herbouw van handmatige privacyexport/delete, fundamenten of Hostinger-back-ups.
