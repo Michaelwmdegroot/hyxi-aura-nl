@@ -57,6 +57,7 @@ jobs:
         run: |
           npm run test:browser
           node tests/knowledge-browser.mjs
+          node tests/hero-viewer-browser.mjs
 
       - name: Validate Beheer login and workbench in Chromium
         timeout-minutes: 5
