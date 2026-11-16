@@ -86,7 +86,7 @@
             <div><h2 id="metricsTitle">Aanvragen in cijfers</h2><p>Werkelijk opgeslagen HYXI-aanvragen per ontvangstdag. Geen cookies of advertentiepixels.</p></div>
             <span class="admin-label" id="metricsScope">Laatste 14 dagen · UTC</span>
           </div>
-          <div class="kpi-stats" aria-label="Totaal ontvangen aanvragen in deze periode">
+          <div class="kpi-stats" role="group" aria-label="Totaal ontvangen aanvragen in deze periode">
             <div class="kpi-stat"><span>Ontvangen</span><strong id="kpiTotal">—</strong></div>
             <div class="kpi-stat"><span>Adviesaanvragen</span><strong id="kpiAdvice">—</strong></div>
             <div class="kpi-stat"><span>Offerteaanvragen</span><strong id="kpiQuote">—</strong></div>
@@ -94,7 +94,7 @@
           <div class="kpi-chart-scroller" role="region" aria-label="Dagelijkse aanvragen, horizontaal scrollbaar" tabindex="0">
             <div class="kpi-days" id="kpiDays" role="list" aria-label="Dagelijkse aanvragen per type"></div>
           </div>
-          <div class="kpi-legend"><span><i class="kpi-dot kpi-advice"></i> Advies</span><span><i class="kpi-dot kpi-quote"></i> Offerte</span></div>
+          <div class="kpi-legend"><span><i class="kpi-dot kpi-advice" aria-hidden="true"></i> Advies</span><span><i class="kpi-dot kpi-quote" aria-hidden="true"></i> Offerte</span></div>
           <p id="kpiMessage" class="list-message" role="status"></p>
           <p class="due-explanation">Deze cijfers komen uitsluitend uit nog aanwezige HYXI-dossiers, gegroepeerd op ontvangstdatum in UTC. Dit zijn geen websitebezoeken, conversiepercentages of bewezen contacttijden. Verwijderde dossiers tellen niet mee.</p>
         </section>
