@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { probeProduction } from '../scripts/probe-production.mjs';
 
 const good = {
-  '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span></div>'],
+  '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
   '/privacy/': [200, 'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database'],
@@ -24,7 +24,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,11);
+  assert.equal(Object.keys(result.checks).length,12);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -89,4 +89,15 @@ test('V5 public readiness rejects the old left floating angle selector and missi
   const stale=await probeProduction(mock({...good,'/':[200,previous]}));
   assert.equal(stale.checks.heroTbtShowroomDeployed,false);
   assert.equal(stale.ok,false);
+});
+
+test('read-only public probe detects editorial regression, old corporate footer and missing ATS',async()=>{
+  const v5=good['/'][1].replace('footer-presenter','old-hyxi-footer').replace('id="backup-usp"','id="old-card"');
+  const result=await probeProduction(mock({...good,'/':[200,v5]}));
+  assert.equal(result.checks.editorialBrandAndBackupDeployed,false);
+  assert.equal(result.ok,false);
+  assert.equal(result.checks.heroTbtShowroomDeployed,true);
+  const generic=good['/'][1].replace('id="backup-usp"','id="backup-usp" class="hero-eyebrow"');
+  const oldEyebrow=await probeProduction(mock({...good,'/':[200,generic]}));
+  assert.equal(oldEyebrow.checks.editorialBrandAndBackupDeployed,false);
 });
