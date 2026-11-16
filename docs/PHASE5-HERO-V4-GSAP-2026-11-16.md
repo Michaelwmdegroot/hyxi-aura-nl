@@ -45,3 +45,15 @@ Hero V3 wordt duidelijk beter gevonden, maar **de beweging van de batterij voelt
 ## Bewijslog / QA
 
 **Alle testresultaten, corrections, PR, merge-SHA en productiecontrole worden na uitvoering ingevuld.**
+
+## 16 november 2026 — eerste geslaagde implementatie- en browsercontrole
+
+**[PR #37](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/37)**, feature `feature/hero-v4-gsap-orbit`. **Exact CI-head-run**: [43921263897](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43921263897) **3/3 success** (production build, isolated MySQL/outbox, browser/Beheer/Lighthouse). Een eerste visuele review van de uit CI gegenereerde beelden `phase5-hero-1440-page.png` en `phase5-hero-390-page.png` bevestigt de nieuwe tweeregelige merkpresentatie zonder overlap en behoud van de rustige hero-compositie.
+
+De browser-output bewijst:
+- Vier schermbreedtes **1440/768/390/320**: `PASS hero` (gelijke zichtbare producthoogte, voetlijn en center bij knopselectie, max. 3,5 px afwijking; WCAG A/AA en geen overflow).
+- `PASS GSAP eased pointer orbit`: numerieke pose wordt onderweg geanimeerd in plaats van direct naar een vak te springen.
+- `PASS reduced motion`, `PASS real mobile horizontal swipe`, `PASS no-GSAP fallback`, `PASS image failure` en `PASS no-JS front fallback`.
+- Actuele CI-Lighthouse: desktop **100/100/100/100**, mobiel **99/100/100/100** (performance/a11y/best practices/SEO); geen opvallende regressie. Geen claim over echte mobiele Safari, veldervaring of gebruikerstevredenheid.
+
+De repository heeft nu het officiële **GSAP 3.15.1** core-bestand lokaal onder `public/vendor/gsap.min.js`, inclusief originele licentiekop, Git-object gelijk aan de gecontroleerde GreenSock GitHub-versie. De bestaande afbeeldingen blijven ongewijzigd. Deze eerste QA wordt gevolgd door een extra assertie op GSAP's laatste beeldkeuze en de publieke V4-herkenning; **merge + publieke readiness zijn hier nog niet als afgerond aangemerkt**.

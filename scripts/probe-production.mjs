@@ -35,9 +35,14 @@ export async function probeProduction(fetcher = fetch) {
       } catch {
         observed[path] = { status: 0, data: null, content: '' };
       }
+      // The homepage title was already correct in V3. Keep retrying during a
+      // Hostinger deploy until the actual V4 local-GSAP + two-line hero lands.
+      const rootV4 = path !== '/' || (observed[path].content.includes('presenter-subline') &&
+        observed[path].content.includes('id="hero-product-pivot"') &&
+        observed[path].content.includes('src="/vendor/gsap.min.js"'));
       if (!guide || (observed[path].status === 200 &&
         observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
-        observed[path].content.includes(guide.title))) break;
+        observed[path].content.includes(guide.title) && rootV4)) break;
       if (attempt + 1 < attempts) await new Promise(resolve => setTimeout(resolve, 10000));
     }
   }
@@ -51,6 +56,9 @@ export async function probeProduction(fetcher = fetch) {
       observed['/'].content.includes('Thuisbatterij') &&
       observed['/'].content.includes('presenteert') &&
       observed['/'].content.includes('presenter-product') &&
+      observed['/'].content.includes('presenter-subline') &&
+      observed['/'].content.includes('id="hero-product-pivot"') &&
+      observed['/'].content.includes('src="/vendor/gsap.min.js"') &&
       observed['/'].content.includes('id="hero-product-stage"') &&
       observed['/'].content.includes('data-product-gallery') &&
       observed['/'].content.includes('data-aura-view="front"') &&

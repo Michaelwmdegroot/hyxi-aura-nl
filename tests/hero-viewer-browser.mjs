@@ -149,7 +149,18 @@ try {
     for(const [ratio,view] of [[.12,'side'],[.50,'front'],[.88,'angle']]){
       await page.mouse.move(box.x+box.width*ratio,box.y+box.height*.5,{steps:5});
       await expect(stage).toHaveAttribute('data-active-view',view,{timeout:12000});
+      // The last frame of a completed GSAP dissolve must have exactly one
+      // visible photo (avoid persistent double-exposure).
+      const visiblePhotos = await page.locator('#hero-product-pivot').evaluate(el =>
+        [...el.querySelectorAll('.hero-product')].filter(img => Number(getComputedStyle(img).opacity) > .05).length);
+      assert.equal(visiblePhotos,1,'An orbit position must finish with one full product photo');
     }
+    // A fast reversal must always finish at the *latest* requested angle,
+    // not a stale image resolved by an earlier load/tween.
+    await page.mouse.move(box.x+box.width*.1,box.y+box.height*.5);
+    await page.mouse.move(box.x+box.width*.9,box.y+box.height*.5);
+    await expect(stage).toHaveAttribute('data-active-view','angle',{timeout:12000});
+    await expect(page.locator('[data-aura-view="angle"]')).toHaveAttribute('aria-pressed','true');
     console.log('PASS GSAP eased pointer orbit smoothly crosses the three accurate source views');
     await context.close();
   }
