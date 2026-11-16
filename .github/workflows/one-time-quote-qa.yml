@@ -1,0 +1,22 @@
+name: One-time synthetic HYXI AURA quote production QA
+
+on:
+  push:
+    branches:
+      - ops/one-time-quote-e2e-20261116
+
+permissions:
+  contents: read
+
+jobs:
+  public-quote-qa:
+    if: github.ref == 'refs/heads/ops/one-time-quote-e2e-20261116'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: One marked synthetic quote through current public API
+        run: node scripts/one-time-quote-qa.mjs
