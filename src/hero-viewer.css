@@ -19,8 +19,8 @@
 .hero-product-stage .hero-product[data-aura-angle="side"]{height:calc(var(--aura-body-height) * 1.075269);transform:translateX(calc(-50% + var(--aura-body-height) * .15))}
 /* Image angle: 2078x1000 optimized source, silhouette y~1..865, center x~1052.5. */
 .hero-product-stage .hero-product[data-aura-angle="angle"]{height:calc(var(--aura-body-height) * 1.157462);transform:translateX(calc(-50% - var(--aura-body-height) * .0147))}
-.hero-view-instruction{display:block;border-top:1px solid #e8e9e0;margin:3px 4px 0;padding:10px 2px 4px;color:#667260;font-size:10px;line-height:1.3;letter-spacing:.01em;text-align:center;font-weight:600}
 .hero-product-stage:active{cursor:grabbing}
+.hero-product-stage:focus-visible{outline:3px solid #b65131;outline-offset:5px;border-radius:8px}
 @media(max-width:1190px){.hero-visual{--aura-body-height:385px}.hero-visual .hero-product-stage{transform:translateY(28px)}}
 @media(max-width:950px){.hero-visual{--aura-body-height:350px}.hero-visual .hero-product-stage{transform:translateY(20px)}.presenter-brand .presenter-owner{font-size:16px}}
 @media(max-width:700px){
@@ -32,8 +32,6 @@
 .site-header .header-cta-short{display:inline}
 .hero .hero-visual{--aura-body-height:305px;min-height:405px}
 .hero-product-stage{flex-basis:100%;transform:translateY(8px)}
-.hero-visual .hero-view-switcher{top:1px;left:50%;transform:translateX(-50%);max-width:100%;white-space:nowrap}
-.hero-view-instruction{display:none}
 .hero-visual .hero-watermark{top:60px}
 .hero-visual .aura-halo{top:49%}
 .hero-visual .product-plinth{bottom:15px}
@@ -64,3 +62,9 @@
 @media(max-width:700px){.presenter-brand .presenter-subline .presenter-verb{font-size:9.2px}.presenter-brand .presenter-subline .presenter-product{font-size:9.6px;letter-spacing:.07em}}
 @media(max-width:360px){.presenter-subline{gap:3px}.presenter-brand .presenter-subline .presenter-verb{font-size:8.4px}.presenter-brand .presenter-subline .presenter-product{font-size:8.9px;letter-spacing:.045em}}
 @media(prefers-reduced-motion:reduce){.hero-product-pivot,.hero-visual .aura-halo,.hero-visual .product-plinth{will-change:auto}}
+
+/* V5: no visible view buttons, overlay or instructions. The battery itself
+   is the pointer, keyboard and touch control; the hidden description is for
+   assistive technologies only. */
+.hero-product-stage[data-aura-zone-viewer]{cursor:ew-resize}
+@media(hover:none){.hero-product-stage[data-aura-zone-viewer]{cursor:default}}
