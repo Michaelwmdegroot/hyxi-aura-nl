@@ -54,8 +54,15 @@
           <article class="metric"><span>Alle aanvragen</span><strong id="statTotal">—</strong><small>In het register</small></article>
           <article class="metric"><span>Nieuw binnen</span><strong id="statNew">—</strong><small>Wacht op opvolging</small></article>
           <article class="metric"><span>Offerte gevraagd</span><strong id="statQuote">—</strong><small>Open offertewensen</small></article>
-          <article class="metric warning"><span>Mail ter controle</span><strong id="statMail">—</strong><small>Onzeker of mislukt</small></article>
+          <article class="metric warning" id="mailMetric"><span>Mail ter controle</span><strong id="statMail">—</strong><small>Onzeker of mislukt</small></article>
         </div>
+        <section class="mail-incident-alert" id="mailIncidentAlert" aria-label="Meldingen voor mailcontrole" hidden>
+          <div class="mail-incident-copy">
+            <strong id="mailIncidentTitle" role="status" aria-live="polite" aria-atomic="true"></strong>
+            <p id="mailIncidentDescription"></p>
+          </div>
+          <button type="button" id="openMailIncidents" class="secondary small">Open mailcontrole</button>
+        </section>
         <nav class="view-switch" id="workbenchViews" aria-label="Werkoverzicht" hidden>
           <button class="view-button" id="leadsTab" type="button" aria-pressed="true">Aanvragen</button>
           <button class="view-button" id="followupsTab" type="button" aria-pressed="false">Vervolgacties <span id="dueCount" hidden>0</span></button>
@@ -99,8 +106,8 @@
           <p class="due-explanation">Deze cijfers komen uitsluitend uit nog aanwezige HYXI-dossiers, gegroepeerd op ontvangstdatum in UTC. Dit zijn geen websitebezoeken, conversiepercentages of bewezen contacttijden. Verwijderde dossiers tellen niet mee.</p>
         </section>
         <section class="list-panel" id="outboxPanel" aria-labelledby="outboxTitle" hidden>
-          <div class="panel-heading"><div><h2 id="outboxTitle">Mailcontrole</h2><p>Je aanvragen zijn opgeslagen. Controleer hier de meldingen die aandacht vragen.</p></div><span class="admin-label">Beheerders</span></div>
-          <p class="outbox-explanation">Controleer bij een onzekere aflevering eerst de ontvangende mailbox. Bevestig daarna de ontvangst of bied de melding bewust opnieuw aan.</p>
+          <div class="panel-heading"><div><h2 id="outboxTitle" tabindex="-1">Mailcontrole</h2><p>Je aanvragen zijn opgeslagen. Controleer hier de meldingen die aandacht vragen.</p></div><span class="admin-label">Beheerders</span></div>
+          <div class="outbox-explanation"><p><strong>Veilige opvolging:</strong> controleer eerst de ontvangende mailbox op het AURA-aanvraagnummer. Vergelijk indien nodig ook de bestaande Odoo-verkoopkans. Bevestig de ontvangst pas na die controle; bij een onzekere verzending kan blind opnieuw aanbieden een dubbele mail opleveren.</p><p>Een opgeslagen aanvraag is niet hetzelfde als een afgeleverde e-mail. Ook <strong>SMTP geaccepteerd</strong> bewijst geen inboxontvangst. Neem bij twijfel contact op met de verantwoordelijke voor de leadinbox.</p></div>
           <div id="outboxMessage" class="list-message" role="status"></div>
           <div id="outboxItems" class="outbox-items"></div>
           <div class="pagination"><span id="outboxPageLabel">Pagina 1</span><div><button type="button" id="outboxPrev" class="secondary small">Vorige</button><button type="button" id="outboxNext" class="secondary small">Volgende</button></div></div>

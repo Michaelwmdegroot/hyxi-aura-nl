@@ -87,6 +87,10 @@ function showLogin(text=''){
   closeMailReview();outboxPage=1;setView('leads');
   $('leadRows').replaceChildren();lastItems=[];
   $('outboxItems').replaceChildren();$('mailCount').textContent='0';
+  $('mailIncidentAlert').hidden=true;
+  $('mailIncidentTitle').textContent='';
+  $('mailIncidentDescription').textContent='';
+  $('mailMetric').hidden=false;
   $('dueItems').replaceChildren();$('dueCount').textContent='0';$('dueCount').hidden=true;
   $('dueSummary').textContent='';$('dueLimitWarning').hidden=true;
   $('kpiDays').replaceChildren();
@@ -110,6 +114,8 @@ function showDashboard(user){
   $('currentRole').textContent=user.role==='admin'?'Beheerder':'Sales';
   $('workbenchViews').hidden=false;
   $('outboxTab').hidden=user.role!=='admin';
+  $('mailMetric').hidden=user.role!=='admin';
+  $('mailIncidentAlert').hidden=true;
   if(user.role!=='admin')setView('leads');
 }
 function setView(name){
@@ -137,23 +143,57 @@ function makeBadge(value){
   el.textContent=labels[value]||textOr(value);
   return el;
 }
+function incidentCount(value){
+  const number=Number(value);
+  return Number.isSafeInteger(number)&&number>=0?number:0;
+}
+function showMailIncidents(summary){
+  const isAdmin=currentUser?.role==='admin';
+  const failed=incidentCount(summary.notifications?.failed);
+  const uncertain=incidentCount(summary.notifications?.uncertain);
+  const count=failed+uncertain;
+  $('mailMetric').hidden=!isAdmin;
+  $('statMail').textContent=isAdmin?String(count):'—';
+  const banner=$('mailIncidentAlert');
+  if(!isAdmin||count===0){
+    banner.hidden=true;
+    $('mailIncidentTitle').textContent='';
+    $('mailIncidentDescription').textContent='';
+    return;
+  }
+  $('mailIncidentTitle').textContent=count+' mailmelding'+(count===1?'':'en')+' voor controle';
+  $('mailIncidentDescription').textContent=failed+' mislukt · '+uncertain+
+    ' onzeker. Controleer de ontvangende mailbox vóór een eventuele heraanbieding.';
+  banner.hidden=false;
+}
 async function refreshAll(){
   const version=++refreshVersion;
   setLoading($('refreshButton'),true);
   try{
-    const data=await Promise.all([api('/summary'),loadLeads(version),
-      currentUser?.role==='admin'?loadNotifications(version):Promise.resolve(),
+    const summaryTask=api('/summary').then(summary=>{
+      // A list failure must never hide the warning from an otherwise valid summary.
+      if(version!==refreshVersion||!currentUser)return;
+      $('statTotal').textContent=String(summary.total);
+      $('statNew').textContent=String(summary.statuses?.new||0);
+      $('statQuote').textContent=String(summary.statuses?.quote_requested||0);
+      showMailIncidents(summary);
+    });
+    const mailTask=currentUser?.role==='admin'
+      ?loadNotifications(version).catch(error=>{
+        if(!isInterrupted(error)&&version===refreshVersion&&currentUser?.role==='admin')
+          message('outboxMessage','Mailcontrole is tijdelijk niet bereikbaar. Vernieuw om opnieuw te proberen; bevestig of herhaal geen verzending zonder mailboxcontrole.');
+        throw error;
+      }):Promise.resolve();
+    const results=await Promise.allSettled([
+      summaryTask,loadLeads(version),mailTask,
       activeView==='followups'?loadDueFollowups(version):Promise.resolve(),
       activeView==='metrics'?loadLeadMetrics(version):Promise.resolve(),
     ]);
     if(version!==refreshVersion||!currentUser)return;
-    const s=data[0];$('statTotal').textContent=String(s.total);
-    $('statNew').textContent=String(s.statuses?.new||0);
-    $('statQuote').textContent=String(s.statuses?.quote_requested||0);
-    $('statMail').textContent=String((s.notifications?.failed||0)+(s.notifications?.uncertain||0));
-    message('dashboardMessage','');
-  }catch(error){if(!isInterrupted(error)&&version===refreshVersion)message('dashboardMessage',error.message);}
-  finally{if(version===refreshVersion)setLoading($('refreshButton'),false);}
+    const failure=results.find(x=>x.status==='rejected'&&!isInterrupted(x.reason));
+    message('dashboardMessage',failure?
+      'Niet alle Beheer-gegevens konden worden geladen. Vernieuw om opnieuw te proberen.':'');
+  }finally{if(version===refreshVersion)setLoading($('refreshButton'),false);}
 }
 async function loadLeads(version=refreshVersion){
   message('listMessage','Aanvragen laden…');
@@ -436,6 +476,11 @@ $('leadsTab').addEventListener('click',()=>setView('leads'));
 $('followupsTab').addEventListener('click',()=>{setView('followups');refreshAll();});
 $('metricsTab').addEventListener('click',()=>{setView('metrics');refreshAll();});
 $('outboxTab').addEventListener('click',()=>setView('outbox'));
+$('openMailIncidents').addEventListener('click',()=>{
+  if(currentUser?.role!=='admin')return;
+  setView('outbox');
+  $('outboxTitle').focus();
+});
 $('outboxPrev').addEventListener('click',()=>{if(outboxPage>1){outboxPage--;refreshAll();}});
 $('outboxNext').addEventListener('click',()=>{outboxPage++;refreshAll();});
 $('closeMailDialog').addEventListener('click',closeMailReview);
