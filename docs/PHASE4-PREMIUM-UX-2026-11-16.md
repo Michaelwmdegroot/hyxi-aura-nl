@@ -19,3 +19,6 @@ GitHub Actions genereert `desktop-page.png` en `mobile-page.png` na alle browser
 - Geen wijzigingen in `server/`, MariaDB, SMTP, Beheer, privacy, Odoo, storage of toekomstige portal. Geen nieuwe echte leadproeven.
 - Na 3/3 groen merge naar `main`, controleer homepage publiek/readiness en registreer de exacte CI-run. Rollback via revert van de squash-merge op `main` en Hostinger auto-deploy; geen schemawijzigingen.
 - Issue #6 blijft open voor daadwerkelijke eigenaarbeoordeling, eventuele echte montagecases met toestemming, mobile Safari review en verdere visuele iteraties.
+
+## Resultaat na review/CI
+[PR #31](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/31) is gemerged als `b939be4966672119b8bb5ec639feafc49b010d37`, met [3/3 groen op exacte PR-head](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43791796471). **Geen** wijziging aan e-mail-, database- of Odoo-processen. Publieke productie en echte conversiecijfers moeten apart en zonder synthetische aanvraag worden bewaakt.
