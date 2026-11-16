@@ -29,3 +29,6 @@
 ## Phase 4 kennis- en UX-pagina's
 
 Zie [Phase 4 SEO-uitvoering](docs/PHASE4-SEO-RELEASE-2026-11-16.md) en [SEO-strategie](docs/SEO-STRATEGY.md). Houd de twee kennispagina's onder `kennis/` originele, source-backed voorlichting en geen duplicate marketingpagina's. Leg de productwaarden naast `src/product-data.mjs`; geen nieuw claims zonder `docs/PRODUCT-SOURCES.md` bij te werken. De nieuwe Playwright-controle op 1440, 390 en 320 px, axe en sitemapgates hoort bij CI. 
+
+## Phase 4 UX extension
+`src/product-gallery.mjs` enhances the official HYXI front product photo (existing no-JS fallback) with the two other already registered and optimized official product WebP angles. Keep the switcher keyboard operable, `aria-pressed` synced, image alt/caption truthful, and no analytics/remote requests. The operator proof in the homepage must name NIVO Groep Holland B.V. as exploitant, Thuisbatterij Team as request handler, HYXI as manufacturer, without inventing dealer/certification status. Desktop/mobile existing tests now cycle the gallery images and still test every existing lead form and energy fallback.
