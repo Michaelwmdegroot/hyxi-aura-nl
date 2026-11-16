@@ -84,3 +84,6 @@ Bewaar de makersvermelding en licentie bij verdere verspreiding van het letterty
 ## Beheer
 
 Bewaar bron-URL, controledatum en afgeleide webbestandsnaam bij nieuwe assets. Hercontroleer bij productwijzigingen of het beeld nog de aangeboden uitvoering toont. Gebruik alt-tekst voor inhoudelijke beelden en een lege alt-tekst voor zuivere decoratie. Verwijder metadata die voor webgebruik niet nodig is zonder de bronregistratie te verliezen.
+
+## Phase 4 — interactieve productaanzichten (16 november 2026)
+De nieuwe homepageweergave in `src/product-gallery.mjs` schakelt uitsluitend tussen de reeds aanwezige, geoptimaliseerde officiële beelden `aura-front.webp`, `aura-angle.webp` en `aura-side.webp`. Dit is geen gegenereerd product, 3D-specificatie, klantinstallatie of nieuw licensed asset. De frontversie blijft als HTML aanwezig zonder JavaScript; de andere twee beelden worden pas bij een klik aangevraagd. Originele bronnen staan hierboven; laatste herkomstcontrole 14 november 2026.

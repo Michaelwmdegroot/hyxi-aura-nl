@@ -304,6 +304,20 @@ try {
     await page.goto(`${live.origin}/?utm_source=browser-qa&utm_medium=test`, { waitUntil: 'load' });
     await page.evaluate(async () => { await document.fonts.ready; });
     await assertImages(page, viewport.label);
+    // Three source-backed product views are reachable without sacrificing the
+    // existing interactive energy, configurator or lead-form journey.
+    const heroProduct = page.locator('#hero-product-image');
+    await expect(page.locator('.hero-view-switcher')).toBeVisible();
+    for (const [view, src] of [['angle', '/images/aura-angle.webp'], ['side', '/images/aura-side.webp'], ['front', '/images/aura-front.webp']]) {
+      const control = page.locator(`[data-aura-view="${view}"]`);
+      await control.click();
+      await expect(control).toHaveAttribute('aria-pressed', 'true');
+      await expect(heroProduct).toHaveAttribute('src', src);
+      await expect(heroProduct).toHaveAttribute('alt', /HYXI AURA/);
+      await expect.poll(() => heroProduct.evaluate(image => image.complete && image.naturalWidth > 0), {timeout:10000}).toBe(true);
+      await assertNoOverflow(page, `${viewport.label}/hero-${view}`);
+    }
+    record(`${viewport.label}: three official HYXI gallery views load and remain accessible`);
     await assertNoOverflow(page, viewport.label);
     await accessibility(page, `${viewport.label}/initial-page`);
     await page.screenshot({ path: resolve(resultsDir, `${viewport.label}-page.png`), fullPage: true });
