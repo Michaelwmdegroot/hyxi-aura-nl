@@ -53,3 +53,16 @@ body>footer .footer-provider small{color:#626b61;font-size:11px;line-height:1.7}
 .datasheet-caveat code{font-size:.92em;font-weight:700;color:#6e4231}
 .legal-page .legal-footer>.secondary-presenter{flex:0 0 auto}
 @media(max-width:700px){.datasheet-caveat{padding:20px 18px}.datasheet-caveat h3{font-size:16px}}
+
+/* The new editorial phase guide uses a semantic figure; remove browser default
+   figure margins, otherwise 320px visitors lose usable width. */
+.hero figure.product-stage{margin:0;min-width:0}
+.legal-page .legal-header .secondary-presenter{max-width:55vw}
+@media(max-width:580px){
+  .legal-page .legal-header{gap:8px}
+  .legal-page .legal-back{font-size:10px}
+  .legal-page .legal-footer>.secondary-presenter{max-width:100%}
+}
+@media(max-width:360px){
+  .legal-page .legal-header{padding-inline:14px}
+}
