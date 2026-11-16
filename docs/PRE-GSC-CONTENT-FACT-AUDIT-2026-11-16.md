@@ -63,3 +63,17 @@ Alle zeven productie-ingangspagina's zijn statisch vanaf `main` gelezen; actuele
 - Privacy Odoo downstream processing explicit, version `2026-11-16` synchronized to server lead record, outgoing team mail and privacy tests.
 - Sitemap and Vite eight routes; source/SEO, all-link and Playwright/axe, production monitor 13 checks extended.
 - Exact CI/run/production approval remains **pending** below; do not infer it from changes committed to a feature branch.
+
+## Definitieve productieacceptatie en broncheck (16 november 2026)
+
+**PR #45** [inhouds-/SEO-/productbroncorrecties](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/45) is gemerged als `885748da4f21850d8e4a8c8e9f23b2c1c4e42992`. De pre-GSC controle bevat nu acht publieke routes: oorspronkelijke zeven plus de eigen technische gids `/kennis/1-fase-of-3-fasen/`. Alle acht hebben een eigen H1 en canonical, interne paden en hoofdstukfragmenten zijn nagegaan, en de bron- en installatieconversielinks zijn gecontroleerd. Het aanwezige HTML is direct leesbaar zonder JS voor de kennisgidsen.
+
+**Controleerbare testgates:**
+- [Definitieve PR-head 3/3 CI groen](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43967386813). De aanvankelijke branchcontrole [43965655832](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43965655832) zag onvoldoende kleurcontrast in de compacte TBT-lockup op 320px. De kleurcontrasten zijn gericht hersteld, niet de tests uitgezet.
+- [Main postmerge 3/3 CI groen](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43968338444). Includes Hostinger-style Node24 production-only build, database/outbox MySQL 8 and full browser/API/SEO/accessibility tests.
+- [Public production readiness](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43968338478) oorspronkelijke poging **12/13**, alleen de nieuw gedateerde privacyuitleg was tijdens de Hostinger-uitrol nog niet te herkennen. **Herverificatie op dezelfde `main`**: **13/13 PASS**, inclusief `privacyDeployed`, `phaseComparisonDeployed` en unauthenticated Beheer 401. Geen nieuwe synthetische leads of mails verstuurd. Dit is geen bewijs van Google-indexatie of echte CRM-salesconversie.
+- De gebruikers-PDF's zijn in de huidige runtime geverifieerd met `sha256sum` en beide hebben vijf pagina's; hun SHA256-waarden in §1 komen exact overeen. Dit is alleen een checksum van de **gebruikersuploaddocumenten**, niet een cryptografische vergelijking met de bytes achter GitHub/downloads.
+
+**Aanvullende release-hardening:** de publieke monitor is in een losse, uitsluitend read-only PR uitgebreid met de al bestaande `/bronnen/`-pagina, canonical, datum **16 november**, zichtbare HSA2/HTA2-waarschuwing en 160000 W-typfout. Daardoor zijn niet slechts de gidsen maar alle **acht** publieke routes expliciet in de monitor opgenomen. Het resultaat van deze aanvullende 14e check en bijbehorende CI-run wordt als apart bewijs gekoppeld; geen ontwerp of productiegedrag verandert hiermee.
+
+**Nog niet bewezen / open:** echte iPhone Safari-eigenaarreview (design ≥9/10), Google Search Console eigendom/indexatie, echte bezoekers- en conversiedata, schriftelijk door fabrikant bevestigde definitieve modelcodes, actuele prijzen/garantie voor BAT-Q7 en operationele sales-SLA in Odoo. De automatische Odoo-leadimport voor beide aanvraagtypen is al door de eigenaar afgevinkt.
