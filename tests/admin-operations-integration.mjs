@@ -119,6 +119,39 @@ try {
   const [events] = await pool.execute("SELECT COUNT(*) AS total FROM aura_lead_events WHERE lead_id=? AND event_type='notification_confirm_received'", [lead.id]);
   assert.equal(Number(events[0].total), 1);
 
+  // GDPR-style admin operations: one explicit manual deletion, no live data or mail traffic.
+  const privacyLead=await newLead();
+  await assert.rejects(() => store.exportPrivacyDossier(sales,privacyLead.requestId),{code:'FORBIDDEN'});
+  const exported=await store.exportPrivacyDossier(admin,privacyLead.requestId);
+  assert.equal(exported.record.status,'new');
+  assert.equal(exported.lead.fullName,'Fictional Operations Applicant');
+  assert.equal(exported.requestId,privacyLead.requestId);
+  assert.ok(exported.scope.includes('Odoo'));
+  const confirmation={
+    confirmedRequestId:privacyLead.requestId,reason:'retention_reviewed',
+    legalReviewConfirmed:true,acknowledgedExternalCopies:true,
+  };
+  await assert.rejects(() => store.deletePrivacyDossier(sales,privacyLead.requestId,confirmation),{code:'FORBIDDEN'});
+  await assert.rejects(() => store.deletePrivacyDossier(admin,privacyLead.requestId,{...confirmation,confirmedRequestId:'AURA-wrong'}),{code:'BAD_PRIVACY_ACTION'});
+  await assert.rejects(() => store.deletePrivacyDossier(admin,privacyLead.requestId,confirmation),{code:'PRIVACY_STATUS'});
+  await assert.rejects(() => store.deletePrivacyDossier(admin,privacyLead.requestId,{...confirmation,reason:'verified_privacy_request'}),{code:'PRIVACY_MAIL_PENDING'});
+  await pool.execute("UPDATE aura_notification_outbox SET delivery_status='accepted' WHERE id=?",[privacyLead.notification_id]);
+  await store.changeStatus(admin,privacyLead.requestId,'not_suitable');
+  const deletedPrivacy=await store.deletePrivacyDossier(admin,privacyLead.requestId,confirmation);
+  assert.equal(deletedPrivacy.deleted,true);
+  assert.equal(deletedPrivacy.externalCopiesPending,true);
+  await assert.rejects(() => store.getLead(admin,privacyLead.requestId),{code:'NOT_FOUND'});
+  for(const table of ['aura_leads','aura_submission_keys','aura_lead_events','aura_notification_outbox']){
+    const clause=table==='aura_leads'?'id=?':'lead_id=?';
+    const [rows]=await pool.execute('SELECT COUNT(*) AS total FROM '+table+' WHERE '+clause,[privacyLead.id]);
+    assert.equal(Number(rows[0].total),0,'Delete cascades in '+table);
+  }
+  const [linkedAudit]=await pool.execute('SELECT COUNT(*) AS total FROM aura_admin_audit WHERE lead_id=?',[privacyLead.id]);
+  assert.equal(Number(linkedAudit[0].total),0,'No correlatable lead UUID remains in audit');
+  const [deleteAudit]=await pool.execute("SELECT COUNT(*) AS total FROM aura_admin_audit WHERE actor_user_id=? AND action='privacy_delete' AND result_code='retention' AND lead_id IS NULL",[admin.id]);
+  assert.ok(Number(deleteAudit[0].total)>=1);
+  await assert.rejects(() => store.deletePrivacyDossier(admin,privacyLead.requestId,confirmation),{code:'NOT_FOUND'});
+
   // Route-level negative authorization is verified separately from store methods.
   server = createApp({ config, adminStore: store }).listen(0, '127.0.0.1');
   await once(server, 'listening');
@@ -127,6 +160,35 @@ try {
   const salesHeaders = await login(base, sales), adminHeaders = await login(base, admin);
   assert.equal((await fetch(base + '/api/beheer/outbox', { headers: salesHeaders })).status, 403);
   assert.equal((await fetch(base + '/api/beheer/assignees', { headers: salesHeaders })).status, 403);
+  const privacyUrl=base+'/api/beheer/leads/'+other.requestId;
+  assert.equal((await fetch(privacyUrl+'/privacy-export',{method:'POST',headers:salesHeaders,body:'{}'})).status,403);
+  assert.equal((await fetch(privacyUrl+'/privacy-export',{method:'POST',headers:{...adminHeaders,'X-Aura-CSRF':'invalid'},body:'{}'})).status,403);
+  const privacyExportResponse=await fetch(privacyUrl+'/privacy-export',{method:'POST',headers:adminHeaders,body:'{}'});
+  assert.equal(privacyExportResponse.status,200);
+  assert.equal(privacyExportResponse.headers.get('cache-control'),'no-store');
+  const privacyExportBody=await privacyExportResponse.json();
+  assert.equal(privacyExportBody.dossier.requestId,other.requestId);
+  assert.equal(privacyExportBody.dossier.lead.fullName,'Fictional Operations Applicant');
+  const invalidDeleteResponse=await fetch(privacyUrl+'/privacy-delete',{
+    method:'POST',headers:adminHeaders,
+    body:JSON.stringify({reason:'retention_reviewed',confirmedRequestId:'wrong',legalReviewConfirmed:true,acknowledgedExternalCopies:true}),
+  });
+  assert.equal(invalidDeleteResponse.status,422);
+  assert.equal((await fetch(privacyUrl+'/privacy-delete',{
+    method:'POST',headers:adminHeaders,
+    body:JSON.stringify({reason:'verified_privacy_request',confirmedRequestId:other.requestId,legalReviewConfirmed:true,acknowledgedExternalCopies:true}),
+  })).status,409,'A pending notification is not silently erased');
+  const routed=await newLead();
+  await pool.execute("UPDATE aura_notification_outbox SET delivery_status='accepted' WHERE id=?",[routed.notification_id]);
+  await store.changeStatus(admin,routed.requestId,'lost');
+  const routedDeleteUrl=base+'/api/beheer/leads/'+routed.requestId+'/privacy-delete';
+  const routedDelete=await fetch(routedDeleteUrl,{method:'POST',headers:adminHeaders,body:JSON.stringify({
+    reason:'retention_reviewed',confirmedRequestId:routed.requestId,legalReviewConfirmed:true,acknowledgedExternalCopies:true,
+  })});
+  assert.equal(routedDelete.status,200);
+  assert.equal((await routedDelete.json()).deleted,true);
+  assert.equal((await fetch(base+'/api/beheer/leads/'+routed.requestId,{headers:adminHeaders})).status,404);
+
   const followupUrl=base+'/api/beheer/leads/'+lead.requestId+'/followup';
   assert.equal((await fetch(followupUrl,{method:'PATCH',headers:{...salesHeaders,'X-Aura-CSRF':'invalid'},body:JSON.stringify({nextAction:'',dueDate:null,note:''})})).status,403);
   assert.equal((await fetch(followupUrl,{method:'PATCH',headers:salesHeaders,body:JSON.stringify({nextAction:'',dueDate:null,note:''})})).status,404,'Unassigned sales must not mutate follow-up');
