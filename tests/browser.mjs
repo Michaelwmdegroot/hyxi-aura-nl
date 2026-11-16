@@ -74,7 +74,14 @@ async function fixture({ enabled = true } = {}) {
 
 async function assertNoOverflow(page, label) {
   const geometry = await page.evaluate(() => ({ width: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
-  assert.ok(geometry.document <= geometry.width + 1 && geometry.body <= geometry.width + 1, `${label}: horizontal overflow ${JSON.stringify(geometry)}`);
+  if (geometry.document > geometry.width + 1 || geometry.body > geometry.width + 1) {
+    const overshoot = await page.evaluate(() => [...document.querySelectorAll('body *')].map(el => {
+      const r = el.getBoundingClientRect();
+      return {tag: el.tagName.toLowerCase(), className: typeof el.className === 'string' ? el.className.slice(0,75) : '',
+        left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width)};
+    }).filter(x => x.width > 0 && (x.right > innerWidth + 2 || x.left < -2)).sort((a,b)=>b.right-a.right).slice(0,18));
+    assert.fail(`${label}: horizontal overflow ${JSON.stringify(geometry)} offenders ${JSON.stringify(overshoot)}`);
+  }
   const dialog = page.locator('#lead-dialog');
   if (await dialog.isVisible()) {
     const bounds = await dialog.boundingBox();
