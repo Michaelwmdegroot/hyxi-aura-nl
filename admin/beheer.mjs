@@ -209,7 +209,7 @@ async function loadDueFollowups(version=refreshVersion){
     action.textContent=item.nextAction||'Vervolgactie zonder omschrijving';
     content.append(head,title,action);
     const open=document.createElement('button');open.className='secondary small due-open';open.type='button';
-    open.textContent='Open dossier';open.setAttribute('aria-label','Bekijk vervolgactie '+item.requestId);
+    open.textContent='Open dossier';open.setAttribute('aria-label','Open dossier voor vervolgactie '+item.requestId);
     open.addEventListener('click',()=>openDetail(item.requestId));
     article.append(content,open);$('dueItems').append(article);
   }
