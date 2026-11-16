@@ -261,6 +261,8 @@ function closeDetail(){
   $('editStatus').value='new';
   $('nextAction').value='';$('followupDate').value='';$('followupNote').value='';
   $('followupNotes').replaceChildren();message('followupMessage','');
+  $('privacySection').hidden=true;$('privacyDeleteDetails').open=false;
+  $('privacyDeleteForm').reset();message('privacyExportMessage','');message('privacyDeleteMessage','');
   currentLead=null;$('detailTitle').textContent='Aanvraag';
   const restore=previousFocus;previousFocus=null;
   if(!$('dashboardView').hidden){
@@ -299,6 +301,7 @@ async function openDetail(requestId){
     ]);
     $('editStatus').value=r.status;
     renderFollowup(r.followUp);
+    $('privacySection').hidden=currentUser?.role!=='admin';
     $('assignmentForm').hidden=!assignees;
     $('assignee').replaceChildren();message('assignmentMessage','');
     if(assignees){
@@ -389,11 +392,59 @@ document.addEventListener('keydown',event=>{
   if($('detailPane').hidden)return;
   if(event.key==='Escape'){event.preventDefault();closeDetail();return;}
   if(event.key!=='Tab')return;
-  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled])')].filter(node=>node.getClientRects().length>0);
+  const focusable=[...$('detailPane').querySelectorAll('button:not([disabled]),select:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),summary')].filter(node=>node.getClientRects().length>0);
   if(!focusable.length)return;
   const first=focusable[0],last=focusable.at(-1);
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
+$('privacyExportButton').addEventListener('click',async()=>{
+  const lead=currentLead,version=detailVersion;
+  if(!lead||currentUser?.role!=='admin')return;
+  const button=$('privacyExportButton');
+  setLoading(button,true);message('privacyExportMessage','');
+  try{
+    const data=await api('/leads/'+encodeURIComponent(lead.requestId)+'/privacy-export',{
+      method:'POST',body:'{}',
+    });
+    if(version!==detailVersion||currentLead!==lead)return;
+    // Sensitive JSON stays in this authenticated browser; no analytics/storage/URL parameters.
+    const file=new Blob([JSON.stringify(data.dossier,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(file);
+    const link=document.createElement('a');
+    link.href=url;link.download=lead.requestId+'-privacy.json';
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    message('privacyExportMessage','Export aangemaakt. Bewaar veilig en controleer interne notities voordat je informatie deelt.');
+  }catch(error){
+    if(!isInterrupted(error)&&version===detailVersion)message('privacyExportMessage',error.message);
+  }finally{setLoading(button,false);}
+});
+$('privacyDeleteForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const lead=currentLead,version=detailVersion;
+  if(!lead||currentUser?.role!=='admin')return;
+  const requestId=$('privacyDeleteId').value.trim();
+  if(requestId!==lead.requestId){
+    message('privacyDeleteMessage','Het aanvraagnummer moet exact overeenkomen.');return;
+  }
+  const button=$('privacyDeleteButton');
+  setLoading(button,true);message('privacyDeleteMessage','');
+  try{
+    const result=await api('/leads/'+encodeURIComponent(lead.requestId)+'/privacy-delete',{
+      method:'POST',body:JSON.stringify({
+        reason:$('privacyDeleteReason').value,confirmedRequestId:requestId,
+        legalReviewConfirmed:$('privacyLegalReview').checked,
+        acknowledgedExternalCopies:$('privacyExternalCopies').checked,
+      }),
+    });
+    if(!result.deleted||version!==detailVersion||currentLead!==lead)return;
+    closeDetail();
+    await refreshAll();
+    if(currentUser)message('dashboardMessage','Het dossier is uit de HYXI-database verwijderd. Controleer mailbox- en Odoo-kopieën afzonderlijk.');
+  }catch(error){
+    if(!isInterrupted(error)&&version===detailVersion)message('privacyDeleteMessage',error.message);
+  }finally{setLoading(button,false);}
 });
 $('statusForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!currentLead)return;

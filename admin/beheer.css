@@ -80,3 +80,18 @@
 .followup-note{background:#f7f9f6;border:1px solid #e5eae4;border-radius:12px;padding:12px}
 .followup-note time{display:block;font-size:10px;color:#536359;margin-bottom:8px}
 .followup-note p{font-size:11px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+
+/* Admin-only privacy actions: deliberately separate from ordinary sales follow-up. */
+.privacy-section{border-top:2px solid #e2e9e3}
+.privacy-explanation,.privacy-delete-details>p{font-size:11px;color:#536359;line-height:1.75;margin:0 0 16px}
+.privacy-section>button{width:100%}
+.privacy-delete-details{margin-top:20px;border-top:1px solid #e4e9e1;padding-top:16px}
+.privacy-delete-details>summary{font-size:11px;font-weight:800;color:#853e2b;cursor:pointer;padding:8px 0}
+.privacy-delete-details>p{margin-top:12px}
+.privacy-delete-details form>label:not(.privacy-confirm){display:block;margin:16px 0 8px}
+.privacy-delete-details select{width:100%;white-space:normal}
+.privacy-section .privacy-confirm{display:flex;gap:10px;align-items:flex-start;font-size:11px;line-height:1.7;color:#344a3c;margin:14px 0}
+.privacy-section .privacy-confirm input{flex:0 0 16px;margin:3px 0 0;accent-color:#344a3c}
+.privacy-section .danger{color:#823e30;border-color:#d9b4ab;background:#fff9f7}
+.privacy-section .danger:hover{background:#fff1ed}
+.privacy-section .form-message{overflow-wrap:anywhere}

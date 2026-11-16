@@ -84,6 +84,9 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
     if(error?.code==='NOT_FOUND')return fail(res,404,'NOT_FOUND','Deze aanvraag is niet beschikbaar.');
     if(error?.code==='BAD_STATUS')return fail(res,422,'BAD_STATUS','Kies een geldige status.');
     if(error?.code==='BAD_FOLLOWUP')return fail(res,422,'BAD_FOLLOWUP','Controleer de vervolgactie, datum en notitie.');
+    if(error?.code==='BAD_PRIVACY_ACTION')return fail(res,422,'BAD_PRIVACY_ACTION','Bevestig aanvraagnummer, beoordeling en externe kopieën.');
+    if(error?.code==='PRIVACY_STATUS')return fail(res,409,'PRIVACY_STATUS','Controleer de dossierstatus en wettelijke bewaarplichten voordat je verwijdert.');
+    if(error?.code==='PRIVACY_MAIL_PENDING')return fail(res,409,'PRIVACY_MAIL_PENDING','Deze aanvraag heeft nog een mailmelding in verwerking. Controleer Mailcontrole.');
     if(error?.code==='FORBIDDEN')return fail(res,403,'FORBIDDEN','Deze actie is alleen beschikbaar voor beheerders.');
     if(error?.code==='BAD_ASSIGNEE')return fail(res,422,'BAD_ASSIGNEE','Kies een actieve medewerker.');
     if(error?.code==='BAD_FILTER')return fail(res,422,'BAD_FILTER','Kies geldige filters.');
@@ -184,6 +187,17 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
   });
   app.get(prefix+'/leads/:requestId',authenticated,async(req,res)=>{
     try{res.json({ok:true,lead:await adminStore.getLead(req.beheerUser,req.params.requestId)});}
+    catch(error){backendError(res,error);}
+  });
+  app.post(prefix+'/leads/:requestId/privacy-export',authenticated,administrator,json,bodyOk,async(req,res)=>{
+    if(!req.body||Array.isArray(req.body)||Object.keys(req.body).length!==0){
+      return fail(res,422,'BAD_PRIVACY_ACTION','Dit verzoek is niet geldig.');
+    }
+    try{res.json({ok:true,dossier:await adminStore.exportPrivacyDossier(req.beheerUser,req.params.requestId)});}
+    catch(error){backendError(res,error);}
+  });
+  app.post(prefix+'/leads/:requestId/privacy-delete',authenticated,administrator,json,bodyOk,async(req,res)=>{
+    try{res.json({ok:true,...await adminStore.deletePrivacyDossier(req.beheerUser,req.params.requestId,req.body)});}
     catch(error){backendError(res,error);}
   });
   app.patch(prefix+'/leads/:requestId/status',authenticated,json,bodyOk,async(req,res)=>{
