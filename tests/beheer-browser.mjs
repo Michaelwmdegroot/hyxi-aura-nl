@@ -20,6 +20,7 @@ const token='a'.repeat(43);
 let signedIn=false, leadStatus='new', statusChanges=0;
 let role='admin', assignedTo=null, assignmentChanges=0, notificationChanges=0, clockOffset=0;
 let followupUpdates=0,followUp={nextAction:'',dueDate:null,notes:[]};
+let privacyExports=0,privacyDeletes=0,privacyDeleted=false;
 let forceNotificationConflict=false;
 let deferredDetail=null, releaseDetail=null, deferredList=null, releaseList=null;
 let waitingDetails=0,waitingLists=0;
@@ -44,12 +45,24 @@ const fakeAdmin={
   async logout(){signedIn=false;},
   async summary(){return {total:2,statuses:{new:leadStatus==='new'?1:0,contact_planned:0,in_progress:leadStatus==='in_progress'?1:0,quote_requested:1},notifications:{accepted:1,[notification.status]:1}};},
   async listLeads(){if(deferredList){waitingLists++;await deferredList;}return {page:1,items:[
-    {id:leadData.id,requestId,status:leadStatus,requestType:'advice',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:'accepted'},
+    ...(!privacyDeleted?[{id:leadData.id,requestId,status:leadStatus,requestType:'advice',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:'accepted'}]:[]),
     {id:'2c000000-1111-4111-8111-222222222222',requestId:secondId,status:'quote_requested',requestType:'quote',source:'hyxi-aura.nl',createdAt:now,assignedTo:null,deliveryStatus:notification.status},
   ]};},
   async getLead(_user,id){assert.equal(id,requestId);if(deferredDetail){waitingDetails++;await deferredDetail;}return {...leadData,status:leadStatus,assignedTo,followUp};},
   async updateFollowup(_user,id,input){assert.equal(id,requestId);followupUpdates++;followUp={nextAction:input.nextAction,dueDate:input.dueDate,notes:input.note?[...followUp.notes,{text:input.note,createdAt:now,authorId:'1'}]:followUp.notes};return {requestId:id,changed:true,followUp};},
   async changeStatus(_user,id,status){assert.equal(id,requestId);leadStatus=status;statusChanges++;return {requestId:id,status,changed:true};},
+  async exportPrivacyDossier(actor,id){
+    assert.equal(actor.role,'admin');assert.equal(id,requestId);privacyExports++;
+    return {requestId:id,record:{status:leadStatus},lead:{fullName:'Fictieve Browsercontrole',followUp},scope:'Only HYXI'};
+  },
+  async deletePrivacyDossier(actor,id,body){
+    assert.equal(actor.role,'admin');assert.equal(id,requestId);
+    assert.equal(body.confirmedRequestId,requestId);
+    assert.equal(body.legalReviewConfirmed,true);assert.equal(body.acknowledgedExternalCopies,true);
+    assert.equal(body.reason,'verified_privacy_request');
+    privacyDeletes++;privacyDeleted=true;
+    return {requestId:id,deleted:true,externalCopiesPending:true};
+  },
   async listAssignees(actor){assert.equal(actor.role,'admin');return {items:[{id:salesId,email:'sales@example.test',role:'sales'}]};},
   async assignLead(actor,id,userId){assert.equal(actor.role,'admin');assert.equal(id,requestId);assignedTo=userId;assignmentChanges++;return {requestId:id,assignedTo,changed:true};},
   async listNotifications(actor,{page}){
@@ -130,6 +143,15 @@ async function loginAndReview(context,label){
   await accessibility(page,label+'/detail');
   await layout(page,label+'/detail');
   await page.screenshot({path:resolve(output,'beheer-'+label+'-detail.png')});
+  await expect(page.locator('#privacySection')).toBeVisible();
+  if(label==='desktop'){
+    const downloadReady=page.waitForEvent('download');
+    await page.locator('#privacyExportButton').click();
+    const exportedFile=await downloadReady;
+    assert.equal(exportedFile.suggestedFilename(),requestId+'-privacy.json');
+    await expect(page.locator('#privacyExportMessage')).toContainText('Export aangemaakt');
+    assert.equal(privacyExports,1);
+  }
   if(label==='desktop'){
     await page.locator('#nextAction').fill('Klant terugbellen');
     await page.locator('#followupDate').fill('2026-11-24');
@@ -188,6 +210,21 @@ async function loginAndReview(context,label){
   await expect(page.locator('.outbox-item')).toHaveCount(0);
   assert.equal(notification.status,label==='desktop'?'confirmed':'pending');
   await page.locator('#leadsTab').click();
+  if(label==='mobile'){
+    await page.locator('.open-lead').first().click();
+    await expect(page.locator('#privacySection')).toBeVisible();
+    await page.locator('#privacyDeleteDetails summary').click();
+    await page.locator('#privacyDeleteReason').selectOption('verified_privacy_request');
+    await page.locator('#privacyDeleteId').fill(requestId);
+    await page.locator('#privacyLegalReview').check();
+    await page.locator('#privacyExternalCopies').check();
+    await accessibility(page,'mobile/privacy-reviewed-delete');
+    await page.locator('#privacyDeleteButton').click();
+    await expect(page.locator('#detailPane')).not.toBeVisible();
+    await expect(page.locator('#leadRows tr')).toHaveCount(1);
+    await expect(page.locator('#dashboardMessage')).toContainText('uit HYXI');
+    assert.equal(privacyDeletes,1);
+  }
   if(label==='desktop'){
     // A closed detail pane must never be repopulated by a response that was
     // already in flight. This also checks keyboard focus while loading.
@@ -216,6 +253,7 @@ async function loginAndReview(context,label){
   assert.equal(await page.evaluate(async()=> (await fetch('/api/beheer/leads')).status),401);
   assert.deepEqual(exceptions,[],label+' JavaScript exceptions');
   await context.close();
+  privacyDeleted=false; // reset injected synthetic state for independent sales authorization tests
 }
 async function checkSalesAndExpiry(){
   role='sales';clockOffset=0;
@@ -231,6 +269,7 @@ async function checkSalesAndExpiry(){
   await page.locator('.open-lead').first().click();
   await expect(page.locator('#contactFields')).toContainText('Fictieve Browsercontrole');
   await expect(page.locator('#assignmentForm')).not.toBeVisible();
+  await expect(page.locator('#privacySection')).not.toBeVisible();
   assert.deepEqual(privateRequests,[],'Sales UI does not request admin-only data');
   signedIn=false;
   await page.locator('#editStatus').selectOption('contact_planned');
@@ -251,7 +290,7 @@ try{
   const mobile=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:'nl-NL',isMobile:true,hasTouch:true});
   await loginAndReview(mobile,'mobile');
   await checkSalesAndExpiry();
-  console.log('PASS desktop/mobile Beheer, mail incident review/retry, assignment, expired CSRF renewal, stale response clearing, sales UI, session expiry, keyboard access, logout and WCAG A/AA');
+  console.log('PASS desktop/mobile Beheer, privacy export/manual delete, mail incident review/retry, assignment, expired CSRF renewal, sales isolation, keyboard, logout and WCAG A/AA');
 } finally {
   // Always release intentionally delayed responses, even if an assertion
   // fails, so CI reports the actual failure instead of timing out in close().
