@@ -7,12 +7,12 @@ const KNOWLEDGE = [
   { path: '/kennis/noodstroom/', title: 'HYXI AURA bij stroomuitval' },
   { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
 ];
-const PATHS = ['/api/health', '/api/config', '/privacy/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const PATHS = ['/', '/api/health', '/api/config', '/privacy/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
   for (const path of PATHS) {
-    const guide = KNOWLEDGE.find(item => item.path === path);
+    const guide = KNOWLEDGE.find(item => item.path === path) || (path === '/' ? {path:'/', title:'HYXI AURA thuisbatterij'} : null);
     // Hostinger deploy may finish after GitHub's push event. Only public guide
     // GETs receive a short bounded retry; API/privacy checks retain their
     // original strict immediate behavior. Unit test mocks never wait.
@@ -42,6 +42,20 @@ export async function probeProduction(fetcher = fetch) {
     }
   }
   const checks = {
+    // Distinct from generic health/readiness: this verifies the new TBT-first
+    // homepage is actually on Hostinger, not only committed to GitHub.
+    heroTbtShowroomDeployed: observed['/'].status === 200 &&
+      observed['/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/">') &&
+      observed['/'].content.includes('presenter-brand') &&
+      observed['/'].content.includes('presenter-owner') &&
+      observed['/'].content.includes('Thuisbatterij') &&
+      observed['/'].content.includes('presenteert') &&
+      observed['/'].content.includes('presenter-product') &&
+      observed['/'].content.includes('id="hero-product-stage"') &&
+      observed['/'].content.includes('data-product-gallery') &&
+      observed['/'].content.includes('data-aura-view="front"') &&
+      observed['/'].content.includes('data-aura-view="angle"') &&
+      observed['/'].content.includes('data-aura-view="side"'),
     healthReachable: observed['/api/health'].status === 200 && observed['/api/health'].data?.ok === true,
     publicIntakeEnabled: observed['/api/health'].data?.leadEnabled === true &&
       observed['/api/config'].status === 200 && observed['/api/config'].data?.leadEnabled === true,

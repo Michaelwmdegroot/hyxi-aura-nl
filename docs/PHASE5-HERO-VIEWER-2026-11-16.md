@@ -60,3 +60,19 @@ De volgende gegevens zijn bepaald op de aangeleverde WebP-bronnen en de daadwerk
 - Documentatie vooraf vastgelegd: deze spec op branch, vóór productiestatements.
 - Codebranch, CI, screenshots, eventuele beeldcorrecties en live QA worden later met SHA/run-IDs toegevoegd.
 - Echte Salesforce/Odoo-/mailto-leadtests niet opnieuw nodig voor uitsluitend visuele UI-wijzigingen; bestaande stubs testen ongewijzigde journeys.
+
+## 7. Resultaat, echte CI en productiecontrole — 16 november 2026
+
+**Gebouwd en gemerged:** [PR #35](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/35) → `main` commit **`73c3729cdc075883da401e2271a7eb133f8b9806`**. Bestanden: `index.html` (nieuwe TBT-presentatorlockup, productstage), `src/hero-viewer.css` (alle view-silhouetten op dezelfde verticale ankers), `src/product-gallery.mjs` (gedecodeerde hoekbeelden, pointer, mobiele swipe en bedienbare fallback), `tests/hero-viewer-browser.mjs` (nieuwe QA), `.github/workflows/ci.yml` (QA in reguliere workflow), `AGENTS.md` en `docs/ASSETS.md`.
+
+**Kwaliteit bewezen:** [PR-head CI 43907295687](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43907295687) **3/3 succesvol**; [post-merge main CI 43908108089](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43908108089) eveneens **3/3 succesvol**. In het echte browserlog staat:
+- `PASS hero 1440px`, `PASS hero 768px`, `PASS hero 390px`, `PASS hero 320px`: merklockup en drie geijkte kijkhoeken, silhouetverschil **kleiner dan 3,5 px** voor top/voet/midden/hoogte, geen horizontale overflow, WCAG A/AA.
+- `PASS natural pointer transitions side → front → angle`, `PASS reduced motion`, `PASS real mobile horizontal swipe`, `PASS no-JS front fallback`.
+- Onaangeroerde advies-/offertejourneys, MySQL8, Beheer, WebGL/SVG-fallback en kennis-/SEO-gidsen opnieuw succesvol.
+- CI-Lighthouse op de laatste PR-head: **desktop 100/100/100/100**, **mobiel 100/100/100/100** voor performance/toegankelijkheid/best practices/SEO in de CI-omgeving. Dit zijn **geen** onafhankelijke echte Safari- of field-metrics.
+
+**Productie:** [publieke readiness 43908108098](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43908108098) en [volgende publieke readiness 43914633576](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43914633576) **beide 10/10 PASS** op de nieuwe main. De bestaande readiness controleerde de homepage-hero echter nog **niet expliciet**: een afzonderlijke aanvullende read-only controle is daarom opgenomen in de releaseverificatiefase. Live-adres voor eigenaar: **https://hyxi-aura.nl/**.
+
+[Browserbeelden (GitHub Actions artifact, tijdelijk)](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43907295687) bevatten per kijkhoek en 1440/768/390/320 pixels screenshots. De fabrikantbeeldbestanden zijn **niet** aangepast, er is geen 3D-model geclaimd.
+
+**Eerlijke open eindjes:** eigenaar moet de nieuwe hero zelf op echte Safari/iPhone beoordelen en aangeven wat naar ≥9/10 moet worden verfijnd. Er is nog geen zakelijke go-live- of nieuwe subjectieve score. Niet afgevinkt: onafhankelijke browsercontrole in echte mobiele Safari en nieuwe commerciële conversie-/SEO-resultaten. Geen extra productieaanvragen of CRM-testleads verstuurd. In geval van bezwaar is de V3 via de merge-commit omkeerbaar zonder schemawijzigingen.

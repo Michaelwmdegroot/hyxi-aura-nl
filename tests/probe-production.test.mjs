@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { probeProduction } from '../scripts/probe-production.mjs';
 
 const good = {
+  '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></header><div data-product-gallery><div id="hero-product-stage"></div><button data-aura-view="front"></button><button data-aura-view="angle"></button><button data-aura-view="side"></button></div>'],
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
   '/privacy/': [200, 'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database'],
@@ -23,7 +24,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,10);
+  assert.equal(Object.keys(result.checks).length,11);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -63,4 +64,15 @@ test('public installation check must be deployed, canonical and in sitemap',asyn
   assert.equal(unavailable.ok,false);
   const oldSitemap=await probeProduction(mock({...good,'/sitemap.xml':[200,'<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc>']}));
   assert.equal(oldSitemap.checks.sitemapPresent,false);
+});
+
+test('public production readiness verifies the TBT-first hero actually deployed without requesting private data', async () => {
+  const ok = await probeProduction(mock(good));
+  assert.equal(ok.checks.heroTbtShowroomDeployed,true);
+  const oldHero=await probeProduction(mock({...good,'/':[200,'<title>HYXI AURA thuisbatterij</title><h1>HYXI AURA</h1>']}));
+  assert.equal(oldHero.checks.heroTbtShowroomDeployed,false);
+  assert.equal(oldHero.ok,false);
+  const missing=await probeProduction(mock({...good,'/':[404,'']}));
+  assert.equal(missing.checks.heroTbtShowroomDeployed,false);
+  assert.equal(missing.ok,false);
 });
