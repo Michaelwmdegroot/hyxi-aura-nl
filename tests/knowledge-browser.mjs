@@ -79,6 +79,7 @@ try {
     assert.ok(geom.document<=geom.width+1&&geom.body<=geom.width+1,`installation check ${width}: overflow ${JSON.stringify(geom)}`);
     const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
     assert.deepEqual(axe.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})),[],`installation check ${width} WCAG violations`);
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
     await page.screenshot({path:resolve(dir,`installation-check-${width}.png`),fullPage:true});
     await page.locator('#installation-check-form button[type="submit"]').click();
     await expect(page).toHaveURL(/\/offerte\/\?solar=yes&phase=three&goal=backup/);
