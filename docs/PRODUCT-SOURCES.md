@@ -1,6 +1,6 @@
 # Productinformatie en bronbeleid
 
-Gecontroleerd op **14 november 2026**. Dit document legt vast welke productinformatie de landingspagina mag gebruiken en waar aanvullende bevestiging nodig is.
+Gecontroleerd op **16 november 2026** aan de hand van de twee door eigenaar geüploade Engelstalige V2.1-PDF’s en de actuele Engelse HYXI-productpagina. Dit document legt vast welke productinformatie de landingspagina mag gebruiken en waar aanvullende bevestiging nodig is.
 
 ## Exploitant, adviseur en fabrikant
 
@@ -77,3 +77,17 @@ De in deze repository bewaarde datasheets blijven **V2.1 van 26 oktober 2026, Pr
 - `/kennis/noodstroom/`: geïntegreerde ATS en fabrikantvermelde 0 ms, 63 A **doorlaatstroom** expliciet niet gelijkgesteld aan geleverd noodvermogen; installateur bepaalt groepen, reserve en aansluiting.
 
 Inzichtelijk bronlog: [Phase 4 SEO-release](PHASE4-SEO-RELEASE-2026-11-16.md). Controleer beide fabrikantdocumenten opnieuw vóór een bindende klantofferte.
+ 
+## Pre-GSC hercontrole — 16 november 2026
+
+**Zelfde fabrikantdocumenten gecontroleerd:** de Engelse [HYXI AURA-pagina](https://www.hyxipower.com/en/ProductsDetail/hyxi-aura) biedt op 16 november nog de twee 5-pagina's **Preliminary V2.1**-datasheets aan. Het bestand van de eigenaar voor HSA2 is 1.497.333 bytes en heeft SHA-256 `6c5c6c42383c469cc36fb622cb7748c570333888de887a6809953366a2c222fe`; HTA2 is 1.498.576 bytes, SHA-256 `1d0a8e3c737f0bca427e6539071c407f4b76ed0687bbef15ed9f60f5c1c0a928`. De bestanden in deze repo hebben diezelfde lengte, maar een aparte bytes-hash vergelijking van de GitHub-blob is **niet** uitgevoerd; claim niet dat exact gelijke bytes onafhankelijk bewezen zijn.
+
+**Feitelijk bevestigd:** BAT-Q7 = 7,03/6,7 kWh, 3,5 kW nominaal, 68 kg; BAT-Q9 = 9,04/8,6 kWh, 4,6 kW nominaal, 79 kg. Eén tot zes modules per controller. 0 ms en 63 A zijn fabrikantspecificaties van omschakeling en netdoorlaat, geen gegarandeerd uit batterij beschikbaar vermogen. Batterijbedrijfstemperatuur −20 tot +55°C, omvormer −30 tot +60°C. 10.000 cycli staat bij 25°C±2°C en 60% EOL, niet onder alle omstandigheden of als onbeperkte garantie.
+
+**Letterlijke voorlopige HTA2-fouten:** HSA2-modelnamen in tabellen onder HTA2-titel op pagina's 1–4; `Max. PV Input Power` op pagina 1 voor de 8k-variant wordt als `160000W` weergegeven. Dit is een **kennelijk onjuist veld**, maar onze website corrigeert of kopieert de waarde **niet** als definitieve specificatie. De publieke bronnenpagina benoemt de inconsistenties en vraagt om bevestiging van exacte modelcode en uitvoering vóór een offerte.
+
+**Aanvullende unieke bezoekersvraag:** `/kennis/1-fase-of-3-fasen/` beschrijft het werkelijke verschil tussen de HSA2- en HTA2-productfamilies, aansluit-/PV-/back-upafwegingen, waar de PDF's fouten bevatten en hoe je de juiste installatievraag voorbereidt. Geen landelijke compatibiliteitsclaim, geen verzonnen leverbare modelcodes/prijzen.
+
+**Nieuwe operationele privacytransparantie:** de zakelijke e-mailimport van `leads@thuisbatterijteam.nl` naar Odoo CRM was door de eigenaar voor advies én offerte bevestigd. De privacyverklaring noemt die **werkelijke downstreamkopie** nu expliciet; versie `2026-11-16` wordt voor nieuwe aanvragen samen met de SQL-aanvraagregistratie en de uitgaande teamnotificatie vastgelegd. Geen verandering aan Odoo of SMTP.
+
+Zie [de volledige 8-pagina audit en bronbeoordeling](PRE-GSC-CONTENT-FACT-AUDIT-2026-11-16.md).

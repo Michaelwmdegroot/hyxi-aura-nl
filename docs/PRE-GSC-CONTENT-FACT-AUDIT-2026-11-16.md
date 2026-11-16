@@ -54,3 +54,12 @@ Alle zeven productie-ingangspagina's zijn statisch vanaf `main` gelezen; actuele
 - Salesbeheer, echte kwalificatie/omzet, privacybeleid voor HYXI + Odoo/mail; Odoo e-maildoorzet voor beide leadtypes is **al bewezen** en hoeft niet opnieuw te worden getest.
 - Garantiematrix BAT-Q7 t.o.v. BAT-Q9 schriftelijk bevestigen; huidige EU-documenten zijn de bron, geen claim voor batterijgarantie zonder voorwaarden.
 - HSA2/HTA2 datasheetfouten bij fabrikant opvragen; niet ‘zelf’ technische waarden fixen.
+
+## Implemented changes (before CI)
+
+- New `/kennis/1-fase-of-3-fasen/` (approximately 1,400 words, source-dependent and original) with different intent than interactive installation check.
+- `Thuisbatterij Team / presenteert HYXI AURA` typographic lockup now applied across six old secondary route headers and their footers, while public homepage design untouched.
+- Source page discloses 3-phase preliminary datasheet defects and refreshes manufacturer check date.
+- Privacy Odoo downstream processing explicit, version `2026-11-16` synchronized to server lead record, outgoing team mail and privacy tests.
+- Sitemap and Vite eight routes; source/SEO, all-link and Playwright/axe, production monitor 13 checks extended.
+- Exact CI/run/production approval remains **pending** below; do not infer it from changes committed to a feature branch.

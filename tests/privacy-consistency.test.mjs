@@ -26,3 +26,11 @@ test('privacyverklaring, database-privacyversie en mailvermelding zijn gelijk', 
   assert.match(db, /PRIVACY_VERSION = '2026-11-16'/);
   assert.match(mail, /Privacyversie: 2026-11-16/);
 });
+
+test('privacy notice explicitly names the already operational Odoo mail-import destination',async()=>{
+  const html=await file('privacy/index.html');
+  assert.match(html,/versie 16 november 2026/);
+  assert.match(html,/leads@thuisbatterijteam\.nl/);
+  assert.match(html,/Odoo CRM/);
+  assert.match(html,/verwijdert niet automatisch/);
+});

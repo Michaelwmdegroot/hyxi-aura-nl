@@ -86,3 +86,41 @@ test('installation check is an original semantic information route with a native
   assert.ok(quote.includes('id="check-prefill-note"'));
   assert.ok(js.includes('new FormData(form)'));
 });
+
+test('pre-GSC phase comparison is independently useful and excludes suspect manufacturer typos',async()=>{
+  const [guide,source,privacy,home]=await Promise.all([
+    file('kennis/1-fase-of-3-fasen/index.html'),file('bronnen/index.html'),
+    file('privacy/index.html'),file('index.html')
+  ]);
+  assert.ok(guide.length>10000, 'A separate substantive technical guide, not a doorway stub');
+  assert.match(guide,/3–12 kW/);
+  assert.match(guide,/5–30 kW/);
+  assert.match(guide,/63 A doorlaatstroom/);
+  assert.match(guide,/0 ms omschakeltijd/);
+  assert.match(guide,/geen afzonderlijke back-upgateway/);
+  assert.match(guide,/Preliminary V2\.1/);
+  assert.doesNotMatch(guide,/160000W|160000 W/);
+  assert.ok(home.includes('href="/kennis/1-fase-of-3-fasen/"'));
+  for(const fragment of ['id="verschil"','id="omvormers"','id="bestaande-pv"','id="noodstroom"','id="checklist"','id="bronnen"'])
+    assert.ok(guide.includes(fragment), fragment);
+  assert.match(source,/160000 W/);
+  assert.match(source,/onterecht.*HSA2/);
+  assert.match(source,/Bronnen gecontroleerd op 16 november 2026/);
+  assert.match(privacy,/Odoo CRM/);
+  assert.match(privacy,/versie 16 november 2026/);
+});
+
+test('all standalone pages identify Thuisbatterij Team as the commercial presenter',async()=>{
+  for(const route of [
+    'bronnen/index.html','privacy/index.html','offerte/index.html',
+    'kennis/bat-q7-vs-bat-q9/index.html','kennis/noodstroom/index.html',
+    'kennis/installatiecheck/index.html','kennis/1-fase-of-3-fasen/index.html'
+  ]){
+    const html=await file(route);
+    assert.match(html,/class="brand secondary-presenter"/,route);
+    assert.match(html,/class="secondary-presenter-owner"/,route);
+    assert.match(html,/presenteert/,route);
+    assert.match(html,/HYXI AURA/,route);
+    assert.ok(html.includes('/src/secondary-brand.css'),route);
+  }
+});
