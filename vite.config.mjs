@@ -9,7 +9,9 @@ export default defineConfig({
         home: resolve(import.meta.dirname, 'index.html'),
         privacy: resolve(import.meta.dirname, 'privacy/index.html'),
         bronnen: resolve(import.meta.dirname, 'bronnen/index.html'),
-        offerte: resolve(import.meta.dirname, 'offerte/index.html')
+        offerte: resolve(import.meta.dirname, 'offerte/index.html'),
+        q7q9: resolve(import.meta.dirname, 'kennis/bat-q7-vs-bat-q9/index.html'),
+        noodstroom: resolve(import.meta.dirname, 'kennis/noodstroom/index.html')
       }
     }
   }
