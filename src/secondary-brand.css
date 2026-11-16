@@ -66,3 +66,14 @@ body>footer .footer-provider small{color:#626b61;font-size:11px;line-height:1.7}
 @media(max-width:360px){
   .legal-page .legal-header{padding-inline:14px}
 }
+
+/* Phase-guide official product photo: reserve its own caption row below the
+   visible battery feet. Never put informational text across the product. */
+.hero figure.phase-product-stage{min-height:440px;padding:23px 21px 75px}
+.hero figure.phase-product-stage img{max-height:310px;max-width:100%}
+.hero figure.phase-product-stage .stage-caption{bottom:19px;line-height:1.6}
+@media(max-width:650px){
+  .hero figure.phase-product-stage{min-height:355px;max-height:355px;padding:20px 16px 64px}
+  .hero figure.phase-product-stage img{max-height:245px}
+  .hero figure.phase-product-stage .stage-caption{bottom:16px;font-size:10px}
+}
