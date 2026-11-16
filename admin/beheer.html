@@ -58,6 +58,7 @@
         </div>
         <nav class="view-switch" id="workbenchViews" aria-label="Werkoverzicht" hidden>
           <button class="view-button" id="leadsTab" type="button" aria-pressed="true">Aanvragen</button>
+          <button class="view-button" id="followupsTab" type="button" aria-pressed="false">Vervolgacties <span id="dueCount" hidden>0</span></button>
           <button class="view-button" id="outboxTab" type="button" aria-pressed="false">Mailcontrole <span id="mailCount">0</span></button>
         </nav>
         <section class="list-panel" id="leadsPanel" aria-labelledby="listTitle">
@@ -68,6 +69,16 @@
           <div id="listMessage" class="list-message" role="status">Aanvragen laden…</div>
           <div class="table-scroll"><table><thead><tr><th scope="col">Aanvraagnummer</th><th scope="col">Ontvangen</th><th scope="col">Status</th><th scope="col">Notificatie</th><th scope="col"><span class="sr-only">Actie</span></th></tr></thead><tbody id="leadRows"></tbody></table></div>
           <div class="pagination"><span id="pageLabel">Pagina 1</span><div><button type="button" id="prevPage" class="secondary small">Vorige</button><button type="button" id="nextPage" class="secondary small">Volgende</button></div></div>
+        </section>
+        <section class="list-panel" id="followupsPanel" aria-labelledby="followupsTitle" hidden>
+          <div class="panel-heading">
+            <div><h2 id="followupsTitle">Wat heeft aandacht nodig?</h2><p>Vervolgacties met een datum vandaag of eerder. Open een aanvraag om de actie bij te werken.</p></div>
+            <span class="admin-label">Alleen zichtbare dossiers</span>
+          </div>
+          <div class="due-summary" id="dueSummary" role="status" aria-live="polite">Vervolgacties laden…</div>
+          <div id="dueItems" class="due-items" role="region" aria-label="Openstaande vervolgacties"></div>
+          <p class="due-warning" id="dueLimitWarning" hidden>Dit overzicht is niet volledig: maximaal 2.500 actieve dossiers zijn doorzocht. De lijst blijft read-only totdat een geïndexeerde werkvoorraad beschikbaar is.</p>
+          <p class="due-explanation">Dit is een intern overzicht, geen automatische afspraakbevestiging of e-mailherinnering. Odoo blijft verantwoordelijk voor de bestaande verkoopopvolging.</p>
         </section>
         <section class="list-panel" id="outboxPanel" aria-labelledby="outboxTitle" hidden>
           <div class="panel-heading"><div><h2 id="outboxTitle">Mailcontrole</h2><p>Je aanvragen zijn opgeslagen. Controleer hier de meldingen die aandacht vragen.</p></div><span class="admin-label">Beheerders</span></div>

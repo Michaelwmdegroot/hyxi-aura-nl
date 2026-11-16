@@ -8,6 +8,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { createLeadPool } from '../server/db/pool.mjs';
 import { createMysqlLeadStore } from '../server/db/store.mjs';
 import { createAdminStore } from '../server/auth/store.mjs';
+import { todayInAmsterdam } from '../server/auth/due-followups.mjs';
 import { createApp } from '../server/app.mjs';
 import { loadConfig } from '../server/config.mjs';
 import { hashAdminPassword } from '../server/auth/security.mjs';
@@ -83,6 +84,17 @@ try {
   assert.equal(Buffer.from(following[0].encrypted_payload).includes(Buffer.from('Volgende week bellen')),false,'Encrypted payload must not contain plaintext notes');
   const [followupAudit]=await pool.execute("SELECT COUNT(*) AS total FROM aura_admin_audit WHERE action='followup_update' AND lead_id=?",[lead.id]);
   assert.equal(Number(followupAudit[0].total),1);
+  const dueToday=await store.listDueFollowups(admin,{now:new Date('2026-11-24T12:00:00Z')});
+  assert.equal(dueToday.asOf,'2026-11-24');
+  assert.ok(dueToday.items.some(item=>item.requestId===lead.requestId&&item.priority==='today'));
+  const late=await store.listDueFollowups(sales,{now:new Date('2026-11-25T12:00:00Z')});
+  assert.ok(late.items.some(item=>item.requestId===lead.requestId&&item.priority==='overdue'));
+  assert.ok(!late.items.some(item=>item.requestId===other.requestId));
+  const future=await store.listDueFollowups(sales,{now:new Date('2026-11-23T12:00:00Z')});
+  assert.ok(!future.items.some(item=>item.requestId===lead.requestId));
+  const [dueAudit]=await pool.execute("SELECT COUNT(*) AS total FROM aura_admin_audit WHERE actor_user_id=? AND action='followups_view' AND lead_id IS NULL",[sales.id]);
+  assert.ok(Number(dueAudit[0].total)>=1);
+
 
   await assert.rejects(() => store.getLead(sales, other.requestId), { code: 'NOT_FOUND' });
   await store.assignLead(admin, lead.requestId, null);
@@ -157,7 +169,17 @@ try {
   await once(server, 'listening');
   const base = 'http://127.0.0.1:' + server.address().port;
   assert.equal((await fetch(base + '/api/beheer/outbox')).status, 401);
+  assert.equal((await fetch(base + '/api/beheer/followups')).status,401);
   const salesHeaders = await login(base, sales), adminHeaders = await login(base, admin);
+  await store.updateFollowup(admin,lead.requestId,{nextAction:'Bel vandaag',dueDate:todayInAmsterdam(),note:''});
+  const adminDueResponse=await fetch(base+'/api/beheer/followups',{headers:adminHeaders});
+  assert.equal(adminDueResponse.status,200);
+  assert.equal(adminDueResponse.headers.get('cache-control'),'no-store');
+  const adminDue=await adminDueResponse.json();
+  assert.ok(adminDue.items.some(item=>item.requestId===lead.requestId));
+  const salesDue=await (await fetch(base+'/api/beheer/followups',{headers:salesHeaders})).json();
+  assert.ok(!salesDue.items.some(item=>item.requestId===lead.requestId));
+
   assert.equal((await fetch(base + '/api/beheer/outbox', { headers: salesHeaders })).status, 403);
   assert.equal((await fetch(base + '/api/beheer/assignees', { headers: salesHeaders })).status, 403);
   const privacyUrl=base+'/api/beheer/leads/'+other.requestId;

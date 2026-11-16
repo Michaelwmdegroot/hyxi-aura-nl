@@ -95,3 +95,17 @@
 .privacy-section .danger{color:#823e30;border-color:#d9b4ab;background:#fff9f7}
 .privacy-section .danger:hover{background:#fff1ed}
 .privacy-section .form-message{overflow-wrap:anywhere}
+
+/* Read-only follow-up worklist, scoped by the same Beheer session/roles. */
+.due-summary{padding:15px 25px;background:#f9faf6;border-top:1px solid #e9eee6;color:#3e5945;font-size:12px;font-weight:800;line-height:1.6}
+.due-items{display:grid;gap:0}
+.due-item{border-top:1px solid #ebeee9;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:19px 25px}
+.due-copy{min-width:0;flex:1}
+.due-item-head{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+.due-item-head time{font-size:11px;color:#536359}
+.due-item-id{font-size:12px;font-weight:800;color:#29372e;display:block;overflow-wrap:anywhere}
+.due-copy p{font-size:11px;line-height:1.6;margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;color:#465a4a}
+.due-open{white-space:nowrap;flex-shrink:0}
+.due-warning{font-size:11px;line-height:1.7;color:#914b2b;background:#fff1e8;padding:13px 25px;margin:0}
+.due-explanation{padding:13px 25px 20px;font-size:11px;color:#536359;line-height:1.7;margin:0}
+@media(max-width:680px){.due-item{display:block;padding:16px 18px}.due-open{margin-top:12px}.due-summary,.due-warning,.due-explanation{padding-left:18px;padding-right:18px}}

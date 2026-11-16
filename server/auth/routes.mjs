@@ -185,6 +185,10 @@ export function mountAdminRoutes(app,{adminStore,config,now=Date.now}) {
     try{res.json({ok:true,...await adminStore.listLeads(req.beheerUser,{status,page,search})});}
     catch(error){backendError(res,error);}
   });
+  app.get(prefix+'/followups',authenticated,async(req,res)=>{
+    try{res.json({ok:true,...await adminStore.listDueFollowups(req.beheerUser)});}
+    catch(error){backendError(res,error);}
+  });
   app.get(prefix+'/leads/:requestId',authenticated,async(req,res)=>{
     try{res.json({ok:true,lead:await adminStore.getLead(req.beheerUser,req.params.requestId)});}
     catch(error){backendError(res,error);}
