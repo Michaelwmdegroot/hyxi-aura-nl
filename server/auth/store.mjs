@@ -6,6 +6,7 @@ import { todayInAmsterdam, classifyFollowup } from './due-followups.mjs';
 import { assertAdminStructure, assertMigrationChecksum } from '../db/schema-check.mjs';
 import { createAdminOperations } from './operations.mjs';
 import { createPrivacyOperations } from './privacy.mjs';
+import { createLeadMetrics } from './metrics.mjs';
 
 const STATUSES = new Set(['new','contact_planned','in_progress','quote_requested','quote_sent','won','lost','not_suitable']);
 const VALID_ID = /^AURA-[a-f0-9-]{36}$/;
@@ -311,5 +312,5 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
     }finally{conn.release();}
   }
 
-  return {login,currentSession,logout,summary,listLeads,listDueFollowups,getLead,changeStatus,updateFollowup,...createAdminOperations({pool}),...createPrivacyOperations({pool,leadEncryptionKey})};
+  return {login,currentSession,logout,summary,listLeads,listDueFollowups,getLead,changeStatus,updateFollowup,...createAdminOperations({pool}),...createPrivacyOperations({pool,leadEncryptionKey}),...createLeadMetrics({pool})};
 }

@@ -59,6 +59,7 @@
         <nav class="view-switch" id="workbenchViews" aria-label="Werkoverzicht" hidden>
           <button class="view-button" id="leadsTab" type="button" aria-pressed="true">Aanvragen</button>
           <button class="view-button" id="followupsTab" type="button" aria-pressed="false">Vervolgacties <span id="dueCount" hidden>0</span></button>
+          <button class="view-button" id="metricsTab" type="button" aria-pressed="false">Cijfers</button>
           <button class="view-button" id="outboxTab" type="button" aria-pressed="false">Mailcontrole <span id="mailCount">0</span></button>
         </nav>
         <section class="list-panel" id="leadsPanel" aria-labelledby="listTitle">
@@ -79,6 +80,23 @@
           <div id="dueItems" class="due-items" role="region" aria-label="Openstaande vervolgacties"></div>
           <p class="due-warning" id="dueLimitWarning" hidden>Dit overzicht is niet volledig: maximaal 2.500 actieve dossiers zijn doorzocht. De lijst blijft read-only totdat een geïndexeerde werkvoorraad beschikbaar is.</p>
           <p class="due-explanation">Dit is een intern overzicht, geen automatische afspraakbevestiging of e-mailherinnering. Odoo blijft verantwoordelijk voor de bestaande verkoopopvolging.</p>
+        </section>
+        <section class="list-panel" id="metricsPanel" aria-labelledby="metricsTitle" hidden>
+          <div class="panel-heading">
+            <div><h2 id="metricsTitle">Aanvragen in cijfers</h2><p>Werkelijk opgeslagen HYXI-aanvragen per ontvangstdag. Geen cookies of advertentiepixels.</p></div>
+            <span class="admin-label" id="metricsScope">Laatste 14 dagen · UTC</span>
+          </div>
+          <div class="kpi-stats" role="group" aria-label="Totaal ontvangen aanvragen in deze periode">
+            <div class="kpi-stat"><span>Ontvangen</span><strong id="kpiTotal">—</strong></div>
+            <div class="kpi-stat"><span>Adviesaanvragen</span><strong id="kpiAdvice">—</strong></div>
+            <div class="kpi-stat"><span>Offerteaanvragen</span><strong id="kpiQuote">—</strong></div>
+          </div>
+          <div class="kpi-chart-scroller" role="region" aria-label="Dagelijkse aanvragen, horizontaal scrollbaar" tabindex="0">
+            <div class="kpi-days" id="kpiDays" role="list" aria-label="Dagelijkse aanvragen per type"></div>
+          </div>
+          <div class="kpi-legend"><span><i class="kpi-dot kpi-advice" aria-hidden="true"></i> Advies</span><span><i class="kpi-dot kpi-quote" aria-hidden="true"></i> Offerte</span></div>
+          <p id="kpiMessage" class="list-message" role="status"></p>
+          <p class="due-explanation">Deze cijfers komen uitsluitend uit nog aanwezige HYXI-dossiers, gegroepeerd op ontvangstdatum in UTC. Dit zijn geen websitebezoeken, conversiepercentages of bewezen contacttijden. Verwijderde dossiers tellen niet mee.</p>
         </section>
         <section class="list-panel" id="outboxPanel" aria-labelledby="outboxTitle" hidden>
           <div class="panel-heading"><div><h2 id="outboxTitle">Mailcontrole</h2><p>Je aanvragen zijn opgeslagen. Controleer hier de meldingen die aandacht vragen.</p></div><span class="admin-label">Beheerders</span></div>
