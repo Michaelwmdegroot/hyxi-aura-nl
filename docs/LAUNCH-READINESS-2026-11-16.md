@@ -1,7 +1,7 @@
 # HYXI AURA — launch-readiness checklist: van werkende basis naar automatische leadmachine
 **Versie:** 16 november 2026 · **Prioriteit:** eigenaarsoordeel actuele visuele baseline **circa 7/10** (eerder 6/10), commerciële lanceergrens **minimaal 9/10**  
 **Project:** https://hyxi-aura.nl · **Master:** https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/10 · **Design:** https://github.com/Michaelwmdegroot/hyxi-aura-nl/issues/6  
-**Codebasis bij audit:** main `69eb8efe4b7a0afa16aa1d6b0d5f9146fcc99d94` · 0 open PR · 3/3 post-merge CI · 10/10 externe publieke readiness (na Hostinger-deploy).  
+**Oorspronkelijke auditlezing:** main `69eb8efe4b7a0afa16aa1d6b0d5f9146fcc99d94`; latere designreleases zijn afzonderlijk vastgelegd. **Huidige Hero V4:** main `031b557f216867e32332d2950018c3f136a0b2a8`, 3/3 post-merge CI, **11/11 read-only productiechecks**.  
 **Belangrijk:** de website is technisch LIVE, maar heeft op eigenaarsoordeel **NO-GO voor actieve commerciële lancering/advertentieverkeer**. Na een tussentijdse beoordeling van 6/10 heeft de eigenaar de bestaande hero herwaardeerd naar ongeveer **7/10**; dat is nog geen 9/10-lanceergoedkeuring. De 9/10-acceptatie is een **menselijke designreview**, geen Lighthouse-score.
 
 ## 1. Wat ‘automatisch leadgeneratieplatform’ betekent
@@ -18,6 +18,8 @@ Bezoeker komt binnen via Google of een toegestane campagne → krijgt een onders
 - [x] Bestaande Odoo-routing is via **mailimport**, geen HYXI→Odoo API. Behoud de werkende keten.
 
 ## 2. P0 — DESIGN circa 7/10 → minimaal 9/10 [HARD COMMERCIAL LAUNCH GATE]
+
+**Hero V4 is technisch gereed en live:** [PR #37](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/37), merklockup op twee regels, GSAP-gebaseerde vloeiende microbeweging, drie nauwkeurig gekalibreerde officiële productfoto's, mobile swipe, toegankelijkheidsfallback; [releasebewijs](PHASE5-HERO-V4-GSAP-2026-11-16.md). **Nog open:** eigenaarsscore van de nieuwe V4 en echte Safari-review; geen automatische commerciële GO.
 **Eigenaar beslist pas GO na review van echte voor-/na-views**, desktop en mobiel. Niet volstaan met een technisch groene CI.
 
 - [ ] **V0 visuele audit:** bewaar 1440/1280/768/390/320-screenshots van de complete pagina, de offerte, configurator en kennischeck. Beoordeel hiërarchie, scrolldiepte, tekstgrootte, witruimte, contrast, overliggende UI en productbeeld. Controleer Safari op een echte iPhone.
