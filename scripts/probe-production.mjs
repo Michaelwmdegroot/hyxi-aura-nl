@@ -5,6 +5,7 @@ const BASE = 'https://hyxi-aura.nl';
 const KNOWLEDGE = [
   { path: '/kennis/bat-q7-vs-bat-q9/', title: 'HYXI AURA BAT-Q7 vs BAT-Q9' },
   { path: '/kennis/noodstroom/', title: 'HYXI AURA bij stroomuitval' },
+  { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
 ];
 const PATHS = ['/api/health', '/api/config', '/privacy/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
@@ -61,6 +62,10 @@ export async function probeProduction(fetcher = fetch) {
       observed['/kennis/noodstroom/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/noodstroom/">`) &&
       observed['/kennis/noodstroom/'].content.includes('HYXI AURA bij stroomuitval') &&
       observed['/kennis/noodstroom/'].content.includes('href="/offerte/"'),
+    installationCheckDeployed: observed['/kennis/installatiecheck/'].status === 200 &&
+      observed['/kennis/installatiecheck/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/installatiecheck/">`) &&
+      observed['/kennis/installatiecheck/'].content.includes('HYXI AURA installatiecheck') &&
+      observed['/kennis/installatiecheck/'].content.includes('id="installation-check-form" action="/offerte/" method="get"'),
     robotsPresent: observed['/robots.txt'].status === 200 &&
       observed['/robots.txt'].content.includes('Sitemap: https://hyxi-aura.nl/sitemap.xml'),
     unauthenticatedLeadsBlocked: observed['/api/beheer/leads'].status === 401,

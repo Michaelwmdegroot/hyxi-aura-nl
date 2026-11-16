@@ -11,7 +11,8 @@ export default defineConfig({
         bronnen: resolve(import.meta.dirname, 'bronnen/index.html'),
         offerte: resolve(import.meta.dirname, 'offerte/index.html'),
         q7q9: resolve(import.meta.dirname, 'kennis/bat-q7-vs-bat-q9/index.html'),
-        noodstroom: resolve(import.meta.dirname, 'kennis/noodstroom/index.html')
+        noodstroom: resolve(import.meta.dirname, 'kennis/noodstroom/index.html'),
+        installatiecheck: resolve(import.meta.dirname, 'kennis/installatiecheck/index.html')
       }
     }
   }

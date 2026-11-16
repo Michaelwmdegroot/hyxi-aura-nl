@@ -14,7 +14,7 @@ const dist = resolve(import.meta.dirname, '../dist');
 const dir = resolve(import.meta.dirname, '../test-results/browser');
 await readFile(resolve(dist, 'kennis/noodstroom/index.html'));
 await mkdir(dir, { recursive: true });
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.svg':'image/svg+xml', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.pdf':'application/pdf' };
+const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.svg':'image/svg+xml', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.pdf':'application/pdf' };
 const http = createServer(async (request, response) => {
   const url = new URL(request.url, 'http://127.0.0.1');
   const pathname = decodeURIComponent(url.pathname);
@@ -56,6 +56,40 @@ try {
       console.log(`PASS knowledge ${slug} ${width}px — image, CTA, no overflow, WCAG A/AA`);
       await ctx.close();
     }
+  }
+
+  // Independent 3-question installation guide: native GET + existing quote handoff.
+  // No live leads, PII or SMTP are submitted by this browser test.
+  for (const width of [1440,390,320]) {
+    const ctx=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});
+    const page=await ctx.newPage();
+    const failures=[];
+    page.on('pageerror',error=>failures.push(error.message));
+    const response=await page.goto(origin+'/kennis/installatiecheck/');
+    assert.equal(response.status(),200);
+    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.locator('#installation-check-form')).toBeVisible();
+    await page.locator('label:has(input[name="solar"][value="yes"])').click();
+    await page.locator('label:has(input[name="phase"][value="three"])').click();
+    await page.locator('label:has(input[name="goal"][value="backup"])').click();
+    await expect(page.locator('#check-preview-summary')).toContainText('Bestaande zonnepanelen');
+    await expect(page.locator('#check-preview-summary')).toContainText('3-fasenaansluiting');
+    await expect(page.locator('#check-preview-summary')).toContainText('noodstroom');
+    const geom=await page.evaluate(()=>({width:innerWidth,document:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
+    assert.ok(geom.document<=geom.width+1&&geom.body<=geom.width+1,`installation check ${width}: overflow ${JSON.stringify(geom)}`);
+    const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+    assert.deepEqual(axe.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})),[],`installation check ${width} WCAG violations`);
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    await page.screenshot({path:resolve(dir,`installation-check-${width}.png`),fullPage:true});
+    await page.locator('#installation-check-form button[type="submit"]').click();
+    await expect(page).toHaveURL(/\/offerte\/\?solar=yes&phase=three&goal=backup/);
+    await expect(page.locator('#solar')).toHaveValue('yes');
+    await expect(page.locator('#phase')).toHaveValue('three');
+    await expect(page.locator('#goal')).toHaveValue('backup');
+    await expect(page.locator('#check-prefill-note')).toBeVisible();
+    assert.deepEqual(failures,[],`installation check ${width} page errors`);
+    console.log(`PASS installation check ${width}px: sources/choices, WCAG, responsive and real quote prefilling`);
+    await ctx.close();
   }
 } finally {
   await browser?.close();
