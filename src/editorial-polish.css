@@ -1,6 +1,6 @@
 /* Final editorial polish: preserve the existing premium HYXI AURA palette,
    layout and V5 showroom. This sheet owns only the deliberately simplified UI. */
-.hero-bottom{justify-content:flex-end}
+.hero .hero-bottom{justify-content:flex-end}.hero .hero-bottom>.team-endorsement{margin-left:auto}
 .hero .hero-content{padding-top:25px}
 .feature-strip strong{letter-spacing:-.02em}
 .capacity-float .float-icon{background:#eef2e8}
@@ -24,7 +24,8 @@
 .site-footer .footer-main>div:first-child>p{max-width:290px;font-size:12px;line-height:1.8;color:#6b6d63;margin-top:20px}
 @media(max-width:960px){.operator-proof nav{padding-left:0}}
 @media(max-width:700px){
-  .hero-bottom{min-height:57px}
+  .hero .hero-bottom{min-height:57px;justify-content:center}
+  .hero .hero-bottom>.team-endorsement{margin-inline:auto}
   .operator-proof{gap:12px}
   .benefit-card{display:flex;flex-direction:column;min-height:330px}
   .benefit-card .card-icon{margin-bottom:20px}

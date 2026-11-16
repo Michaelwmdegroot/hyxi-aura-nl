@@ -331,6 +331,12 @@ try {
     const footerLine=await page.locator('.site-footer .footer-presenter .presenter-subline').boundingBox();
     assert.ok(footerLine.y >= footerOwner.y + footerOwner.height - 2, 'Footer HYXI credit must sit below TBT owner');
     assert.ok(footerLine.width <= footerOwner.width + 2, 'Footer credit cannot exceed TBT wordmark width');
+    const heroBar = await page.locator('.hero-bottom').boundingBox();
+    const heroTrust = await page.locator('.hero-bottom .team-endorsement').boundingBox();
+    if (viewport.width >= 701) assert.ok(heroTrust.x > heroBar.x + heroBar.width/2,
+      'Desktop hero must retain its right-hand TBT endorsement');
+    else assert.ok(Math.abs((heroTrust.x + heroTrust.width/2) - (heroBar.x + heroBar.width/2)) < 10,
+      'Mobile hero TBT endorsement remains visually centered');
     await page.locator('.site-footer').screenshot({path:resolve(resultsDir,`${viewport.label}-footer-polish.png`)});
     await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
     record(`${viewport.label}: editorial cleanup, TBT-first footer, source-backed ATS USP`);
