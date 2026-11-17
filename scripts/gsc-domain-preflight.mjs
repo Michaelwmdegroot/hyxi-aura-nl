@@ -55,6 +55,24 @@ async function inspect(check) {
       report.result=report.location?.startsWith(CANONICAL+'/') ? 'CANONICAL_REDIRECT' : 'OTHER_REDIRECT';
     }else if(response.status===200) {
       report.result='200_NOT_REDIRECTED';
+      // For an alias serving HTTP 200, read ONLY public HTML metadata to
+      // distinguish duplicate product websites from domain placeholders.
+      // Never dump page bodies, cookies, credentials or private content.
+      if(check.url.startsWith('https://') && check.url!==CANONICAL+'/') {
+        const htmlResponse=await fetch(check.url,{
+          method:'GET', redirect:'manual', signal:AbortSignal.timeout(12000),
+          headers:{Accept:'text/html','Cache-Control':'no-cache'},
+        });
+        if(htmlResponse.status===200){
+          const html=(await htmlResponse.text()).slice(0,180000);
+          report.pageTitle=(html.match(/<title[^>]*>([^<]+)<\\/title>/i)?.[1]||'').replace(/\\s+/g,' ').trim().slice(0,100);
+          report.pageCanonical=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1]
+            ||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)?.[1]
+            ||null;
+          report.robotsMeta=html.match(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)/i)?.[1]||null;
+          report.hasProductText=/HYXI AURA|Thuisbatterij Team/i.test(html);
+        }
+      }
     }else{
       report.result='NOT_CANONICAL_OR_UNAVAILABLE';
     }
@@ -71,7 +89,11 @@ console.log('HYXI AURA — public pre-indexing canonical, DNS and alternative-ho
 for(const r of results){
   const status=r.status??r.errorCode??'none';
   const loc=r.location? ' → '+r.location:'';
-  console.log((r.required ? 'REQUIRED ' : 'OPTIONAL ')+r.id+': '+r.result+' ('+status+')'+loc);
+  console.log((r.required ? 'REQUIRED ' : 'OPTIONAL ')+r.id+': '+r.result+' ('+status+')'+loc+
+    (r.pageTitle? ' | title='+JSON.stringify(r.pageTitle):'')+
+    (r.pageCanonical? ' | canonical='+r.pageCanonical:'')+
+    (r.robotsMeta? ' | robots='+r.robotsMeta:'')+
+    (r.hasProductText!==undefined? ' | HYXI/product copy='+r.hasProductText:''));
   if(r.required && r.result!=='PASS')fail=true;
   if(!r.required && r.result!=='CANONICAL_REDIRECT')warnings++;
 }
