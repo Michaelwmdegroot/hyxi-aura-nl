@@ -11,7 +11,7 @@
 - **Externe netwerkcontrole op GitHub runner:** [Domain indexing preflight PR #54](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/54), workflow `.github/workflows/gsc-domain-preflight.yml`, script `scripts/gsc-domain-preflight.mjs`. Controleert uitsluitend publieke HTTP GET/HEAD, met redirects niet automatisch gevolgd en zonder PII, cookies of formulieren.
 - **Echte HTTP-status op 17-11-2026:** `https://hyxi-aura.nl/` = **200**, sitemap = **200** met 13 unieke canonical URLs, robots.txt = **200**, `https://hyxi-aura.nl/index.html` = **308** naar `https://hyxi-aura.nl/`. `http://hyxi-aura.nl/` geeft **301** naar HTTPS; `https://www.hyxi-aura.nl/` geeft **308** naar het hoofddomein.
 - **De drie andere domeinen** (`hyxiaura.nl`, `hyxi-aura.com`, `hyxiaura.com`) geven **200**, maar tonen de **Hostinger “Parked Domain name on Hostinger DNS system”** placeholder met `robots=noindex,nofollow,noarchive,nosnippet` en **zonder HYXI AURA-/Thuisbatterij Team-producttekst**. Dit zijn *geen dubbele publieke kopieën van onze productwebsite*. Een 301/308 naar de hoofdsite is alsnog commercieel nuttig voor bezoekers die een andere schrijfwijze intypen, maar niet vereist om de hoofdsitemap bij Google aan te melden. Wijzig alleen domeinen waarvan de eigenaar bevestigt dat hij ze wil doorverwijzen.
-- **Google Search Console:** **niet geverifieerd en geen indiening bevestigd**. De bestaande GSC Wizard-connector is geblokkeerd met `payment_required`, ook bij `list_sites` / `get_account_info`; alle calls opnieuw proberen zonder gewijzigd abonnement heeft geen zin. **Google Search Console zelf is gratis** en wordt rechtstreeks via het Google-account van de eigenaar gebruikt.
+- **Google Search Console:** **propertyverificatie en sitemapindiening zijn via deze toegang niet bevestigd**. De bestaande GSC Wizard-connector is geblokkeerd met `payment_required`, ook bij `list_sites` / `get_account_info`; alle calls opnieuw proberen zonder gewijzigd abonnement heeft geen zin. **Google Search Console zelf is gratis** en wordt rechtstreeks via het Google-account van de eigenaar gebruikt.
 
 **Grenzen:** HTTP 200 en een geldige sitemap zijn geen bewijs van Google-indexatie, ranking of CTR. Een publieke website kan al vóór een sitemapaanmelding door Google zijn ontdekt. De Google-eigenaar moet property/URL-inspectie uitvoeren en eventuele Google-exclusions controleren.
 
@@ -57,7 +57,7 @@ Documentatie: [Google: Domeinproperty en verificatie](https://support.google.com
 ## 5. GO/NO-GO
 
 **Technische crawler-ready site:** **GO** op basis van publieke HTTP- en HTML-/CI-controles.  
-**Google-property verified:** **OPEN**, eigenaar moet Google DNS-verificatie uitvoeren.  
+**Google-property verified:** **NIET BEVESTIGD**; controleer bij de eigenaar of de property al bestaat, anders moet de eigenaar Google DNS-verificatie uitvoeren.  
 **Sitemap in GSC submitted:** **OPEN**, na verificatie.  
 **Google-indexatie bevestigd:** **OPEN**, uitsluitend via echte Google URL Inspection.  
 **Optionele parked-domain redirects:** **OPEN, niet blokkerend**; raadpleeg Hostinger-domeinbeheer.  
