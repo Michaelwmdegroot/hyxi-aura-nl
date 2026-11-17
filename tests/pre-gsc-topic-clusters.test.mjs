@@ -106,7 +106,7 @@ test('model overview keeps kW and kWh separate and does not fabricate exact vari
   const html=await readRoute('/modellen/');
   for(const term of ['HSA2','HTA2','3–12 kW','5–30 kW','7,03 kWh','9,04 kWh','6,7 kWh','8,6 kWh','160000 W'])
     assert.ok(html.includes(term),term);
-  assert.match(html,/niet.*automatisch.*leverbaar/is);
+  assert.match(html,/geen belofte dat elke individuele variant in Nederland leverbaar is/i);
   assert.match(html,/Preliminary/);
 });
 test('pricing and existing-PV guides describe evidence boundaries and support useful quote preparation',async()=>{
@@ -119,7 +119,7 @@ test('pricing and existing-PV guides describe evidence boundaries and support us
   assert.doesNotMatch(price,/€\s*\d+|\b\d+[.,]\d{2}\s*euro/i,'unapproved public selling price');
   assert.match(solar,/stringomvormer/);
   assert.match(solar,/micro-omvormers/);
-  assert.match(solar,/niet automatisch.*compatibiliteit/i);
+  assert.match(solar,/geen voldoende compatibiliteitsbewijs/i);
   assert.match(solar,/geen.*aansluitschema/i);
 });
 test('homepage and existing knowledge routes link editorially to the new topical documents',async()=>{
