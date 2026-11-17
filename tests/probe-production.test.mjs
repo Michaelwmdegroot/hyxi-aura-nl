@@ -17,8 +17,13 @@ const good = {
   '/kennis/bat-q7-vs-bat-q9/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/"><title>HYXI AURA BAT-Q7 vs BAT-Q9</title><a href="/offerte/">'],
   '/kennis/noodstroom/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/noodstroom/"><title>HYXI AURA bij stroomuitval</title><a href="/offerte/">'],
   '/kennis/installatiecheck/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/installatiecheck/"><title>HYXI AURA installatiecheck</title><form id="installation-check-form" action="/offerte/" method="get">'],
+  '/modellen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/modellen/"><title>HYXI AURA modellen</title><p>HSA2 BAT-Q9</p><a href="/datasheet/">PDF</a><a href="/offerte/">Offerte</a>'],
+  '/datasheet/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/datasheet/"><title>HYXI AURA datasheet</title><p>Preliminary HTA2 HSA2 160000 W</p><a href="/downloads/hyxi-aura-1-fase-datasheet.pdf">HSA2 PDF</a><a href="/downloads/hyxi-aura-3-fasen-datasheet.pdf">HTA2 PDF</a>'],
+  '/kennis/prijs-en-installatie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/prijs-en-installatie/"><title>HYXI AURA prijs</title><p>geen onbevestigde vanafprijs</p><a href="/offerte/">Offerte</a>'],
+  '/kennis/bestaande-zonnepanelen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/"><title>HYXI AURA bij bestaande zonnepanelen</title><p>micro-omvormers</p><a href="/offerte/">Offerte</a>'],
+  '/kennis/garantie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/garantie/"><title>HYXI AURA garantie</title><p>BAT-Q7 BAT-Q9 50,7 MWh</p><a href="/downloads/hyxi-eu-garantievoorwaarden.pdf">Garantie PDF</a>'],
   '/kennis/1-fase-of-3-fasen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/"><title>HYXI AURA 1 fase of 3 fasen</title><a href="/offerte/">'],
-  '/sitemap.xml': [200, '<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc>'],
+  '/sitemap.xml': [200, "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc>"],
   '/robots.txt': [200, 'Sitemap: https://hyxi-aura.nl/sitemap.xml'],
   '/api/beheer/leads': [401, '{}'],
 };
@@ -31,7 +36,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,15);
+  assert.equal(Object.keys(result.checks).length,20);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -143,4 +148,30 @@ test('public readiness detects incomplete or stale HYXI AURA favicon/PWA install
   const oldHome = await probeProduction(mock({...good,'/':[200,good['/'][1].replace('href="/favicon.png"','href="/favicon.svg"')]}));
   assert.equal(oldHome.checks.brandAssetsDeployed,false);
   assert.equal(oldHome.ok,false);
+});
+
+test('five topic-cluster pages must be live, canonical, source-aware and covered by the sitemap',async()=>{
+  const checks=[
+    ['/modellen/','modelsGuideDeployed'],
+    ['/datasheet/','datasheetGuideDeployed'],
+    ['/kennis/prijs-en-installatie/','priceGuideDeployed'],
+    ['/kennis/bestaande-zonnepanelen/','solarGuideDeployed'],
+    ['/kennis/garantie/','warrantyGuideDeployed']
+  ];
+  for(const [url,key] of checks){
+    const noPage=await probeProduction(mock({...good,[url]:[404,'']}));
+    assert.equal(noPage.checks[key],false,key+' must fail on absent page');
+    assert.equal(noPage.ok,false,key+' prevents false release acceptance');
+    const map=good['/sitemap.xml'][1].replace('<loc>https://hyxi-aura.nl'+url+'</loc>','');
+    const noSitemap=await probeProduction(mock({...good,'/sitemap.xml':[200,map]}));
+    assert.equal(noSitemap.checks.sitemapPresent,false,'Missing '+url+' in sitemap');
+  }
+  const stale=await probeProduction(mock({...good,
+    '/kennis/garantie/':[200,good['/kennis/garantie/'][1].replace('50,7 MWh','onbeperkte cycli')]
+  }));
+  assert.equal(stale.checks.warrantyGuideDeployed,false);
+  const typo=await probeProduction(mock({...good,
+    '/datasheet/':[200,good['/datasheet/'][1].replace('160000 W','corrected 16000W')]
+  }));
+  assert.equal(typo.checks.datasheetGuideDeployed,false);
 });
