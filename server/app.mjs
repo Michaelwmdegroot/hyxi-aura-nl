@@ -38,7 +38,7 @@ function cspFor(directory) {
   ].join('; ');
 }
 
-const PUBLIC_CANONICAL_PATHS = new Set([
+export const PUBLIC_CANONICAL_PATHS = new Set([
   "/",
   "/privacy/",
   "/bronnen/",
