@@ -50,3 +50,12 @@ De gebruiker heeft op **16 november 2026** via twee screenshots van de echte Odo
 - [Historische 3/3 Build & verify](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43956562134) en [12/12 live-checks](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43956562135) zijn inmiddels opgevolgd door [PR #45](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/45), [PR #46](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/46) en [14/14 read-only productiechecks](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43971898853), inclusief alle acht routes. Dit bewijst geen CRM-verkoop of Google-indexatie.
 
 **Uitvoeringsvolgorde na het eigenaarssignaal:** eerst GSC/indexatie + metriekontwerp (parallel), dan brongetrouwe content en een beperkte acquisitiepilot. De commerciële eigenaar houdt Odoo-verkoopopvolging intern; HYXI levert leads aan de bestaande mailbox.
+
+
+## 17 november 2026 — favicon en laatste SEO-eerste-indruk-afwerking DONE
+
+Na de pre-GSC fabrikant-/copy-audit zijn het **origineel door eigenaar aangeleverde huis/batterij-icoon** en de resterende zoekresultaat-/merkmetadata daadwerkelijk gebouwd, getest en live gepubliceerd. [PR #48](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/48) is gemerged als `4653b842`, [3/3 CI op main](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43989145262) en [15/15 publieke Hostinger-checks](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43989145299) zijn groen. Lighthouse PR-head desktop én mobiel vier categorieën 100; dit is een laboratoriumscore, geen Google-posities of gemeten conversie.
+
+**Niet opnieuw bouwen:** favicon/apple-touch/manifest en bijpassende 192/512-beeldbestanden; acht unieke publieke SEO-routes met consistente OpenGraph, canonical, titles en structured data; bestaande MySQL/outbox/Beheer/Odoo-aanvragen. [Exact releasebewijs en beperkingen](PRE-GSC-BRAND-SEO-RELEASE-2026-11-17.md).
+
+**Hierna:** eigen, gratis Google Search Console-property verifiëren, de huidige sitemap indienen, de acht URL's met echte indexatiegegevens beoordelen. Losstaand blijft eigenaarreview design op iPhone Safari en privacyvriendelijke bezoek-naar-leadmeting. Geen automatisch indexatiesucces claimen vóór GSC-data.
