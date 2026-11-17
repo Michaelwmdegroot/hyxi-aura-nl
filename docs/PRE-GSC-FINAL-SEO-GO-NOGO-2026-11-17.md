@@ -59,11 +59,19 @@
 - Voor PDF's en afbeeldingen kan Google aparte crawls/zoekresultaten tonen. De datasheet-HTML biedt originele downloaduitleg, en het gebruik van de fabrikantdocumenten is niet afhankelijk van een formulier.
 - Google kan een andere titel, snippet of favicon kiezen dan onze markup; onze code beïnvloedt die keuze, garandeert haar niet.
 
-## 5. Definitieve releasebewijzen
+## 5. Definitieve releasebewijzen — PASS 17 november 2026
 
-**Status tijdens schrijven:** nog te bevestigen.
+**Pre-Search Console audit en 308-canonical-correctie zijn uitgevoerd en technisch geaccepteerd.**
 
-- [PR](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pulls) voor deze aanvullende SEO-hardening, commit/CI:
-- Postmerge main build/DB/browser:
-- Live Hostinger read-only canonical + overige 20 controles:
-- Geen nieuwe lead, SMTP, cookie of Google Search Console-indiening uitgevoerd.
+| Acceptatiepunt | Uitslag | Bewijs |
+| --- | --- | --- |
+| Implementatie op productiebranch `main` | [PR #52](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/52) **gemerged**, commit `b6b12826dcc8bbc64aa51f685fb84ac60d07908d` | [Code, tests en auditdocument](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/52/files) |
+| PR-head builds / MySQL8 / API / SEO / browser / Lighthouse | **3/3 CI PASS** | [GitHub Actions #44070796746](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44070796746) |
+| Postmerge `main` dezelfde controles | **3/3 CI PASS** | [GitHub Actions #44071180981](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44071180981) |
+| Echte publieke Hostinger-versie, 13 URL's en canoniek alias | **21/21 PASS bij hercontrole** | [GitHub Actions #44071180894, rerun attempt 2](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44071180894) |
+
+De **eerste** publieke run op de nieuwe commit gaf **20/21**: de expliciete `/index.html`-redirect werd toen nog niet als gedeployd herkend, terwijl alle bestaande checks groen waren. De aansluitende read-only hercontrole op dezelfde commit gaf **21/21 PASS**, inclusief `canonicalHtmlAliasRedirected`. Dit komt overeen met een Hostinger-uitrol die na de GitHub-push doorliep; de twee runlogs tonen de feitelijke overgang. Er zijn geen nieuwe synthetische lead-POSTs, mailboxschrijfacties of wijzigingen aan GSC uitgevoerd.
+
+**Definitief oordeel:** de website voldoet aan de *controleerbare* technische/inhoudelijke pre-GSC-voorwaarden van deze audit. **Het daadwerkelijk indienen en monitoren in Google Search Console blijft OPEN** totdat de eigenaar de DNS-/domeinverificatie en de inspectie van 13 URLs uitvoert. De www-/alternatieve hostredirects zijn nog niet rechtstreeks vanuit de echte DNS-omgeving bewezen. De 9/10 eigenaarreview op echte iPhone Safari, echte verkeers-/salesdata en aanvullende schriftelijke fabrikantbevestigingen zijn afzonderlijke commerciële/open bronpunten.
+
+Terugkerende preventie: na iedere site-uitbreiding de `PUBLIC_CANONICAL_PATHS`-lijst samen met de sitemap bijwerken; `tests/pre-gsc-topic-clusters.test.mjs` bewijst hun gelijkheid en `tests/backend.test.mjs` controleert permanente redirects, querybehoud en onbekende 404's. Een groene publiek-bereikbaarheidstest is geen Google Search Console-inspectie.
