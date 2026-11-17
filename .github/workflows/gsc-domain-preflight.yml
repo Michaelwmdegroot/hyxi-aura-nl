@@ -1,0 +1,30 @@
+name: HYXI AURA — Domain indexing preflight
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/gsc-domain-preflight.mjs'
+      - '.github/workflows/gsc-domain-preflight.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/gsc-domain-preflight.mjs'
+      - '.github/workflows/gsc-domain-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-domain-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Read-only domain, redirects and sitemap preflight
+        run: node scripts/gsc-domain-preflight.mjs
