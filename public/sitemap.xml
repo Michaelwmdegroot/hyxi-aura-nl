@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://hyxi-aura.nl/</loc></url>
+  <url><loc>https://hyxi-aura.nl/modellen/</loc></url>
+  <url><loc>https://hyxi-aura.nl/datasheet/</loc></url>
+  <url><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc></url>
+  <url><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc></url>
+  <url><loc>https://hyxi-aura.nl/kennis/garantie/</loc></url>
   <url><loc>https://hyxi-aura.nl/bronnen/</loc></url>
   <url><loc>https://hyxi-aura.nl/offerte/</loc></url>
   <url><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc></url>

@@ -44,3 +44,8 @@ footer{border-top:1px solid #e6e8e1;display:flex;justify-content:space-between;g
 
 /* Phase 4: transparent, non-personal installation-check handoff */
 .check-prefill-note:not([hidden]){margin:13px 0 0;padding:12px 15px;border-left:3px solid #b76442;background:#f0f1eb;color:#3c493d;font-size:12px;line-height:1.75}
+
+
+/* Useful contextual preparation links without altering the quote form or first-screen layout. */
+.quote-reading{font-size:12px;line-height:1.8;max-width:720px;margin-top:14px;color:#596157}
+.quote-reading a{font-weight:750;color:#9b4932;text-decoration:underline;text-underline-offset:3px}

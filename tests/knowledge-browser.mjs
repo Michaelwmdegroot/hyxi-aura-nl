@@ -58,6 +58,45 @@ try {
     }
   }
 
+  // Distinct editorial buyer-intent pages. These are real HTML, not JS-stubs;
+  // check legibility, link intent, source access, mobile overflow and WCAG.
+  for (const target of [
+    {url:'/modellen/',slug:'modellen'},
+    {url:'/datasheet/',slug:'datasheet'},
+    {url:'/kennis/prijs-en-installatie/',slug:'prijs-en-installatie'},
+    {url:'/kennis/bestaande-zonnepanelen/',slug:'bestaande-zonnepanelen'},
+    {url:'/kennis/garantie/',slug:'garantie'}
+  ]) {
+    for (const width of [1440,390,320]) {
+      const ctx=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});
+      const page=await ctx.newPage();
+      const errors=[];
+      page.on('pageerror',error=>errors.push(error.message));
+      const response=await page.goto(origin+target.url);
+      assert.equal(response.status(),200,target.url);
+      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page.locator('main > article')).toHaveCount(1);
+      await expect(page.locator('.hero-actions a[href="/offerte/"]')).toBeVisible();
+      await expect(page.locator('a[href="/bronnen/"]').first()).toBeVisible();
+      const photo=page.locator('.product-stage img');
+      await expect.poll(()=>photo.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+      const sizes=await page.evaluate(()=>({innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth}));
+      if (sizes.scrollWidth>sizes.innerWidth+1 || sizes.bodyWidth>sizes.innerWidth+1) {
+        const offenders=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>{
+          const r=el.getBoundingClientRect(); const css=getComputedStyle(el);
+          return css.display!=='none' && css.visibility!=='hidden' && r.width>0 && (r.right>innerWidth+1 || r.left< -1);
+        }).slice(0,14).map(el=>({tag:el.tagName,class:el.className?.baseVal??el.className,rect:{left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right)},text:el.textContent?.trim().slice(0,65)})));
+        throw new Error(`${target.slug} ${width}px overflow: ${JSON.stringify({sizes,offenders})}`);
+      }
+      const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+      assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[],`${target.slug} ${width}px WCAG violation`);
+      assert.deepEqual(errors,[],`${target.slug} ${width}px runtime errors`);
+      await page.screenshot({path:resolve(dir,`topic-${target.slug}-${width}.png`),fullPage:true});
+      console.log(`PASS topic ${target.slug} ${width}px — source, conversion CTA, no overflow, WCAG A/AA`);
+      await ctx.close();
+    }
+  }
+
   // Independent 3-question installation guide: native GET + existing quote handoff.
   // No live leads, PII or SMTP are submitted by this browser test.
   for (const width of [1440,390,320]) {

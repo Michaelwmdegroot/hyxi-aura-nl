@@ -7,6 +7,11 @@ const KNOWLEDGE = [
   { path: '/kennis/noodstroom/', title: 'HYXI AURA bij stroomuitval' },
   { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
   { path: '/kennis/1-fase-of-3-fasen/', title: 'HYXI AURA 1 fase of 3 fasen' },
+  { path: '/modellen/', title: 'HYXI AURA modellen' },
+  { path: '/datasheet/', title: 'HYXI AURA datasheet' },
+  { path: '/kennis/prijs-en-installatie/', title: 'HYXI AURA prijs' },
+  { path: '/kennis/bestaande-zonnepanelen/', title: 'HYXI AURA bij bestaande zonnepanelen' },
+  { path: '/kennis/garantie/', title: 'HYXI AURA garantie' },
 ];
 const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
 const PATHS = [...BRAND_ASSETS, '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
@@ -115,6 +120,7 @@ export async function probeProduction(fetcher = fetch) {
       observed['/offerte/'].content.includes('href="https://hyxi-aura.nl/offerte/"'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
       observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/') &&
+      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 13 &&
       KNOWLEDGE.every(item => observed['/sitemap.xml'].content.includes(`<loc>${BASE}${item.path}</loc>`)),
     q7ComparisonDeployed: observed['/kennis/bat-q7-vs-bat-q9/'].status === 200 &&
       observed['/kennis/bat-q7-vs-bat-q9/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/bat-q7-vs-bat-q9/">`) &&
@@ -128,6 +134,36 @@ export async function probeProduction(fetcher = fetch) {
       observed['/kennis/1-fase-of-3-fasen/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/1-fase-of-3-fasen/">`) &&
       observed['/kennis/1-fase-of-3-fasen/'].content.includes('HYXI AURA 1 fase of 3 fasen') &&
       observed['/kennis/1-fase-of-3-fasen/'].content.includes('href="/offerte/"'),
+    modelsGuideDeployed: observed['/modellen/'].status === 200 &&
+      observed['/modellen/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/modellen/">') &&
+      observed['/modellen/'].content.includes('HYXI AURA modellen') &&
+      observed['/modellen/'].content.includes('HSA2') &&
+      observed['/modellen/'].content.includes('BAT-Q9') &&
+      observed['/modellen/'].content.includes('href="/datasheet/"') &&
+      observed['/modellen/'].content.includes('href="/offerte/"'),
+    datasheetGuideDeployed: observed['/datasheet/'].status === 200 &&
+      observed['/datasheet/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/datasheet/">') &&
+      observed['/datasheet/'].content.includes('HYXI AURA datasheet') &&
+      observed['/datasheet/'].content.includes('Preliminary') &&
+      observed['/datasheet/'].content.includes('160000 W') &&
+      observed['/datasheet/'].content.includes('href="/downloads/hyxi-aura-1-fase-datasheet.pdf"') &&
+      observed['/datasheet/'].content.includes('href="/downloads/hyxi-aura-3-fasen-datasheet.pdf"'),
+    priceGuideDeployed: observed['/kennis/prijs-en-installatie/'].status === 200 &&
+      observed['/kennis/prijs-en-installatie/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/kennis/prijs-en-installatie/">') &&
+      observed['/kennis/prijs-en-installatie/'].content.includes('HYXI AURA prijs') &&
+      observed['/kennis/prijs-en-installatie/'].content.includes('geen onbevestigde vanafprijs') &&
+      observed['/kennis/prijs-en-installatie/'].content.includes('href="/offerte/"'),
+    solarGuideDeployed: observed['/kennis/bestaande-zonnepanelen/'].status === 200 &&
+      observed['/kennis/bestaande-zonnepanelen/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/">') &&
+      observed['/kennis/bestaande-zonnepanelen/'].content.includes('HYXI AURA bij bestaande zonnepanelen') &&
+      observed['/kennis/bestaande-zonnepanelen/'].content.includes('micro-omvormers') &&
+      observed['/kennis/bestaande-zonnepanelen/'].content.includes('href="/offerte/"'),
+    warrantyGuideDeployed: observed['/kennis/garantie/'].status === 200 &&
+      observed['/kennis/garantie/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/kennis/garantie/">') &&
+      observed['/kennis/garantie/'].content.includes('HYXI AURA garantie') &&
+      observed['/kennis/garantie/'].content.includes('50,7 MWh') &&
+      observed['/kennis/garantie/'].content.includes('BAT-Q7') &&
+      observed['/kennis/garantie/'].content.includes('href="/downloads/hyxi-eu-garantievoorwaarden.pdf"'),
     installationCheckDeployed: observed['/kennis/installatiecheck/'].status === 200 &&
       observed['/kennis/installatiecheck/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/installatiecheck/">`) &&
       observed['/kennis/installatiecheck/'].content.includes('HYXI AURA installatiecheck') &&

@@ -57,7 +57,7 @@ test('public discovery includes both guides and links back to conversion flows',
     assert.ok(sitemap.includes(`<loc>${base}${path}</loc>`), path);
     assert.ok(config.includes(`'kennis/${slug}/index.html'`), path);
   }
-  assert.equal((sitemap.match(/<loc>/g) || []).length,8);
+  assert.equal((sitemap.match(/<loc>/g) || []).length,13);
 });
 
 test('horizontally scrollable knowledge tables have keyboard focus and accessible names', async () => {
@@ -99,7 +99,8 @@ test('pre-GSC phase comparison is independently useful and excludes suspect manu
   assert.match(guide,/0 ms omschakeltijd/);
   assert.match(guide,/geen afzonderlijke back-upgateway/);
   assert.match(guide,/Preliminary V2\.1/);
-  assert.doesNotMatch(guide,/160000W|160000 W/);
+  assert.match(guide,/verdachte PV-invoerwaarde van 160000 W/);
+  assert.match(guide,/Neem die fouten niet over als definitieve specificaties/);
   assert.ok(home.includes('href="/kennis/1-fase-of-3-fasen/"'));
   for(const fragment of ['id="verschil"','id="omvormers"','id="bestaande-pv"','id="noodstroom"','id="checklist"','id="bronnen"'])
     assert.ok(guide.includes(fragment), fragment);

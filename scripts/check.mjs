@@ -150,9 +150,9 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 8 && new Set(sitemapUrls).size === 8, 'sitemap lists the eight distinct public pages');
+ensure(sitemapUrls.length === 13 && new Set(sitemapUrls).size === 13, 'sitemap lists the thirteen distinct public pages');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/', '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
 
 
 // Knowledge pages must remain real, indexable static HTML and part of the user journey.

@@ -13,6 +13,11 @@ const routes = new Map([
   ['/kennis/noodstroom/', 'kennis/noodstroom/index.html'],
   ['/kennis/installatiecheck/', 'kennis/installatiecheck/index.html'],
   ['/kennis/1-fase-of-3-fasen/', 'kennis/1-fase-of-3-fasen/index.html'],
+  ['/modellen/', 'modellen/index.html'],
+  ['/datasheet/', 'datasheet/index.html'],
+  ['/kennis/prijs-en-installatie/', 'kennis/prijs-en-installatie/index.html'],
+  ['/kennis/bestaande-zonnepanelen/', 'kennis/bestaande-zonnepanelen/index.html'],
+  ['/kennis/garantie/', 'kennis/garantie/index.html'],
 ]);
 const htmlAt = path => readFile(resolve(root, 'dist', path), 'utf8');
 const attribute = (html, tagName, field, needle, attrName) => {
@@ -55,7 +60,7 @@ test('Site manifest uses real installed assets, truthful brand ownership and no 
   ]);
 });
 
-test('All eight public pages have branded favicon, share preview, trustworthy metadata and exactly one H1',async()=>{
+test('All thirteen public pages have branded favicon, share preview, trustworthy metadata and exactly one H1',async()=>{
   const titles=new Set(),descriptions=new Set();
   for(const [url,path] of routes){
     const html=await htmlAt(path);
@@ -100,10 +105,10 @@ test('Homepage title and structured data match without fake offers, reviews or m
   assert.match(home,/geen officiële HYXI-website/i);
 });
 
-test('Eight canonical URLs remain in sitemap; private Beheer remains noindex',async()=>{
+test('Thirteen canonical URLs remain in sitemap; private Beheer remains noindex',async()=>{
   const sitemap=await readFile(resolve(root,'dist/sitemap.xml'),'utf8');
   const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x=>x[1]);
-  assert.equal(urls.length,8);
+  assert.equal(urls.length,13);
   assert.deepEqual(new Set(urls),new Set([...routes.keys()].map(x=>`https://hyxi-aura.nl${x}`)));
   const beheer=await readFile(resolve(root,'admin/beheer.html'),'utf8');
   assert.match(beheer,/name="robots" content="noindex,nofollow,noarchive"/);
