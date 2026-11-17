@@ -14,7 +14,7 @@ const KNOWLEDGE = [
   { path: '/kennis/garantie/', title: 'HYXI AURA garantie' },
 ];
 const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
-const PATHS = [...BRAND_ASSETS, '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
@@ -39,7 +39,7 @@ export async function probeProduction(fetcher = fetch) {
         if (path === '/api/health' || path === '/api/config') {
           try { parsed = JSON.parse(text); } catch { /* treated as failed check */ }
         }
-        observed[path] = { status: response.status, data: parsed, content: path.startsWith('/api/') ? '' : text };
+        observed[path] = { status: response.status, data: parsed, redirectLocation: path === '/index.html' ? response.headers?.get?.('location') : null, content: path.startsWith('/api/') ? '' : text };
       } catch {
         observed[path] = { status: 0, data: null, content: '' };
       }
@@ -96,6 +96,8 @@ export async function probeProduction(fetcher = fetch) {
     healthReachable: observed['/api/health'].status === 200 && observed['/api/health'].data?.ok === true,
     publicIntakeEnabled: observed['/api/health'].data?.leadEnabled === true &&
       observed['/api/config'].status === 200 && observed['/api/config'].data?.leadEnabled === true,
+    canonicalHtmlAliasRedirected: observed['/index.html'].status === 308 &&
+      observed['/index.html'].redirectLocation === `${BASE}/`,
     brandAssetsDeployed: observed['/'].content.includes('href="/favicon.png"') &&
       observed['/'].content.includes('href="/site.webmanifest"') &&
       observed['/'].content.includes('src="/icons/brand-192.png"') &&
