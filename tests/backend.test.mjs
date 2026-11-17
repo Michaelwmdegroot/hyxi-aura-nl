@@ -307,7 +307,7 @@ test('canonical and preview hosts keep queries out of public API responses', asy
   const typo = await withHost('/niet-bestaand/index.html', 'hyxi-aura.nl');
   assert.equal(typo.status, 404, 'Never redirect an unknown document into a soft 404');
   assert.match(typo.text, /noindex/);
-  const previewAlias = await withHost('/modellen/index.html', 'example.hostingersite.com');
+  const previewAlias = await withHost('/index.html', 'example.hostingersite.com');
   assert.equal(previewAlias.status, 200);
   assert.equal(previewAlias.headers['x-robots-tag'], 'noindex, nofollow');
 
