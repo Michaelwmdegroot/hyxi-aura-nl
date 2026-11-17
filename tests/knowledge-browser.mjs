@@ -81,7 +81,13 @@ try {
       const photo=page.locator('.product-stage img');
       await expect.poll(()=>photo.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
       const sizes=await page.evaluate(()=>({innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth}));
-      assert.ok(sizes.scrollWidth<=sizes.innerWidth+1&&sizes.bodyWidth<=sizes.innerWidth+1,`${target.slug} ${width}px overflow: ${JSON.stringify(sizes)}`);
+      if (sizes.scrollWidth>sizes.innerWidth+1 || sizes.bodyWidth>sizes.innerWidth+1) {
+        const offenders=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>{
+          const r=el.getBoundingClientRect(); const css=getComputedStyle(el);
+          return css.display!=='none' && css.visibility!=='hidden' && r.width>0 && (r.right>innerWidth+1 || r.left< -1);
+        }).slice(0,14).map(el=>({tag:el.tagName,class:el.className?.baseVal??el.className,rect:{left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right)},text:el.textContent?.trim().slice(0,65)})));
+        throw new Error(`${target.slug} ${width}px overflow: ${JSON.stringify({sizes,offenders})}`);
+      }
       const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
       assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[],`${target.slug} ${width}px WCAG violation`);
       assert.deepEqual(errors,[],`${target.slug} ${width}px runtime errors`);
