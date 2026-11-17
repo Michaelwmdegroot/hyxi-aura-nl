@@ -1,0 +1,25 @@
+{
+  "name": "HYXI AURA — Thuisbatterij Team",
+  "short_name": "HYXI AURA",
+  "description": "Productinformatie, configurator en vrijblijvend thuisbatterijadvies van Thuisbatterij Team.",
+  "lang": "nl-NL",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#f6f5f1",
+  "theme_color": "#f6f5f1",
+  "icons": [
+    {
+      "src": "/icons/brand-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/brand-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
