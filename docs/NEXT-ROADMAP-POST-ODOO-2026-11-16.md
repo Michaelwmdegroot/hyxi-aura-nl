@@ -59,3 +59,12 @@ Na de pre-GSC fabrikant-/copy-audit zijn het **origineel door eigenaar aangeleve
 **Niet opnieuw bouwen:** favicon/apple-touch/manifest en bijpassende 192/512-beeldbestanden; acht unieke publieke SEO-routes met consistente OpenGraph, canonical, titles en structured data; bestaande MySQL/outbox/Beheer/Odoo-aanvragen. [Exact releasebewijs en beperkingen](PRE-GSC-BRAND-SEO-RELEASE-2026-11-17.md).
 
 **Hierna:** eigen, gratis Google Search Console-property verifiëren, de huidige sitemap indienen, de acht URL's met echte indexatiegegevens beoordelen. Losstaand blijft eigenaarreview design op iPhone Safari en privacyvriendelijke bezoek-naar-leadmeting. Geen automatisch indexatiesucces claimen vóór GSC-data.
+
+
+## SEO-topicclusters afgerond — 17 november 2026
+
+**Nu op `main` en live:** [PR #50](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/50), commit `a45e4ba7`, breidt het oorspronkelijke productplatform uit met **5 zelfverklarende pagina's, 13 canonieke routes**, één modellenhub, directe datasheetdownloads, transparante garantie, koopprijsfactoren en bestaande-zonnepanelencontext. De contextlinks lopen van de homepage naar aparte vragen en naar de bestaande beveiligde offerte. De fabrikant-PDF's, de werkende `leads@`→Odoo route en Beheer zijn behouden.
+
+**Geverifieerd:** [3/3 PR CI](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43997110605), [3/3 postmerge `main` CI](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43997478395), [20/20 publieke Hostinger checks](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43997478381). De volledige intentiematrix, precieze bronnen en openstaande model-SKU-vereisten staan in [SEO topic-clusters](PRE-GSC-SEO-TOPIC-CLUSTERS-2026-11-17.md).
+
+**VOLGENDE ACTIE — geen nieuwe SEO-pages zonder gegevens:** native Google Search Console-property verifiëren, `https://hyxi-aura.nl/sitemap.xml` indienen en de status van alle 13 URL's beoordelen. Ga niet gokken naar organisch volume, indexatie, ranking of resultaten. Echte Safari-/eigenaarreview ≥9/10 en privacyvriendelijke bezoek-naar-leadmeting blijven aparte commerciële GO-punten.
