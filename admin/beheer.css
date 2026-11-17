@@ -139,3 +139,6 @@
 .outbox-explanation p{font-size:11px;line-height:1.75;color:#536359}
 .outbox-explanation p strong{font-weight:850;color:#37493c}
 @media(max-width:680px){.mail-incident-alert{flex-direction:column;align-items:flex-start;padding:16px 17px;margin-top:0}.mail-incident-alert .secondary{width:auto}.outbox-explanation{gap:7px}}
+
+/* Owner-provided icon replaces the legacy decorative orange mark. */
+.wordmark .brand-mark-image{display:block;transform:none;border:0;border-radius:0;object-fit:contain;flex:0 0 23px}
