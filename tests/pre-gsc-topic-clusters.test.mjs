@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { PUBLIC_CANONICAL_PATHS } from '../server/app.mjs';
 
 const origin = 'https://hyxi-aura.nl';
 const root = resolve(import.meta.dirname, '..');
@@ -31,6 +32,7 @@ test('all thirteen canonical public URLs are unique and configured as separate b
   assert.equal(urlsInMap.length,13);
   assert.deepEqual(new Set(urlsInMap),new Set(urls.map(x=>origin+x)));
   assert.equal(new Set(urlsInMap).size,13);
+  assert.deepEqual(new Set(PUBLIC_CANONICAL_PATHS),new Set(urls),'Express 308 alias redirects must track the whole live sitemap');
   for(const target of topics){
     const path = target.substring(1)+'index.html';
     assert.ok(vite.includes("'"+path+"'"),'Vite static entry '+target);
