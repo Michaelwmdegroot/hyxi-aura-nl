@@ -18,7 +18,7 @@ test('each knowledge article is independently useful, canonical, sourced and ind
     assert.match(html, /<main id="main">/);
     assert.ok(html.includes(`<link rel="canonical" href="${url}">`));
     assert.ok(html.includes(`<meta property="og:url" content="${url}">`));
-    assert.match(html, /<meta name="robots" content="index, follow">/);
+    assert.match(html, /<meta name="robots" content="index, follow, max-image-preview:large">/);
     assert.match(html, /href="\/offerte\/"/);
     assert.match(html, /href="\/#samenstellen"/);
     assert.match(html, /Preliminary/);
