@@ -90,7 +90,7 @@ test('Homepage title and structured data match without fake offers, reviews or m
   const home=await htmlAt('index.html');
   const title=home.match(/<title>([^<]+)<\/title>/)?.[1];
   assert.equal(title,'HYXI AURA thuisbatterij | Capaciteit & advies | Thuisbatterij Team');
-  const graph=[...home.matchAll(/<script type="application\/ld\\+json">([\s\\S]*?)<\/script>/g)]
+  const graph=[...home.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
     .flatMap(match=>{const item=JSON.parse(match[1]);return item['@graph']||[item]});
   const site=graph.find(x=>x['@type']==='WebSite'),page=graph.find(x=>x['@type']==='WebPage'),owner=graph.find(x=>x['@type']==='Organization');
   assert.equal(site?.name,'HYXI AURA · Thuisbatterij Team');
