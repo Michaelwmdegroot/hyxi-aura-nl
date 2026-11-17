@@ -27,3 +27,5 @@
   .site-footer .footer-presenter:has(>.site-brand-icon){padding-left:35px!important}
   .site-footer .footer-presenter>.site-brand-icon{width:27px;height:27px}
 }
+
+.dialog-brand .brand-symbol-image{display:inline-block;width:22px;height:22px;object-fit:contain;flex:none;margin-right:4px}
