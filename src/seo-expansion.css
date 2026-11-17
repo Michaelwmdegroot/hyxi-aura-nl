@@ -71,3 +71,7 @@
 .knowledge-deep{margin-top:31px}
 .knowledge-deep-title{font-size:clamp(20px,2.4vw,28px);font-weight:680;letter-spacing:-.045em;margin:0 0 11px;color:#29302a}
 .knowledge-deep-intro{font-size:13px;line-height:1.8;max-width:690px;color:#666d63}
+
+/* Long Dutch compound headings must wrap naturally at 320px.
+   Do not hide horizontal overflow: preserve focus and text visibility. */
+.topic-guide .section h2,.topic-guide .topic-card h3{hyphens:auto;overflow-wrap:break-word}
