@@ -98,3 +98,12 @@ Officiële GSAP core **3.15.1** als lokaal `public/vendor/gsap.min.js` ingeslote
 
 ## Hero V6 — geen verzonnen nieuw logo (16 november 2026)
 Het footerlogo is, net als de header, een typografische **Thuisbatterij Team / presenteert HYXI AURA**-merkcombinatie in de bestaande huisstijl. Er is **geen** nieuw grafisch logo geüpload, geen HYXI-fabrikantlogo veranderd of onofficiële dealerstatus geclaimd. De oorspronkelijke HYXI-productfoto's, merklicenties en GSAP-component zijn ongewijzigd. De verandering aan de USP is gebaseerd op de officiële HYXI Aura-productpagina: ingebouwde ATS zonder aparte back-upgateway (bron: https://www.hyxipower.com/nl/ProductsDetail/hyxi-aura); uiteindelijke geschiktheid voor groepen/vermogen wordt door de installateur beoordeeld.
+
+
+## Eigenaaricoon HYXI AURA — 17 november 2026
+
+De eigenaar leverde een transparant, vierkant **antraciet huis / witte batterij / goudgele bliksem**-icoon aan. Dit is de **visuele bron van waarheid** voor het HYXI AURA-site-icoon; gebruik niet opnieuw het vroegere generieke oranje A-favicon en maak geen alternatief getekend beeld.
+
+De oorspronkelijke upload (1254 × 1254 RGBA, 930.803 bytes, SHA-256 `6d656216302fff37e9bcf749577e23edd4617bfd7537aae0e61f9dd9885dbf52`) is buiten GitHub aangeleverd. Afgeleide web-PNGs zijn uitsluitend verkleind/gecomprimeerd; formaat-, SHA256- en bestemmingsregister: [PRE-GSC-BRAND-SEO-RELEASE-2026-11-17.md](PRE-GSC-BRAND-SEO-RELEASE-2026-11-17.md).
+
+`public/favicon.png` (48), `public/apple-touch-icon.png` (192), `public/icons/brand-192.png`, `public/icons/brand-512.png` en `public/site.webmanifest` worden lokaal gehost en zonder externe tracker geladen. `public/favicon.svg` is terugwaarts compatibel en bevat de ingesloten rastervariant, **geen** nieuw icoon. Dezelfde markering siert het TBT-presentatiewoordmerk en Beheer zonder het informatieve, echte woordmerk te vervangen. Hou de oorspronkelijke HYXI-productfoto's en Thuisbatterij Team-/NIVO-relatie intact.
