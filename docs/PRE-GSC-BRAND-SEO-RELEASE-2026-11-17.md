@@ -2,7 +2,7 @@
 
 **Uitgevoerd:** 17 november 2026 · **Scope:** statische website-assets, publiek metadata, merkpresentatie, aanvullende read-only releasecontrole en tests.  
 **Basis:** afgeronde fabrikant-/inhoudsaudit PR #45–#46 + gecorrigeerde overdracht PR #47.  
-**Status:** implementatie op featurebranch; merge/deploy-bewijs hieronder pas na de geslaagde CI/Hostinger-check invullen.
+**Status:** feature-PR #48 gemerged op `main` en **15/15 echte publieke checks groen**, bewezen met GitHub Actions op 17 november 2026.
 
 ## 1. Eigenaarssignaal en uitgangspunt
 
@@ -60,4 +60,17 @@ De homepage toont nog steeds het redactionele H1 `De zon gaat onder. Jouw energi
 
 ## Merge- en productiebewijs
 
-Wordt uitsluitend aangevuld op basis van daadwerkelijke CI-resultaten en publieke GET-controle na de Hostinger-deploy. **Publicatie in GitHub op zichzelf is geen bewijs dat Hostinger de laatste versie serveert.**
+**PR #48 is geslaagd en gemerged**: [code-, metadata- en assetwijzigingen](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/48) op `main` als `4653b84211223d0d852bc3ee62a802800aa1d44e`. De wijzigingen staan daarmee in de productiebranch, maar de daadwerkelijke uitrol is ook zelfstandig gecontroleerd.
+
+| Gate | Resultaat en bron | Wat dit wél en niet bewijst |
+| --- | --- | --- |
+| PR-head build/QA | [GitHub Actions #43988837014](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43988837014): **3/3 jobs PASS** | Node24, productiebouw, 82 bron-/API-/merkregressietests, statische links/schema/PDF's, Chromium 1440/390/320, axe, Beheer en geïsoleerde MySQL8/outbox. Geen echte leadverzending |
+| Lighthouse op PR-head | Zelfde Actions-run: **desktop 100/100/100/100**, **mobiel 100/100/100/100** (performance / accessibility / best practices / SEO) | Synthetische testomgeving; geen echte Core Web Vitals/gebruikerservaring of gegarandeerde Google-posities |
+| Na merge: `main` | [GitHub Actions #43989145262](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43989145262): **3/3 jobs PASS** | Onafhankelijke hercontrole op de exacte gemergede commit |
+| Echte Hostinger-site | [Publieke controle #43989145299](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43989145299): **15/15 PASS** inclusief `brandAssetsDeployed` | Alle 8 HTML-routes, canonicals, sitemap, privacy/Odoo-uitleg, API-readiness, geen toegang tot private leads, **werkelijke** PNG-iconen en manifest op hyxi-aura.nl. GET-only, geen nieuwe mail of echte aanvraag |
+
+**Gekozen afwerking:** het transparante 48px favicon met de exacte vorm van de eigenaar is publiek bereikbaar, naast 192px en 512px-versies en een iOS-touchicoon. Het merk is op de website zelf in de zichtbare presentatie opgenomen; geen fabrikanterkenning of nieuw verzonnen logo. Googlebot kan de favicon bereiken omdat de bronpagina en iconbestanden publiek bereikbaar zijn en de robots.txt die niet blokkeert. Google kiest zelf of/wanneer het favicon in zoekresultaten getoond wordt.
+
+**Releasebesluit:** technische en redactionele **pre-indexatiebasis gereed**. De eigen GSC-verificatie, reële URL-indexatie, zoekimpressies, CTR, bezoeker→aanvraagconversie en de door eigenaar beoordeelde visuele ≥9/10 op echte iPhone Safari blijven afzonderlijk **OPEN**. GSC Wizard gaf eerder `payment_required`; gebruik de gratis officiële Google Search Console via geverifieerde eigenaarstoegang, niet een betaalde afhankelijkheid.
+
+**Google-bronnen voor de SEO-keuzes:** [favicon in Google](https://developers.google.com/search/docs/appearance/favicon-in-search), [titellinks](https://developers.google.com/search/docs/appearance/title-link) en [snippets](https://developers.google.com/search/docs/appearance/snippet). De website voldoet aan de controleerbare markup-/bestandsvoorwaarden; Google bepaalt de uiteindelijke presentatie en crawl.
