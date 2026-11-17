@@ -58,3 +58,29 @@
 - [Google productvarianten](https://developers.google.com/search/docs/specialty/ecommerce/designing-a-url-structure-for-ecommerce-sites)
 
 **Let op:** geen sitemap indienen bij Search Console betekent niet dat Google de al publiek crawlbare website nog niet heeft ontdekt. Niet stilzwijgend `noindex` toevoegen; dat is een afzonderlijk eigenaarbesluit.
+
+
+## 5. Definitief releasebewijs — 17 november 2026
+
+**[PR #50](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/50) is gemerged naar `main` als `a45e4ba7c3ed18c2fd5e646cff3971caec09e741`.** De vorige 8 pagina's en alle vijf nieuwe kennispagina's zijn behouden en staan samen in de canonieke sitemap van 13 publieke URL's.
+
+| Gate | Uitslag en direct bewijs | Betekenis |
+| --- | --- | --- |
+| PR-head CI op laatste code | [Run 43997110605](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43997110605): **3/3 PASS** | Node 24, MySQL 8/outbox, Vite + Hostinger-prod-only, **91/91 Node-tests**, **1.912 statische SEO-/link-/bronchecks** |
+| Browser- en visuele regressie | Dezelfde run: oude én nieuwe pagina's op **1440, 390 en 320 px** met Chromium/axe; Beheer, formulieren, hero, semantische links, afbeeldingen en horizontale overflow geslaagd | Inclusief gerichte herstelronde voor een lange Nederlandse kop op 320px; geen test uitgeschakeld |
+| Lighthouse (synthetisch) | Zelfde run: desktop **100/100/100/100** en mobiel **100/100/100/100** (performance, accessibility, best practices, SEO) | Laboratoriumscore van geteste website, **geen** echte Google-rankings/gebruikersdata |
+| Postmerge `main` | [Run 43997478395](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43997478395): **3/3 PASS** | Onafhankelijke hercontrole van de gemergede productiecode |
+| Werkelijke Hostinger-uitrol | [Publieke run 43997478381](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/43997478381): **20/20 PASS** | Alle 5 nieuwe URL's en 8 oude pagina's bereikt, sitemap, iconen, privacyuitleg, intake-readiness, onbereikbare niet-ingelogde private leads; **uitsluitend GET**, geen echte lead-POST |
+
+De vijf nieuwe URL's zijn:
+- [HYXI AURA modellen](https://hyxi-aura.nl/modellen/)
+- [HYXI AURA datasheet PDF's](https://hyxi-aura.nl/datasheet/)
+- [HYXI AURA prijs en installatie](https://hyxi-aura.nl/kennis/prijs-en-installatie/)
+- [HYXI AURA bij bestaande zonnepanelen](https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/)
+- [HYXI AURA garantie](https://hyxi-aura.nl/kennis/garantie/)
+
+**Pre-indexatie redactionele/technische sprint: DONE.** GSC-eigendom, opname in de zoekindex, vertoningen, doorklikratio, aantoonbaar zoekvolume per model, werkelijke bezoekers-naar-leadconversie en eigenaarsscore op echte iPhone Safari blijven afzonderlijk **OPEN**. De site is publiek crawlbaar, dus “nog geen sitemap ingediend” bewijst niet dat Google nog niet kan indexeren. Zoekmachinecontrole blijft bij Google.
+
+**Bevestiging per model-URL:** de kwalitatieve SERP-verkenning en huidige productbronnen rechtvaardigen een goed onderbouwde familiepagina, **niet** meerdere duplicerende SKU-pages. Een losse HSA2/HTA2-modelpagina komt pas in beeld met (1) daadwerkelijk leverbare modelcode, (2) definitieve juiste datasheet, (3) door eigenaar goedgekeurde pakket-/prijsinformatie en (4) bij voorkeur zichtbare zoekvraag/GSC-trend. Voor BAT-Q7 geldt aanvullend schriftelijk bevestigde garantievoorwaarden voordat een garantiebedrag of duur als feit wordt gepubliceerd.
+
+**Eerstvolgende uitvoeringsfase:** domeineigendom verifiëren in **gratis** Google Search Console en de 13 canonieke URL's en de bestaande sitemap inspecteren. Daarna realistische query-/pagina-impressies beoordelen en binnen de bewezen commerciële operatie bezoekers-naar-leads meten. Geen betaalde GSC Wizard-verplichting, geen nieuwe Odoo API, geen dubbele testleads.
