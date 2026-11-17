@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import { probeProduction } from '../scripts/probe-production.mjs';
 
 const good = {
-  '/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
+  '/': [200, '<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png"><link rel="manifest" href="/site.webmanifest"><img class="site-brand-icon" src="/icons/brand-192.png" width="32" height="32" alt=""><link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
+  '/favicon.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 48x48 pixels'],
+  '/apple-touch-icon.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 192x192 pixels'],
+  '/icons/brand-192.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 192x192 pixels'],
+  '/icons/brand-512.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 512x512 pixels'],
+  '/site.webmanifest': [200, JSON.stringify({ name: 'HYXI AURA — Thuisbatterij Team', icons: [{sizes:'192x192'}, {sizes:'512x512'}] })],
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
   '/privacy/': [200, 'Privacyverklaring · versie 16 november 2026; versleuteld op in een beveiligde database; Odoo CRM'],
@@ -26,7 +31,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,14);
+  assert.equal(Object.keys(result.checks).length,15);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -126,4 +131,16 @@ test('manufacturer source page is public, canonical and transparent about Prelim
   assert.equal(old.ok,false);
   const wrongBrand=await probeProduction(mock({...good,'/bronnen/':[200,good['/bronnen/'][1].replace('secondary-presenter','legacy-hyxi')] }));
   assert.equal(wrongBrand.checks.sourceDocumentationDeployed,false);
+});
+
+test('public readiness detects incomplete or stale HYXI AURA favicon/PWA installation',async()=>{
+  const missing = await probeProduction(mock({...good,'/favicon.png':[404,'']}));
+  assert.equal(missing.checks.brandAssetsDeployed,false);
+  assert.equal(missing.ok,false);
+  const partial = await probeProduction(mock({...good,'/site.webmanifest':[200,'{"name":"Old orange A"}']}));
+  assert.equal(partial.checks.brandAssetsDeployed,false);
+  assert.equal(partial.ok,false);
+  const oldHome = await probeProduction(mock({...good,'/':[200,good['/'][1].replace('href="/favicon.png"','href="/favicon.svg"')]}));
+  assert.equal(oldHome.checks.brandAssetsDeployed,false);
+  assert.equal(oldHome.ok,false);
 });
