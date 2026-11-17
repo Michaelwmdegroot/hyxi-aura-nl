@@ -66,3 +66,8 @@
  .knowledge-topic-list{grid-template-columns:1fr}
 }
 @media(max-width:360px){.topic-guide .topic-notice{padding:18px 15px}.topic-guide .topic-document .pill{width:100%}}
+
+
+.knowledge-deep{margin-top:31px}
+.knowledge-deep-title{font-size:clamp(20px,2.4vw,28px);font-weight:680;letter-spacing:-.045em;margin:0 0 11px;color:#29302a}
+.knowledge-deep-intro{font-size:13px;line-height:1.8;max-width:690px;color:#666d63}
