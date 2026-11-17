@@ -286,6 +286,31 @@ test('canonical and preview hosts keep queries out of public API responses', asy
   const canonical = await withHost('/privacy/?utm_source=check', 'www.hyxi-aura.nl');
   assert.equal(canonical.status, 308);
   assert.equal(canonical.headers.location, 'https://hyxi-aura.nl/privacy/?utm_source=check');
+
+  // Duplicated static index.html paths must never compete with preferred
+  // readable URLs in Google; the canonical hostname and query are preserved.
+  for (const [alias, clean] of [
+    ['/index.html', '/'],
+    ['/modellen/index.html', '/modellen/'],
+    ['/datasheet/index.html', '/datasheet/'],
+    ['/kennis/garantie/index.html', '/kennis/garantie/'],
+    ['/kennis/bestaande-zonnepanelen/index.html', '/kennis/bestaande-zonnepanelen/'],
+    ['/privacy/index.html', '/privacy/']
+  ]) {
+    const result = await withHost(alias + '?utm_campaign=source-test', 'hyxi-aura.nl');
+    assert.equal(result.status, 308, alias);
+    assert.equal(result.headers.location, 'https://hyxi-aura.nl' + clean + '?utm_campaign=source-test');
+  }
+  const doubleAlias = await withHost('/datasheet/index.html?utm_source=search', 'www.hyxi-aura.nl');
+  assert.equal(doubleAlias.status, 308);
+  assert.equal(doubleAlias.headers.location, 'https://hyxi-aura.nl/datasheet/?utm_source=search');
+  const typo = await withHost('/niet-bestaand/index.html', 'hyxi-aura.nl');
+  assert.equal(typo.status, 404, 'Never redirect an unknown document into a soft 404');
+  assert.match(typo.text, /noindex/);
+  const previewAlias = await withHost('/index.html', 'example.hostingersite.com');
+  assert.equal(previewAlias.status, 200);
+  assert.equal(previewAlias.headers['x-robots-tag'], 'noindex, nofollow');
+
   const config = await fetch(`${f.base}/api/config?email=private@example.test`);
   assert.doesNotMatch(await config.text(), /private@example/);
 });

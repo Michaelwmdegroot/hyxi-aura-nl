@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { probeProduction } from '../scripts/probe-production.mjs';
 
 const good = {
+  '/index.html': [308, ''],
   '/': [200, '<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png"><link rel="manifest" href="/site.webmanifest"><img class="site-brand-icon" src="/icons/brand-192.png" width="32" height="32" alt=""><link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
   '/favicon.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 48x48 pixels'],
   '/apple-touch-icon.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 192x192 pixels'],
@@ -30,13 +31,13 @@ const good = {
 const mock = (data) => async url => {
   const path = new URL(url).pathname;
   const [status,body] = data[path] ?? [404,''];
-  return {status,text:async()=>body};
+  return {status,text:async()=>body,headers:{get:name=>name.toLowerCase()==='location' && path==='/index.html' ? 'https://hyxi-aura.nl/' : null}};
 };
 
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,20);
+  assert.equal(Object.keys(result.checks).length,21);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -174,4 +175,13 @@ test('five topic-cluster pages must be live, canonical, source-aware and covered
     '/datasheet/':[200,good['/datasheet/'][1].replace('160000 W','corrected 16000W')]
   }));
   assert.equal(typo.checks.datasheetGuideDeployed,false);
+});
+
+test('canonical HTML alias must permanently redirect to the preferred home URL',async()=>{
+  const aliasNotFound=await probeProduction(mock({...good,'/index.html':[404,'']}));
+  assert.equal(aliasNotFound.checks.canonicalHtmlAliasRedirected,false);
+  assert.equal(aliasNotFound.ok,false);
+  const duplicate=await probeProduction(mock({...good,'/index.html':[200,'<title>Duplicate homepage</title>']}));
+  assert.equal(duplicate.checks.canonicalHtmlAliasRedirected,false);
+  assert.equal(duplicate.ok,false);
 });

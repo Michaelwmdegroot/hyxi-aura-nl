@@ -38,6 +38,22 @@ function cspFor(directory) {
   ].join('; ');
 }
 
+export const PUBLIC_CANONICAL_PATHS = new Set([
+  "/",
+  "/privacy/",
+  "/bronnen/",
+  "/offerte/",
+  "/kennis/bat-q7-vs-bat-q9/",
+  "/kennis/noodstroom/",
+  "/kennis/installatiecheck/",
+  "/kennis/1-fase-of-3-fasen/",
+  "/modellen/",
+  "/datasheet/",
+  "/kennis/prijs-en-installatie/",
+  "/kennis/bestaande-zonnepanelen/",
+  "/kennis/garantie/"
+]);
+
 export function createApp({ config, transport = null, leadStore = null, notificationWorker = null, adminStore = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {
   if (!config) throw new Error('Server configuration is required.');
   const app = express();
@@ -109,8 +125,22 @@ export function createApp({ config, transport = null, leadStore = null, notifica
     const canonical = new URL(config.siteUrl);
     const hostname = String(req.hostname || '').toLowerCase();
     if (hostname !== canonical.hostname) res.set('X-Robots-Tag', 'noindex, nofollow');
-    if (config.canonicalRedirect && ['GET', 'HEAD'].includes(req.method) && hostname === `www.${canonical.hostname}`) {
-      return res.redirect(308, `${canonical.origin}${req.originalUrl}`);
+    // Express serves /index.html and /topic/index.html as valid static URLs.
+    // Consolidate those explicit aliases before Google can crawl duplicate URLs.
+    // Only the actual 13 published canonical pages are eligible; never rewrite
+    // API, Beheer, a missing route, or a temporary preview host.
+    const isReadRequest = ['GET', 'HEAD'].includes(req.method);
+    const cleanCandidate = req.path.endsWith('/index.html')
+      ? req.path.slice(0, -'index.html'.length) : null;
+    const cleanPath = cleanCandidate && PUBLIC_CANONICAL_PATHS.has(cleanCandidate)
+      ? cleanCandidate : req.path;
+    const wwwToApex = config.canonicalRedirect && hostname === `www.${canonical.hostname}`;
+    if (isReadRequest && (
+      (hostname === canonical.hostname && cleanPath !== req.path) || wwwToApex
+    )) {
+      // Keep query parameters intact for attribution; never send them to logs.
+      const query = req.originalUrl.slice(req.path.length);
+      return res.redirect(308, `${canonical.origin}${cleanPath}${query}`);
     }
     next();
   });
