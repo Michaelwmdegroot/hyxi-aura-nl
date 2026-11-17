@@ -8,16 +8,18 @@ const KNOWLEDGE = [
   { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
   { path: '/kennis/1-fase-of-3-fasen/', title: 'HYXI AURA 1 fase of 3 fasen' },
 ];
-const PATHS = ['/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
+const PATHS = [...BRAND_ASSETS, '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
   for (const path of PATHS) {
     const guide = KNOWLEDGE.find(item => item.path === path) || (path === '/' ? {path:'/', title:'HYXI AURA thuisbatterij'} : null);
-    // Hostinger deploy may finish after GitHub's push event. Only public guide
-    // GETs receive a short bounded retry; API/privacy checks retain their
-    // original strict immediate behavior. Unit test mocks never wait.
-    const attempts = guide && fetcher === fetch ? 8 : 1;
+    // Hostinger deployment may lag behind the GitHub push. Only public guides
+    // and static icons get a short bounded retry; API/privacy checks remain
+    // strict and immediate. Unit test mocks never wait.
+    const brandAsset = BRAND_ASSETS.includes(path);
+    const attempts = (guide || brandAsset) && fetcher === fetch ? 8 : 1;
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
         const response = await fetcher(BASE + path, {
@@ -46,8 +48,12 @@ export async function probeProduction(fetcher = fetch) {
         !observed[path].content.includes('class="hero-eyebrow"') &&
         observed[path].content.includes('id="backup-usp"') &&
         observed[path].content.includes('footer-presenter') &&
-        observed[path].content.includes('src="/vendor/gsap.min.js"'));
-      if (!guide || (observed[path].status === 200 &&
+        observed[path].content.includes('src="/vendor/gsap.min.js"') &&
+        observed[path].content.includes('href="/favicon.png"'));
+      const assetReady = brandAsset && observed[path].status === 200 &&
+        (path.endsWith('.png') ? observed[path].content.length > 64 :
+          observed[path].content.includes('"HYXI AURA — Thuisbatterij Team"'));
+      if ((!guide && !brandAsset) || assetReady || (guide && observed[path].status === 200 &&
         observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
         observed[path].content.includes(guide.title) && rootV6)) break;
       if (attempt + 1 < attempts) await new Promise(resolve => setTimeout(resolve, 10000));
@@ -85,6 +91,12 @@ export async function probeProduction(fetcher = fetch) {
     healthReachable: observed['/api/health'].status === 200 && observed['/api/health'].data?.ok === true,
     publicIntakeEnabled: observed['/api/health'].data?.leadEnabled === true &&
       observed['/api/config'].status === 200 && observed['/api/config'].data?.leadEnabled === true,
+    brandAssetsDeployed: observed['/'].content.includes('href="/favicon.png"') &&
+      observed['/'].content.includes('href="/site.webmanifest"') &&
+      observed['/'].content.includes('src="/icons/brand-192.png"') &&
+      BRAND_ASSETS.every(path => observed[path]?.status === 200) &&
+      observed['/site.webmanifest'].content.includes('"192x192"') &&
+      observed['/site.webmanifest'].content.includes('"512x512"'),
     privacyDeployed: observed['/privacy/'].status === 200 &&
       observed['/privacy/'].content.includes('Privacyverklaring · versie 16 november 2026') &&
       observed['/privacy/'].content.includes('Odoo CRM') &&
