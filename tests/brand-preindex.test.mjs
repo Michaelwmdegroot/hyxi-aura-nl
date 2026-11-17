@@ -81,7 +81,7 @@ test('All eight public pages have branded favicon, share preview, trustworthy me
     assert.ok(html.includes('site-brand-icon'), 'brand icon present in visible lockup');
     assert.match(html,/class="site-brand-icon" src="\/icons\/brand-192\.png" width="32" height="32" alt=""/,
       `${name} user image decorates without replacing readable TBT wordmark`);
-    assert.doesNotMatch(html,/<link rel="icon" type="image\/svg\\+xml" href="\/favicon\.svg">/);
+    assert.doesNotMatch(html,/<link rel="icon" type="image\/svg\+xml" href="\/favicon\.svg">/);
     assert.match(html,/Thuisbatterij/,`${name} presenter identity remains visible`);
   }
 });
