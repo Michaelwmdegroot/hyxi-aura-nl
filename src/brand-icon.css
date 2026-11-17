@@ -1,0 +1,29 @@
+/* HYXI AURA brand mark, derived only from the owner-provided house/battery icon.
+   Keep the wordmark authoritative and the trademark relation transparent. */
+.presenter-brand,.secondary-presenter{position:relative}
+.presenter-brand:has(>.site-brand-icon){padding-left:40px!important;box-sizing:border-box}
+.secondary-presenter:has(>.site-brand-icon){padding-left:35px!important;box-sizing:border-box}
+.site-brand-icon{
+  position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:31px;height:31px;object-fit:contain;flex:none;pointer-events:none;
+}
+.secondary-presenter>.site-brand-icon{width:27px;height:27px}
+.site-footer .footer-presenter>.site-brand-icon{width:32px;height:32px}
+/* Existing narrow headers already contain the complete company name and a CTA.
+   Do not crowd the wordmark or produce horizontal overflow on phones. */
+@media(max-width:960px){
+  .site-header .presenter-brand:has(>.site-brand-icon){padding-left:0!important}
+  .site-header .presenter-brand>.site-brand-icon{display:none}
+}
+@media(max-width:760px){
+  .site-bar .secondary-presenter:has(>.site-brand-icon),
+  .topbar .secondary-presenter:has(>.site-brand-icon),
+  .legal-header .secondary-presenter:has(>.site-brand-icon){padding-left:0!important}
+  .site-bar .secondary-presenter>.site-brand-icon,
+  .topbar .secondary-presenter>.site-brand-icon,
+  .legal-header .secondary-presenter>.site-brand-icon{display:none}
+}
+@media(max-width:360px){
+  .site-footer .footer-presenter:has(>.site-brand-icon){padding-left:35px!important}
+  .site-footer .footer-presenter>.site-brand-icon{width:27px;height:27px}
+}
