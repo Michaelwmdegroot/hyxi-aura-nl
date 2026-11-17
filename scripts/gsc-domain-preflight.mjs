@@ -65,7 +65,7 @@ async function inspect(check) {
         });
         if(htmlResponse.status===200){
           const html=(await htmlResponse.text()).slice(0,180000);
-          report.pageTitle=(html.match(/<title[^>]*>([^<]+)<\\/title>/i)?.[1]||'').replace(/\\s+/g,' ').trim().slice(0,100);
+          report.pageTitle=(html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim().slice(0,100);
           report.pageCanonical=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1]
             ||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)?.[1]
             ||null;
