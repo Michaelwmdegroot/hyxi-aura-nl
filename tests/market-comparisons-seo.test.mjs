@@ -86,7 +86,7 @@ test('the nine comparison pages disclose conflicts, avoid system-level shortcuts
     const page=await htmlAt('/vergelijken/hyxi-aura-vs-'+slug+'/');
     assert.match(page,/HYXI AURA of /);
     assert.match(page,/niet onafhankelijk|geen onafhankelijke testinstantie/i);
-    assert.match(page,/geen gegarandeerd|geen fictieve|Geen fictieve/i);
+    assert.match(page,/geen gegarandeerd|geen fictieve|geen niet-bevestigde prijzen/i);
     assert.ok(page.includes('href="/datasheet/"'),'original HYXI pdf');
     assert.ok(page.includes('href="/bronnen/"'),'preliminary source status');
     assert.ok(page.includes('href="/kennis/prijs-en-installatie/"'),'pricing nuance');
