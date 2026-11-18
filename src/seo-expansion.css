@@ -75,3 +75,25 @@
 /* Long Dutch compound headings must wrap naturally at 320px.
    Do not hide horizontal overflow: preserve focus and text visibility. */
 .topic-guide .section h2,.topic-guide .topic-card h3{hyphens:auto;overflow-wrap:break-word}
+
+
+/* 2026-11-18: Editorial market comparisons, never a fabricated ranking grid. */
+.market-comparison-hub .hero-copy h1,
+.market-detail .hero-copy h1 { overflow-wrap: break-word; hyphens: auto; }
+.market-comparison-hub .section,
+.market-detail .section { scroll-margin-top: 96px; }
+.comparison-matrix { min-width: 670px; }
+.comparison-matrix th[scope="row"] { font-size: 14px; min-width: 160px; }
+.comparison-matrix .model-name { display:block; font-size: 12px; font-weight:500; color:#686f69; margin-top:5px; }
+.comparison-matrix td { min-width: 125px; line-height:1.7; }
+.comparison-matrix td small { display:block; color:#68736c; font-size:11px; margin-top:7px; line-height:1.65; }
+.comparison-matrix a { display:block; font-weight:650; text-underline-offset:3px; }
+.comparison-matrix a.comparison-deep-link { margin-top:9px; font-weight:750; }
+.comparison-matrix tbody tr:nth-child(even) { background:rgba(248,250,247,.8); }
+.comparison-links { margin-top:20px; }
+.market-comparison-hub .hero-note,.market-detail .hero-note { max-width:670px; }
+@media(max-width:650px) {
+  .comparison-matrix { min-width: 650px; font-size:12px; }
+  .market-comparison-hub .table-wrap, .market-detail .table-wrap { scroll-padding-inline:12px; }
+  .market-comparison-hub .hero-copy h1 em, .market-detail .hero-copy h1 em { overflow-wrap:anywhere; }
+}
