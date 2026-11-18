@@ -83,14 +83,14 @@ test('dynamic tariff guide distinguishes capability from guaranteed trading inte
   assert.match(html,/AI-modus/);
   assert.match(html,/VPP-ready/);
   assert.match(html,/niet.*automatisch.*gekoppeld/is);
-  assert.match(html,/geen.*gegarandeerde besparing/is);
+  assert.match(html,/niet.*over als gegarandeerde besparing of terugverdientijd/is);
   assert.ok(html.includes('href="/kennis/btw-subsidie/"'));
 });
 
 test('expansion guide and outdoor guide preserve provisional specification boundaries',async()=>{
   const expand=await htmlAt('/kennis/uitbreiden/');
   for(const v of ['7,03 kWh','6,7 kWh','9,04 kWh','8,6 kWh','51,6 kWh','BAT-Q7-garantie'])assert.ok(expand.includes(v),'expansion '+v);
-  assert.match(expand,/niet.*automatisch.*passend/is);
+  assert.match(expand,/niet hetzelfde als een onbeperkte garantie dat elke oude en nieuwe batterij/is);
   const outside=await htmlAt('/kennis/buiten-plaatsen/');
   for(const v of ['IP66','−20 tot +55 °C','−30 tot +60 °C','68 kg','79 kg'])assert.ok(outside.includes(v),'placement '+v);
   assert.match(outside,/IP66 is geen locatievergunning|IP66 is geen algemene garantie/i);
