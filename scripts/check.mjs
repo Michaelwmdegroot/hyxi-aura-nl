@@ -150,9 +150,9 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 18 && new Set(sitemapUrls).size === 18, 'sitemap lists the eighteen distinct public pages');
+ensure(sitemapUrls.length === 31 && new Set(sitemapUrls).size === 31, 'sitemap lists the thirty-one distinct public pages');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/', '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/', '/kennis/salderingsregeling-2027/', '/kennis/btw-subsidie/', '/kennis/dynamisch-energiecontract/', '/kennis/uitbreiden/', '/kennis/buiten-plaatsen/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/', '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/', '/kennis/salderingsregeling-2027/', '/kennis/btw-subsidie/', '/kennis/dynamisch-energiecontract/', '/kennis/uitbreiden/', '/kennis/buiten-plaatsen/', '/vergelijken/', '/hyxi-power/', '/kennis/hoeveel-kwh-nodig/', '/kennis/app-monitoring/', '/vergelijken/hyxi-aura-vs-sigenergy/', '/vergelijken/hyxi-aura-vs-alphaess/', '/vergelijken/hyxi-aura-vs-tesla-powerwall/', '/vergelijken/hyxi-aura-vs-enphase/', '/vergelijken/hyxi-aura-vs-huawei/', '/vergelijken/hyxi-aura-vs-byd/', '/vergelijken/hyxi-aura-vs-solaredge/', '/vergelijken/hyxi-aura-vs-ecoflow/', '/vergelijken/hyxi-aura-vs-sessy/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
 
 
 // Knowledge pages must remain real, indexable static HTML and part of the user journey.
