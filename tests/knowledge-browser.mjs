@@ -50,7 +50,8 @@ try {
     }));
     assert.equal(paint.background,'rgb(250, 249, 246)',`Sitemap CSS must render at ${width}px, not bare XML`);
     assert.ok(paint.scroll <= paint.width + 1,`Sitemap ${width}px overflow: ${JSON.stringify(paint)}`);
-    await page.screenshot({path:resolve(dir,`sitemap-xml-${width}.png`),fullPage:true});
+    // Chromium can stall when capturing screenshots of XML documents;
+    // DOM structure, computed CSS and viewport overflow are asserted above.
     console.log(`PASS sitemap ${width}px: parsed 13 URLs, styled XML, no overflow`);
     await context.close();
   }
