@@ -86,12 +86,12 @@ test('the nine comparison pages disclose conflicts, avoid system-level shortcuts
     const page=await htmlAt('/vergelijken/hyxi-aura-vs-'+slug+'/');
     assert.match(page,/HYXI AURA of /);
     assert.match(page,/niet onafhankelijk|geen onafhankelijke testinstantie/i);
-    assert.match(page,/geen gegarandeerd|geen fictieve|geen niet-bevestigde prijzen/i);
+    assert.match(page,/geen garantie voor een individuele woning|geen gegarandeerd|geen fictieve|geen niet-bevestigde prijzen|Geen actuele verkoopprijs/i);
     assert.ok(page.includes('href="/datasheet/"'),'original HYXI pdf');
     assert.ok(page.includes('href="/bronnen/"'),'preliminary source status');
     assert.ok(page.includes('href="/kennis/prijs-en-installatie/"'),'pricing nuance');
     assert.ok(page.includes('class="compare-table comparison-matrix"'),'accessible comparison table');
-    assert.ok(page.includes('aria-label="HYXI AURA versus'),'real comparison table');
+    assert.match(page,/aria-label="(?:HYXI AURA versus|Feitelijke vergelijking HYXI AURA)/,'accessible comparison table name');
     assert.ok(page.includes('target="_blank" rel="noopener"'),'official competitor source');
     const otherSources=MARKET_MODELS.filter(x=>x.scope==='vergelijking' && x.id!=='hyxi-aura');
     assert.ok(otherSources.some(x=>page.includes('href="'+x.source+'"')),'official comparator cited');
