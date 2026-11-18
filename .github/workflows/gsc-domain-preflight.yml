@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: '24'
       - name: Validate public and live XML sitemap with crawler-like requests
-        run: python3 scripts/audit-sitemap.py public/sitemap.xml --xsl public/sitemap.xsl --live
+        run: python3 scripts/audit-sitemap.py public/sitemap.xml --css public/sitemap.css --live
 
       - name: Read-only domain, redirects and sitemap preflight
         run: node scripts/gsc-domain-preflight.mjs
