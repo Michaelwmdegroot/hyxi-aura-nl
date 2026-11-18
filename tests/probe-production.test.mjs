@@ -24,7 +24,8 @@ const good = {
   '/kennis/bestaande-zonnepanelen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/"><title>HYXI AURA bij bestaande zonnepanelen</title><p>micro-omvormers</p><a href="/offerte/">Offerte</a>'],
   '/kennis/garantie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/garantie/"><title>HYXI AURA garantie</title><p>BAT-Q7 BAT-Q9 50,7 MWh</p><a href="/downloads/hyxi-eu-garantievoorwaarden.pdf">Garantie PDF</a>'],
   '/kennis/1-fase-of-3-fasen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/"><title>HYXI AURA 1 fase of 3 fasen</title><a href="/offerte/">'],
-  '/sitemap.xml': [200, "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc>"],
+  '/sitemap.xml': [200, '<?xml-stylesheet type="text/css" href="/sitemap.css"?>' + "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc>"],
+  '/sitemap.css': [200, '@namespace "http://www.sitemaps.org/schemas/sitemap/0.9"; urlset::before {content:"XML-sitemap"} loc {display:block}'],
   '/robots.txt': [200, 'Sitemap: https://hyxi-aura.nl/sitemap.xml'],
   '/api/beheer/leads': [401, '{}'],
 };
@@ -37,7 +38,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,21);
+  assert.equal(Object.keys(result.checks).length,22);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -184,4 +185,19 @@ test('canonical HTML alias must permanently redirect to the preferred home URL',
   const duplicate=await probeProduction(mock({...good,'/index.html':[200,'<title>Duplicate homepage</title>']}));
   assert.equal(duplicate.checks.canonicalHtmlAliasRedirected,false);
   assert.equal(duplicate.ok,false);
+});
+
+test('styled sitemap deployment gate rejects missing XML PI and missing browser CSS', async()=>{
+  const missingCss=await probeProduction(mock({...good,'/sitemap.css':[404,'']}));
+  assert.equal(missingCss.checks.styledSitemapDeployed,false);
+  assert.equal(missingCss.ok,false);
+  const noStylePI=await probeProduction(mock({...good,
+    '/sitemap.xml':[200,good['/sitemap.xml'][1].replace('<?xml-stylesheet type="text/css" href="/sitemap.css"?>','')]
+  }));
+  assert.equal(noStylePI.checks.styledSitemapDeployed,false);
+  assert.equal(noStylePI.ok,false);
+  const wrongNamespace=await probeProduction(mock({...good,
+    '/sitemap.css':[200,'@namespace "https://wrong.example"; urlset::before { } loc { }']
+  }));
+  assert.equal(wrongNamespace.checks.styledSitemapDeployed,false);
 });
