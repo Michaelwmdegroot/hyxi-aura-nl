@@ -9,7 +9,7 @@
 De eigenaar zag in Safari alleen aaneengeregen tekst-URL's, terwijl in de geverifieerde Search Console-domeinproperty `hyxi-aura.nl` bij de pas ingediende sitemap de status **“Couldn't fetch”**, type **“Unknown”**, laatste uitlezing leeg en 0 ontdekte pagina's stond. Als referentie is de Yoast-sitemapindex van thuisbatterijteam.nl getoond, die als verzorgde HTML-tabel verschijnt.
 
 **Dit zijn twee verschillende zaken:**
-- **Browserweergave:** de oorspronkelijke sitemap was valide XML, maar had geen XSL-presentatiestylesheet. Safari kon de inhoud daardoor als onopgemaakte, samengevoegde tekst tonen. De XML zelf is niet ongeldig vanwege ontbrekende opmaak.
+- **Browserweergave:** de oorspronkelijke sitemap was valide XML, maar had geen presentatie-stylesheet. Safari kon de inhoud daardoor als onopgemaakte, samengevoegde tekst tonen. De XML zelf is niet ongeldig vanwege ontbrekende opmaak.
 - **Google kon sitemap nog niet ophalen:** deze GSC-status is niet hetzelfde als “parsing error”. Een eerdere crawl kan tijdelijk zijn mislukt of Google kan een ander toegangsprobleem hebben ervaren. We kunnen dat **niet** uit een Safari-screenshot of van buiten Googles eigen crawler achterhalen.
 
 ## Officiële sitemaps.org-vereisten en onze toets
@@ -25,7 +25,7 @@ De [externe GitHub Actions-sitemapdiagnose (PR #55)](https://github.com/Michaelw
 | Controle | Resultaat |
 | --- | --- |
 | Sitemap uit de repository via `xml.etree.ElementTree` parser | PASS; 13 unieke kanonieke HTTPS-URL's; juiste namespace en UTF-8 |
-| Sitemaps.org-structuur, geldige XSL | PASS |
+| Sitemaps.org-structuur, geldige browser-CSS | PASS |
 | Live `GET https://hyxi-aura.nl/sitemap.xml` | HTTP **200** |
 | Content-Type live | **`application/xml`**, dus Google-compatible |
 | Live request van onafhankelijke standaardclient | XML parseert, **13/13** unieke canonieke pagina-URLs |
@@ -37,9 +37,9 @@ De [externe GitHub Actions-sitemapdiagnose (PR #55)](https://github.com/Michaelw
 ## Wat is geïmplementeerd?
 
 1. **Behoud bestaande URLset** `public/sitemap.xml`: 13 URL's, geen dubbele varianten, geen nieuwe sitemapindex en geen niet-relevante extra XML-elementen.
-2. **XSL-presentatie toegevoegd**: `public/sitemap.xsl` en een standaard `<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>` processing instruction. De browser kan dezelfde inhoud nu als nette, lichte HYXI AURA-tabel tonen; de zoekmachine leest nog steeds de gewone XML-urlset. Geen JavaScript, geen cookies of tracking.
-3. **Express-header expliciet**: `application/xml; charset=UTF-8` voor `/sitemap.xml` en `text/xsl; charset=UTF-8` voor `/sitemap.xsl`. De bron bleek al `application/xml` te serveren; dit is een preventieve versterking, **geen bewezen root-cause fix** voor Search Console.
-4. **Regression gate met echte XML-parser**: `scripts/audit-sitemap.py` maakt de CI harder dan het uitsluitend zoeken naar `<loc>` via regex. Het controleert namespaces, UTF-8, URL's, XSL en live MIME. De CI test het dist-artifact met Python stdlib, zonder extra afhankelijkheden op Hostinger.
+2. **CSS-presentatie toegevoegd**: `public/sitemap.css` en de gestandaardiseerde `<?xml-stylesheet type="text/css" href="/sitemap.css"?>` processing instruction. De browser kan dezelfde inhoud nu als overzichtelijk opgemaakte URL-rijen tonen; de zoekmachine leest nog steeds de gewone XML-urlset. Geen JavaScript, geen cookies of tracking. **Bewuste keuze voor CSS in plaats van XSLT:** [Chrome verwijdert XSLT vanaf versie 158, gepland op 17 november 2026](https://developer.chrome.com/docs/web-platform/deprecating-xslt), en WebKit/Safari en Firefox hebben soortgelijke plannen aangegeven. De XML+CSS-werkwijze blijft volgens de browserdocumentatie ondersteund; een Yoast-achtige XSLT-conversie naar klikbare HTML is daarom geen toekomstbestendige afhankelijkheid.
+3. **Express-header expliciet**: `application/xml; charset=UTF-8` voor `/sitemap.xml` en `text/css; charset=UTF-8` voor `/sitemap.css`. De bron bleek al `application/xml` te serveren; dit is een preventieve versterking, **geen bewezen root-cause fix** voor Search Console.
+4. **Regression gate met echte XML-parser**: `scripts/audit-sitemap.py` maakt de CI harder dan het uitsluitend zoeken naar `<loc>` via regex. Het controleert namespaces, UTF-8, URL's, browser-CSS en live MIME. De CI test het dist-artifact met Python stdlib, zonder extra afhankelijkheden op Hostinger.
 5. **Live monitoring**: `.github/workflows/gsc-domain-preflight.yml` controleert naast de bestaande domein- en robotschecks ook XML-parse en HTTP Content-Type in twee publieke UA-varianten.
 
 ## Stappen in Google Search Console na de Hostinger-deploy
