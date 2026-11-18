@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@namespace url("http://www.sitemaps.org/schemas/sitemap/0.9");
+@namespace "http://www.sitemaps.org/schemas/sitemap/0.9";
 
 /* CSS on raw XML is supported without XSLT. The sitemap remains a standards-
    compliant, machine-readable urlset. No HTML, scripts or SEO-only markup. */
