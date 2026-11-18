@@ -26,8 +26,8 @@ async function fixture(t, { env, sendMail, now, sendTimeoutMs } = {}) {
   await mkdir(dist);
   await writeFile(join(dist, 'index.html'), '<!doctype html><title>AURA test</title><script type="application/ld+json">{"@type":"Product"}</script><h1>HYXI AURA</h1>');
   await writeFile(join(dist, 'privacy.html'), '<h1>Privacy</h1>');
-  await writeFile(join(dist, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://hyxi-aura.nl/</loc></url></urlset>');
-  await writeFile(join(dist, 'sitemap.xsl'), '<?xml version="1.0" encoding="UTF-8"?>\\n<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>');
+  await writeFile(join(dist, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://hyxi-aura.nl/</loc></url></urlset>');
+  await writeFile(join(dist, 'sitemap.xsl'), '<?xml version="1.0" encoding="UTF-8"?>\n<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>');
   await writeFile(join(dist, 'public-copy.txt'), 'HYXI AURA — energie bewaren voor later.\n'.repeat(100));
   await writeFile(join(root, '.env'), 'NEVER_PUBLIC');
   await writeFile(join(root, 'server.mjs'), 'NEVER_PUBLIC');
@@ -271,13 +271,13 @@ test('Vite localhost:5173 origin and reusable proxy cookie work in development',
 
 test('serves sitemap XML and XSL as publicly readable machine and browser resources', async t => {
   const f = await fixture(t);
-  const xml = await fetch(f.base + '/sitemap.xml', {headers:{'Accept':'application/xml'}});
+  const xml = await fetch(f.base + '/sitemap.xml', { headers:{ Accept:'application/xml' } });
   assert.equal(xml.status, 200);
-  assert.match(xml.headers.get('content-type')||'', /^application\\/xml/i);
-  assert.match(await xml.text(), /<urlset xmlns="http:\\/\\/www\\.sitemaps\\.org\\/schemas\\/sitemap\\/0\\.9">/);
+  assert.match(xml.headers.get('content-type') || '', /^application\/xml/i);
+  assert.match(await xml.text(), /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
   const xsl = await fetch(f.base + '/sitemap.xsl');
   assert.equal(xsl.status, 200);
-  assert.match(xsl.headers.get('content-type')||'', /^text\\/xsl/i);
+  assert.match(xsl.headers.get('content-type') || '', /^text\/xsl/i);
   assert.match(await xsl.text(), /xsl:stylesheet/);
 });
 
