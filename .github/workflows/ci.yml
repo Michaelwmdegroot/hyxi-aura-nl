@@ -42,6 +42,9 @@ jobs:
         id: build
         run: npm run build
 
+      - name: Validate sitemap XML with Sitemaps.org namespace and browser XSL
+        run: python3 scripts/audit-sitemap.py dist/sitemap.xml --xsl dist/sitemap.xsl
+
       - name: Test models and the secured lead API
         run: npm test
 
@@ -116,6 +119,9 @@ jobs:
           test -x node_modules/.bin/vite
           npm run build
           npm run check
+
+      - name: Validate XML sitemap from Hostinger-style production build
+        run: python3 scripts/audit-sitemap.py dist/sitemap.xml --xsl dist/sitemap.xsl
 
       - name: Smoke test production entry both ways Hostinger may start it
         run: node scripts/runtime-smoke.mjs
