@@ -4,7 +4,7 @@ import { probeProduction } from '../scripts/probe-production.mjs';
 
 const good = {
   '/index.html': [308, ''],
-  '/': [200, '<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png"><link rel="manifest" href="/site.webmanifest"><img class="site-brand-icon" src="/icons/brand-192.png" width="32" height="32" alt=""><link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
+  '/': [200, '<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png"><link rel="manifest" href="/site.webmanifest"><img class="site-brand-icon" src="/icons/brand-192.png" width="32" height="32" alt=""><link rel="canonical" href="https://hyxi-aura.nl/"><title>HYXI AURA thuisbatterij</title><header class="presenter-brand"><span class="presenter-owner">Thuisbatterij Team</span><span class="presenter-subline"><span class="presenter-verb">presenteert</span><span class="presenter-product">HYXI AURA</span></span></header><script defer src="/vendor/gsap.min.js"></script><div data-product-gallery><div id="hero-product-stage" data-aura-zone-viewer><div id="hero-product-pivot"></div></div><span id="aura-viewer-help">Kijkhoeken</span><div id="backup-usp">Automatische ATS-omschakeling</div><h3>Back-up is ingebouwd.</h3><a href="/kennis/noodstroom/">Techniek</a><a href="/kennis/salderingsregeling-2027/">SEO gids</a><a href="/kennis/btw-subsidie/">SEO gids</a><a href="/kennis/dynamisch-energiecontract/">SEO gids</a><a href="/kennis/uitbreiden/">SEO gids</a><a href="/kennis/buiten-plaatsen/">SEO gids</a><footer class="footer-presenter">Thuisbatterij Team</footer></div>'],
   '/favicon.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 48x48 pixels'],
   '/apple-touch-icon.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 192x192 pixels'],
   '/icons/brand-192.png': [200, 'PNG binary payload fixture - this is a public static icon, never user data, 192x192 pixels'],
@@ -22,9 +22,14 @@ const good = {
   '/datasheet/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/datasheet/"><title>HYXI AURA datasheet</title><p>Preliminary HTA2 HSA2 160000 W</p><a href="/downloads/hyxi-aura-1-fase-datasheet.pdf">HSA2 PDF</a><a href="/downloads/hyxi-aura-3-fasen-datasheet.pdf">HTA2 PDF</a>'],
   '/kennis/prijs-en-installatie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/prijs-en-installatie/"><title>HYXI AURA prijs</title><p>geen onbevestigde vanafprijs</p><a href="/offerte/">Offerte</a>'],
   '/kennis/bestaande-zonnepanelen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/"><title>HYXI AURA bij bestaande zonnepanelen</title><p>micro-omvormers</p><a href="/offerte/">Offerte</a>'],
+  '/kennis/salderingsregeling-2027/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/salderingsregeling-2027/"><title>HYXI AURA na salderen in 2027</title><p>1 januari 2027</p><a href="/kennis/bestaande-zonnepanelen/">Further</a><a href="/offerte/">Offerte</a>'],
+  '/kennis/btw-subsidie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/btw-subsidie/"><title>HYXI AURA btw terugvragen</title><p>Belastingdienst</p><a href="/kennis/prijs-en-installatie/">Further</a><a href="/offerte/">Offerte</a>'],
+  '/kennis/dynamisch-energiecontract/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/dynamisch-energiecontract/"><title>HYXI AURA met dynamisch energiecontract</title><p>EMS</p><a href="/kennis/noodstroom/">Further</a><a href="/offerte/">Offerte</a>'],
+  '/kennis/uitbreiden/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/uitbreiden/"><title>HYXI AURA uitbreiden</title><p>BAT-Q9</p><a href="/kennis/garantie/">Further</a><a href="/offerte/">Offerte</a>'],
+  '/kennis/buiten-plaatsen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/buiten-plaatsen/"><title>HYXI AURA buiten plaatsen</title><p>IP66</p><a href="/kennis/garantie/">Further</a><a href="/offerte/">Offerte</a>'],
   '/kennis/garantie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/garantie/"><title>HYXI AURA garantie</title><p>BAT-Q7 BAT-Q9 50,7 MWh</p><a href="/downloads/hyxi-eu-garantievoorwaarden.pdf">Garantie PDF</a>'],
   '/kennis/1-fase-of-3-fasen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/"><title>HYXI AURA 1 fase of 3 fasen</title><a href="/offerte/">'],
-  '/sitemap.xml': [200, '<?xml-stylesheet type="text/css" href="/sitemap.css"?>' + "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc>"],
+  '/sitemap.xml': [200, '<?xml-stylesheet type="text/css" href="/sitemap.css"?>' + "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc><loc>https://hyxi-aura.nl/kennis/salderingsregeling-2027/</loc><loc>https://hyxi-aura.nl/kennis/btw-subsidie/</loc><loc>https://hyxi-aura.nl/kennis/dynamisch-energiecontract/</loc><loc>https://hyxi-aura.nl/kennis/uitbreiden/</loc><loc>https://hyxi-aura.nl/kennis/buiten-plaatsen/</loc>"],
   '/sitemap.css': [200, '@namespace "http://www.sitemaps.org/schemas/sitemap/0.9"; urlset::before {content:"XML-sitemap"} loc {display:block}'],
   '/robots.txt': [200, 'Sitemap: https://hyxi-aura.nl/sitemap.xml'],
   '/api/beheer/leads': [401, '{}'],
@@ -38,7 +43,7 @@ const mock = (data) => async url => {
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
   assert.equal(result.ok,true);
-  assert.equal(Object.keys(result.checks).length,22);
+  assert.equal(Object.keys(result.checks).length,27);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
 });
 
@@ -200,4 +205,23 @@ test('styled sitemap deployment gate rejects missing XML PI and missing browser 
     '/sitemap.css':[200,'@namespace "https://wrong.example"; urlset::before { } loc { }']
   }));
   assert.equal(wrongNamespace.checks.styledSitemapDeployed,false);
+});
+
+test('five longtail guides are required in the actual live release',async()=>{
+  const targets=[
+    ['/kennis/salderingsregeling-2027/','salderen2027GuideDeployed'],
+    ['/kennis/btw-subsidie/','btwSubsidyGuideDeployed'],
+    ['/kennis/dynamisch-energiecontract/','dynamicContractGuideDeployed'],
+    ['/kennis/uitbreiden/','batteryExpansionGuideDeployed'],
+    ['/kennis/buiten-plaatsen/','outdoorPlacementGuideDeployed']
+  ];
+  for(const [route,key] of targets){
+    const notDeployed=await probeProduction(mock({...good,[route]:[404,'']}));
+    assert.equal(notDeployed.checks[key],false,key+' absent');
+    assert.equal(notDeployed.ok,false,key+' must block release');
+    const noIndex=await probeProduction(mock({...good,
+      '/sitemap.xml':[200,good['/sitemap.xml'][1].replace('<loc>https://hyxi-aura.nl'+route+'</loc>','')]
+    }));
+    assert.equal(noIndex.checks.sitemapPresent,false,route+' sitemap missing');
+  }
 });
