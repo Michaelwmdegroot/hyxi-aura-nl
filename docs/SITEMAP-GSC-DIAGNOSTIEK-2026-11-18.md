@@ -59,6 +59,18 @@ Referentie: [Google Search Console Sitemaps Report](https://support.google.com/w
 - **Geen** extra `sitemap_index.xml` of meermaals identieke URL's; dit geeft geen extra SEO-rendement.
 - **Geen** aangenomen `lastmod`-waarden, zoekrangschikking, indexatieclaims of Google-API-writes zonder echte bevestiging.
 
-## Release-evidence
+## Release-evidence en onafhankelijke follow-up
 
-In te vullen op basis van werkelijke PR/CI/Hostinger-bewijzen na groene merge; geen 'GSC Success' claimen zonder Search Console-uitkomst.
+**[PR #55](https://github.com/Michaelwmdegroot/hyxi-aura-nl/pull/55) is gemerged als `9942a0df22b9eb1d8f1c5e8f81412d3d870615a3`.**
+
+| Controle | Resultaat |
+| --- | --- |
+| Laatste PR-head CI | [Run 44293724603](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44293724603): **3/3 groen**, inclusief Chrome XML+CSS-render op 1440, 390, 320px, Node/Beheer/API, MySQL8 en statische sitemap parser |
+| Onafhankelijke PR sitemap/domein-preflight | [Run 44293724790](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44293724790): **groen**, live valide XML en correcte HTTP-MIME; de nieuw toegevoegde CSS-PI hoeft vóór de Hostinger-deploy nog niet op live te staan |
+| Postmerge `main` CI | [Run 44294725005](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44294725005): **3/3 groen** |
+| Onafhankelijke hoofdsite monitor | [Run 44294724972](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44294724972): **21/21 groen** |
+| Onafhankelijke domeinpreflight op `main` | [Run 44294725141](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/44294725141): **groen** |
+
+**PR #56** voegt nu een **22e publieke GET-gate** toe om de nieuwe `<?xml-stylesheet type="text/css" href="/sitemap.css"?>` én het CSS-bestand op Hostinger afzonderlijk te bewaken. De eerdere 21/21-run bewijst de toegankelijkheid van de sitemap, niet afzonderlijk de nieuwe CSS-publicatie. Deze extra bewijsvoering wordt pas GO genoemd na de echte 22/22-run op productie.
+
+**Niet bewezen:** de exacte foutreden in Google Search Console. Ook na een geldig XML-bestand kan Google's status tijdelijk “Couldn't fetch” blijven. De eigenaar moet de sitemapdetailfout openen en na bevestigde uitrol de **bestaande** `https://hyxi-aura.nl/sitemap.xml` opnieuw indienen of de lopende Google-retry beoordelen. **Geen 'GSC Success' of echte indexatie claimen zonder dat resultaat.**
