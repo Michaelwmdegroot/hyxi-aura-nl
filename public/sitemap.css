@@ -1,0 +1,77 @@
+@charset "UTF-8";
+@namespace url("http://www.sitemaps.org/schemas/sitemap/0.9");
+
+/* CSS on raw XML is supported without XSLT. The sitemap remains a standards-
+   compliant, machine-readable urlset. No HTML, scripts or SEO-only markup. */
+urlset {
+  display: block;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 64px);
+  background: #faf9f6;
+  color: #2a302b;
+  font: 400 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  counter-reset: page;
+}
+urlset::before {
+  content: "HYXI AURA  /  XML-sitemap";
+  display: block;
+  max-width: 1060px;
+  margin: 0 auto 26px;
+  padding: 0 0 24px;
+  color: #303a34;
+  border-bottom: 1px solid #d9dfd8;
+  font-weight: 740;
+  font-size: clamp(22px, 3.5vw, 35px);
+  letter-spacing: -.035em;
+}
+url {
+  counter-increment: page;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 15px clamp(14px, 2.5vw, 24px);
+  border: 1px solid #e0e5de;
+  border-bottom-width: 0;
+  background: #fff;
+}
+url:first-of-type {
+  border-radius: 12px 12px 0 0;
+}
+url:last-of-type {
+  border-bottom-width: 1px;
+  border-radius: 0 0 12px 12px;
+}
+url::before {
+  content: counter(page, decimal-leading-zero);
+  flex: 0 0 35px;
+  color: #96613f;
+  font-size: 12px;
+  font-weight: 750;
+}
+loc {
+  display: block;
+  min-width: 0;
+  color: #276548;
+  font-size: clamp(12px, 1.45vw, 15px);
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+urlset::after {
+  content: "Dit overzicht is een officiële XML-sitemap van hyxi-aura.nl voor zoekmachines. De vormgeving wordt alleen in browsers getoond; ze verandert de XML-gegevens niet.";
+  display: block;
+  max-width: 1060px;
+  margin: 28px auto 0;
+  color: #69726b;
+  font-size: 12px;
+  line-height: 1.8;
+}
+@media (max-width: 520px) {
+  urlset { padding: 24px 13px; }
+  url { gap: 9px; padding: 11px 12px; }
+  url::before { flex-basis: 25px; font-size: 11px; }
+}
