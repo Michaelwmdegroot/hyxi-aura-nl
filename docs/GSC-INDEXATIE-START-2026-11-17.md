@@ -64,3 +64,12 @@ Documentatie: [Google: Domeinproperty en verificatie](https://support.google.com
 **Grootschalige commerciële launch:** apart te beoordelen op echte mobiele Safari-eigenaarscore ≥9/10, sales-SLA en privacyvriendelijke conversiemeting.
 
 **Volgende agent:** gebruik dit bestand als startdossier en voer geen nieuw SEO-redesign of dubbele modelsites uit. Haal eerst het concrete Google-verificatiestatus/resultaat op, dien de bestaande sitemap daarna in en archiveer de 13 echte inspectieresultaten. Werk nooit met verzonnen Google-crawlstatus.
+
+
+## 18 november 2026 — eerste GSC-sitemapstatus ‘Couldn't fetch’
+
+De Google-domeinproperty `hyxi-aura.nl` is inmiddels **door de eigenaar via DNS-TXT geverifieerd**. De gebruiker heeft de sitemap `https://hyxi-aura.nl/sitemap.xml` via de **gratis** Search Console aangemeld. De eerste GSC-status toont **“Couldn't fetch”**, type **“Unknown”**, laatst gelezen leeg en 0 gedetecteerde pagina's.
+
+**Controleer vóór verder indienen het dossier [sitemapdiagnostiek 18 november](SITEMAP-GSC-DIAGNOSTIEK-2026-11-18.md):** de machineleesbare XML was al geldig en werd door twee publieke externe HTTP-clients met de correcte `application/xml`-header opgehaald; een Googlebot-achtige User-Agent kon hem eveneens ophalen. De onopgemaakte Safari-weergave was geen bewijs van ongeldige XML. PR #55 voegt een XSL-weergave en extra XML-/MIME-regressiecontroles toe, zonder de 13 URL's te wijzigen. **Root cause van Google's fetch-fout is nog niet bewezen.**
+
+Bij een blijvende GSC-fout: klik de sitemaprij open voor de concrete foutdetails, test via Google URL-inspectie en dien na productiecontrole dezelfde sitemap opnieuw in. Niet onnodig een tweede `sitemap_index.xml` maken omdat een andere WordPress-site dat wel heeft. Na GSC `Success` worden de 13 pagina's afzonderlijk beoordeeld. GSC Success ≠ geïndexeerd.
