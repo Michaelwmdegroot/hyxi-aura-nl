@@ -77,7 +77,7 @@ def check_css(path):
     text = Path(path).read_text(encoding="utf-8")
     if not text.startswith('@charset "UTF-8";'):
         raise ValueError("Sitemap CSS lacks UTF-8 declaration")
-    if '@namespace url("http://www.sitemaps.org/schemas/sitemap/0.9");' not in text:
+    if '@namespace "http://www.sitemaps.org/schemas/sitemap/0.9";' not in text:
         raise ValueError("Sitemap CSS lacks the correct XML namespace")
     if not all(selector in text for selector in ("urlset {", "url {", "loc {")):
         raise ValueError("Sitemap CSS does not style the XML elements")
