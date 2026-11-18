@@ -26,6 +26,8 @@ async function fixture(t, { env, sendMail, now, sendTimeoutMs } = {}) {
   await mkdir(dist);
   await writeFile(join(dist, 'index.html'), '<!doctype html><title>AURA test</title><script type="application/ld+json">{"@type":"Product"}</script><h1>HYXI AURA</h1>');
   await writeFile(join(dist, 'privacy.html'), '<h1>Privacy</h1>');
+  await writeFile(join(dist, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://hyxi-aura.nl/</loc></url></urlset>');
+  await writeFile(join(dist, 'sitemap.css'), '@charset "UTF-8";\nurlset { display: block; }');
   await writeFile(join(dist, 'public-copy.txt'), 'HYXI AURA — energie bewaren voor later.\n'.repeat(100));
   await writeFile(join(root, '.env'), 'NEVER_PUBLIC');
   await writeFile(join(root, 'server.mjs'), 'NEVER_PUBLIC');
@@ -265,6 +267,18 @@ test('Vite localhost:5173 origin and reusable proxy cookie work in development',
   assert.equal((await refresh.json()).csrfToken, f.data.csrfToken);
   assert.doesNotMatch(refresh.headers.get('set-cookie'), /; Secure/);
   assert.equal((await f.post(sample(), { headers: { Origin: 'http://localhost:5173' } })).status, 201);
+});
+
+test('serves sitemap XML and CSS as publicly readable machine and browser resources', async t => {
+  const f = await fixture(t);
+  const xml = await fetch(f.base + '/sitemap.xml', { headers:{ Accept:'application/xml' } });
+  assert.equal(xml.status, 200);
+  assert.match(xml.headers.get('content-type') || '', /^application\/xml/i);
+  assert.match(await xml.text(), /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+  const css = await fetch(f.base + '/sitemap.css');
+  assert.equal(css.status, 200);
+  assert.match(css.headers.get('content-type') || '', /^text\/css/i);
+  assert.match(await css.text(), /urlset/);
 });
 
 test('canonical and preview hosts keep queries out of public API responses', async t => {

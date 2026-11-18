@@ -266,6 +266,13 @@ export function createApp({ config, transport = null, leadStore = null, notifica
     dotfiles: 'deny', index: 'index.html', extensions: ['html'], fallthrough: true,
     setHeaders(res, file) {
       const immutable = /[/\\]assets[/\\].*-[a-zA-Z0-9_-]{8,}\.(?:js|css|woff2?|webp|avif|png|jpe?g|svg)$/.test(file);
+      // Explicit XML/CSS MIME types for crawlers and browser presentation.
+      // XML remains the machine-readable sitemap; CSS affects presentation only.
+      if (file.endsWith('/sitemap.xml') || file.endsWith('\\sitemap.xml')) {
+        res.set('Content-Type', 'application/xml; charset=UTF-8');
+      } else if (file.endsWith('/sitemap.css') || file.endsWith('\\sitemap.css')) {
+        res.set('Content-Type', 'text/css; charset=UTF-8');
+      }
       res.set('Cache-Control', immutable ? 'public, max-age=31536000, immutable' : /\.(?:html|xml|txt)$/.test(file) ? 'public, max-age=0, must-revalidate' : 'public, max-age=86400');
     },
   }));

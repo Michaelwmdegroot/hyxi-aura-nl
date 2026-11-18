@@ -14,7 +14,7 @@ const dist = resolve(import.meta.dirname, '../dist');
 const dir = resolve(import.meta.dirname, '../test-results/browser');
 await readFile(resolve(dist, 'kennis/noodstroom/index.html'));
 await mkdir(dir, { recursive: true });
-const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.svg':'image/svg+xml', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.pdf':'application/pdf' };
+const types = { '.xml':'application/xml; charset=utf-8', '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.svg':'image/svg+xml', '.jpg':'image/jpeg', '.webp':'image/webp', '.woff2':'font/woff2', '.pdf':'application/pdf' };
 const http = createServer(async (request, response) => {
   const url = new URL(request.url, 'http://127.0.0.1');
   const pathname = decodeURIComponent(url.pathname);
@@ -33,6 +33,29 @@ const origin = `http://127.0.0.1:${http.address().port}`;
 let browser;
 try {
   browser = await chromium.launch({headless:true, executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined});
+
+  // Native XML+CSS is browser supported even after XSLT deprecation.
+  // This guards the real visual improvement the site owner requested.
+  for (const width of [1440, 390, 320]) {
+    const context = await browser.newContext({viewport:{width,height:844},locale:'nl-NL'});
+    const page = await context.newPage();
+    const response = await page.goto(origin + '/sitemap.xml', {waitUntil:'networkidle'});
+    assert.equal(response.status(),200,'XML sitemap must be served to the browser');
+    await expect(page.locator('urlset')).toHaveCount(1);
+    await expect(page.locator('url')).toHaveCount(13);
+    const paint = await page.evaluate(() => ({
+      background:getComputedStyle(document.documentElement).backgroundColor,
+      scroll:document.documentElement.scrollWidth,
+      width:innerWidth,
+    }));
+    assert.equal(paint.background,'rgb(250, 249, 246)',`Sitemap CSS must render at ${width}px, not bare XML`);
+    assert.ok(paint.scroll <= paint.width + 1,`Sitemap ${width}px overflow: ${JSON.stringify(paint)}`);
+    // Chromium can stall when capturing screenshots of XML documents;
+    // DOM structure, computed CSS and viewport overflow are asserted above.
+    console.log(`PASS sitemap ${width}px: parsed 13 URLs, styled XML, no overflow`);
+    await context.close();
+  }
+
   for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen']) {
     for (const width of [1440,390,320]) {
       const ctx = await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});
