@@ -22,7 +22,7 @@ const good = {
   '/datasheet/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/datasheet/"><title>HYXI AURA datasheet</title><p>Preliminary HTA2 HSA2 160000 W</p><a href="/downloads/hyxi-aura-1-fase-datasheet.pdf">HSA2 PDF</a><a href="/downloads/hyxi-aura-3-fasen-datasheet.pdf">HTA2 PDF</a>'],
   '/kennis/prijs-en-installatie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/prijs-en-installatie/"><title>HYXI AURA prijs</title><p>geen onbevestigde vanafprijs</p><a href="/offerte/">Offerte</a>'],
   '/kennis/bestaande-zonnepanelen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/"><title>HYXI AURA bij bestaande zonnepanelen</title><p>micro-omvormers</p><a href="/offerte/">Offerte</a>'],
-  '/kennis/salderingsregeling-2027/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/salderingsregeling-2027/"><title>HYXI AURA na salderen in 2027</title><p>1 januari 2027</p><a href="/kennis/bestaande-zonnepanelen/">Further</a><a href="/offerte/">Offerte</a>'],
+  '/kennis/salderingsregeling-2027/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/salderingsregeling-2027/"><title>HYXI AURA na salderen in 2027</title><h1>Salderen stopt in 2027.</h1><p>1 januari 2027</p><a href="/kennis/bestaande-zonnepanelen/">Further</a><a href="/offerte/">Offerte</a>'],
   '/kennis/btw-subsidie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/btw-subsidie/"><title>HYXI AURA btw terugvragen</title><p>Belastingdienst</p><a href="/kennis/prijs-en-installatie/">Further</a><a href="/offerte/">Offerte</a>'],
   '/kennis/dynamisch-energiecontract/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/dynamisch-energiecontract/"><title>HYXI AURA met dynamisch energiecontract</title><p>EMS</p><a href="/kennis/noodstroom/">Further</a><a href="/offerte/">Offerte</a>'],
   '/kennis/uitbreiden/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/uitbreiden/"><title>HYXI AURA uitbreiden</title><p>BAT-Q9</p><a href="/kennis/garantie/">Further</a><a href="/offerte/">Offerte</a>'],
@@ -42,6 +42,7 @@ const mock = (data) => async url => {
 
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
   const result=await probeProduction(mock(good));
+  assert.deepEqual(Object.entries(result.checks).filter(([,ok])=>!ok).map(([key])=>key),[], 'all 27 public readiness gates need a passing fixture');
   assert.equal(result.ok,true);
   assert.equal(Object.keys(result.checks).length,27);
   assert.doesNotMatch(JSON.stringify(result),/DO-NOT-LOG/);
