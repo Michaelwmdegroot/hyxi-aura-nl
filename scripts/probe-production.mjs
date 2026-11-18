@@ -14,7 +14,7 @@ const KNOWLEDGE = [
   { path: '/kennis/garantie/', title: 'HYXI AURA garantie' },
 ];
 const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
-const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/robots.txt', '/api/beheer/leads'];
+const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/sitemap.css', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
@@ -120,6 +120,12 @@ export async function probeProduction(fetcher = fetch) {
     quotePageReady: observed['/offerte/'].status === 200 &&
       observed['/offerte/'].content.includes('id="quoteForm"') &&
       observed['/offerte/'].content.includes('href="https://hyxi-aura.nl/offerte/"'),
+    styledSitemapDeployed: observed['/sitemap.xml'].status === 200 &&
+      observed['/sitemap.xml'].content.includes('<?xml-stylesheet type="text/css" href="/sitemap.css"?>') &&
+      observed['/sitemap.css'].status === 200 &&
+      observed['/sitemap.css'].content.includes('@namespace "http://www.sitemaps.org/schemas/sitemap/0.9";') &&
+      observed['/sitemap.css'].content.includes('urlset::before') &&
+      observed['/sitemap.css'].content.includes('loc {'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
       observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/') &&
       (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 13 &&
