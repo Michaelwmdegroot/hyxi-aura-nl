@@ -56,7 +56,20 @@ export const PUBLIC_CANONICAL_PATHS = new Set([
   "/kennis/btw-subsidie/",
   "/kennis/dynamisch-energiecontract/",
   "/kennis/uitbreiden/",
-  "/kennis/buiten-plaatsen/"
+  "/kennis/buiten-plaatsen/",
+  "/vergelijken/",
+  "/hyxi-power/",
+  "/kennis/hoeveel-kwh-nodig/",
+  "/kennis/app-monitoring/",
+  "/vergelijken/hyxi-aura-vs-sigenergy/",
+  "/vergelijken/hyxi-aura-vs-alphaess/",
+  "/vergelijken/hyxi-aura-vs-tesla-powerwall/",
+  "/vergelijken/hyxi-aura-vs-enphase/",
+  "/vergelijken/hyxi-aura-vs-huawei/",
+  "/vergelijken/hyxi-aura-vs-byd/",
+  "/vergelijken/hyxi-aura-vs-solaredge/",
+  "/vergelijken/hyxi-aura-vs-ecoflow/",
+  "/vergelijken/hyxi-aura-vs-sessy/"
 ]);
 
 export function createApp({ config, transport = null, leadStore = null, notificationWorker = null, adminStore = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {
