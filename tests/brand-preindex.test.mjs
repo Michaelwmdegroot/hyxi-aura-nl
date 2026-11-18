@@ -18,6 +18,11 @@ const routes = new Map([
   ['/kennis/prijs-en-installatie/', 'kennis/prijs-en-installatie/index.html'],
   ['/kennis/bestaande-zonnepanelen/', 'kennis/bestaande-zonnepanelen/index.html'],
   ['/kennis/garantie/', 'kennis/garantie/index.html'],
+  ['/kennis/salderingsregeling-2027/', 'kennis/salderingsregeling-2027/index.html'],
+  ['/kennis/btw-subsidie/', 'kennis/btw-subsidie/index.html'],
+  ['/kennis/dynamisch-energiecontract/', 'kennis/dynamisch-energiecontract/index.html'],
+  ['/kennis/uitbreiden/', 'kennis/uitbreiden/index.html'],
+  ['/kennis/buiten-plaatsen/', 'kennis/buiten-plaatsen/index.html'],
 ]);
 const htmlAt = path => readFile(resolve(root, 'dist', path), 'utf8');
 const attribute = (html, tagName, field, needle, attrName) => {
@@ -60,7 +65,7 @@ test('Site manifest uses real installed assets, truthful brand ownership and no 
   ]);
 });
 
-test('All thirteen public pages have branded favicon, share preview, trustworthy metadata and exactly one H1',async()=>{
+test('All eighteen public pages have branded favicon, share preview, trustworthy metadata and exactly one H1',async()=>{
   const titles=new Set(),descriptions=new Set();
   for(const [url,path] of routes){
     const html=await htmlAt(path);
@@ -105,10 +110,10 @@ test('Homepage title and structured data match without fake offers, reviews or m
   assert.match(home,/geen officiële HYXI-website/i);
 });
 
-test('Thirteen canonical URLs remain in sitemap; private Beheer remains noindex',async()=>{
+test('Eighteen canonical URLs remain in sitemap; private Beheer remains noindex',async()=>{
   const sitemap=await readFile(resolve(root,'dist/sitemap.xml'),'utf8');
   const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x=>x[1]);
-  assert.equal(urls.length,13);
+  assert.equal(urls.length,18);
   assert.deepEqual(new Set(urls),new Set([...routes.keys()].map(x=>`https://hyxi-aura.nl${x}`)));
   const beheer=await readFile(resolve(root,'admin/beheer.html'),'utf8');
   assert.match(beheer,/name="robots" content="noindex,nofollow,noarchive"/);
