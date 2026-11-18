@@ -9,7 +9,7 @@
 import { appendFile } from 'node:fs/promises';
 
 const CANONICAL = 'https://hyxi-aura.nl';
-const EXPECTED_URLS = 13;
+const EXPECTED_URLS = 18;
 const checks = [
   { id: 'Canonical homepage', url: CANONICAL + '/', method: 'HEAD', required: true },
   { id: 'Sitemap XML', url: CANONICAL + '/sitemap.xml', method: 'GET', required: true },
