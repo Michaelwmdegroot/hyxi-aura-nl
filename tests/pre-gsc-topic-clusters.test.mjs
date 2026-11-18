@@ -11,7 +11,8 @@ const urls = [
   '/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/',
   '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/', '/bronnen/',
   '/offerte/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/',
-  '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/', '/privacy/'
+  '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/',
+  '/kennis/salderingsregeling-2027/', '/kennis/btw-subsidie/', '/kennis/dynamisch-energiecontract/', '/kennis/uitbreiden/', '/kennis/buiten-plaatsen/', '/privacy/'
 ];
 const topics = urls.slice(1,6);
 const readRoute = async url => readFile(resolve(dist, '.' + url, 'index.html'), 'utf8');
@@ -23,15 +24,15 @@ const structured = html => [...html.matchAll(/<script\b[^>]*type=["']application
 const titleOf = html => html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.trim();
 const descriptionOf = html => html.match(/<meta name="description" content="([^"]+)"/)?.[1];
 
-test('all thirteen canonical public URLs are unique and configured as separate build entries',async()=>{
+test('all eighteen canonical public URLs are unique and configured as separate build entries',async()=>{
   const [sitemap,vite] = await Promise.all([
     readFile(resolve(dist,'sitemap.xml'),'utf8'),
     readFile(resolve(root,'vite.config.mjs'),'utf8')
   ]);
   const urlsInMap=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x=>x[1]);
-  assert.equal(urlsInMap.length,13);
+  assert.equal(urlsInMap.length,18);
   assert.deepEqual(new Set(urlsInMap),new Set(urls.map(x=>origin+x)));
-  assert.equal(new Set(urlsInMap).size,13);
+  assert.equal(new Set(urlsInMap).size,18);
   assert.deepEqual(new Set(PUBLIC_CANONICAL_PATHS),new Set(urls),'Express 308 alias redirects must track the whole live sitemap');
   for(const target of topics){
     const path = target.substring(1)+'index.html';

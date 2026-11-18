@@ -18,7 +18,12 @@ export default defineConfig({
         datasheet: resolve(import.meta.dirname, 'datasheet/index.html'),
         prijs: resolve(import.meta.dirname, 'kennis/prijs-en-installatie/index.html'),
         zonnepanelen: resolve(import.meta.dirname, 'kennis/bestaande-zonnepanelen/index.html'),
-        garantie: resolve(import.meta.dirname, 'kennis/garantie/index.html')
+        garantie: resolve(import.meta.dirname, 'kennis/garantie/index.html'),
+        salderen: resolve(import.meta.dirname, 'kennis/salderingsregeling-2027/index.html'),
+        btw: resolve(import.meta.dirname, 'kennis/btw-subsidie/index.html'),
+        dynamisch: resolve(import.meta.dirname, 'kennis/dynamisch-energiecontract/index.html'),
+        uitbreiden: resolve(import.meta.dirname, 'kennis/uitbreiden/index.html'),
+        buiten: resolve(import.meta.dirname, 'kennis/buiten-plaatsen/index.html')
       }
     }
   }

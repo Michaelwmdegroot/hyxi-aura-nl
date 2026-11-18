@@ -42,7 +42,7 @@ try {
     const response = await page.goto(origin + '/sitemap.xml', {waitUntil:'networkidle'});
     assert.equal(response.status(),200,'XML sitemap must be served to the browser');
     await expect(page.locator('urlset')).toHaveCount(1);
-    await expect(page.locator('url')).toHaveCount(13);
+    await expect(page.locator('url')).toHaveCount(18);
     const paint = await page.evaluate(() => ({
       background:getComputedStyle(document.documentElement).backgroundColor,
       scroll:document.documentElement.scrollWidth,
@@ -52,7 +52,7 @@ try {
     assert.ok(paint.scroll <= paint.width + 1,`Sitemap ${width}px overflow: ${JSON.stringify(paint)}`);
     // Chromium can stall when capturing screenshots of XML documents;
     // DOM structure, computed CSS and viewport overflow are asserted above.
-    console.log(`PASS sitemap ${width}px: parsed 13 URLs, styled XML, no overflow`);
+    console.log(`PASS sitemap ${width}px: parsed 18 URLs, styled XML, no overflow`);
     await context.close();
   }
 
@@ -88,7 +88,12 @@ try {
     {url:'/datasheet/',slug:'datasheet'},
     {url:'/kennis/prijs-en-installatie/',slug:'prijs-en-installatie'},
     {url:'/kennis/bestaande-zonnepanelen/',slug:'bestaande-zonnepanelen'},
-    {url:'/kennis/garantie/',slug:'garantie'}
+    {url:'/kennis/garantie/',slug:'garantie'},
+    {url:'/kennis/salderingsregeling-2027/',slug:'salderingsregeling-2027'},
+    {url:'/kennis/btw-subsidie/',slug:'btw-subsidie'},
+    {url:'/kennis/dynamisch-energiecontract/',slug:'dynamisch-energiecontract'},
+    {url:'/kennis/uitbreiden/',slug:'uitbreiden'},
+    {url:'/kennis/buiten-plaatsen/',slug:'buiten-plaatsen'}
   ]) {
     for (const width of [1440,390,320]) {
       const ctx=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});

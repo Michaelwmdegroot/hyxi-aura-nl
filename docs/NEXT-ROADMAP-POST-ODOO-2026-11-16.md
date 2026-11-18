@@ -72,3 +72,10 @@ Na de pre-GSC fabrikant-/copy-audit zijn het **origineel door eigenaar aangeleve
 
 ## 17 november 2026 — afsluitende SEO-/GSC-ready controle
 Na het live publiceren van de 13-pagina topicclusters is de complete site opnieuw op titel/H1/canonical/meta, schema, interne linkgraaf, sitemap, bronveiligheid en publieke productiechecks beoordeeld. Zie de uitvoerbare [pre-indexatie GO/NO-GO-audit](PRE-GSC-FINAL-SEO-GO-NOGO-2026-11-17.md). De kleine aanvullende codewijziging consolideert `index.html`-aliassen op 13 echte pagina's via 308 en legt de voorkeurs-URL van de homepage vast in een extra publieke read-only check. Google-indexatie wordt **niet** van de broncode afgeleid. Voltooi daarna uitsluitend nog de daadwerkelijke www-/domein-DNS-check, eigenaar-GSC-verificatie, sitemapaanmelding en de individuele URL-inspecties. Visuele 9/10-review en sales-SLA blijven aparte commerciële launch-gates.
+
+
+## 18 november 2026 — nieuwe SEO-contentfase na 13/13 Google-indexatie
+
+De eigenaar bevestigde alle oorspronkelijke 13 pagina's als geïndexeerd en vroeg proactieve keywordresearch en nieuwe sterke SEO-pagina's. Het [nieuwe brongetrouwe keyword- en topicplan](SEO-KEYWORD-GROWTH-2026-11-18.md) bouwt 5 zelfstandige gidsen om naar 18 HTML-pagina's te groeien: salderen vanaf 2027, BTW/subsidie/Warmtefonds, dynamisch contract/EMS, batterij later uitbreiden en buitenplaatsing/IP66. Hun zoekintentie is expliciet anders dan de bestaande prijs-, model-, Q7/Q9-, installatie- en noodstroomgidsen.
+
+Nog niet bewezen: echte maandelijkse zoekvolumes, stijgende impressions/klikken of extra leads uit deze 5 gidsen. De eigen GSC-queryrapportage is de toekomstige beslisbron. Niet zelfstandig 30 bijna gelijke modelcode-/plaatsnaampagina's bouwen, geen valse fabrikantprijzen of financiële beloftes. Voor publicatie zijn 3/3 PR CI, 3/3 postmerge en 27/27 werkelijke Hostinger-readinesschecks vereist.

@@ -51,7 +51,12 @@ export const PUBLIC_CANONICAL_PATHS = new Set([
   "/datasheet/",
   "/kennis/prijs-en-installatie/",
   "/kennis/bestaande-zonnepanelen/",
-  "/kennis/garantie/"
+  "/kennis/garantie/",
+  "/kennis/salderingsregeling-2027/",
+  "/kennis/btw-subsidie/",
+  "/kennis/dynamisch-energiecontract/",
+  "/kennis/uitbreiden/",
+  "/kennis/buiten-plaatsen/"
 ]);
 
 export function createApp({ config, transport = null, leadStore = null, notificationWorker = null, adminStore = null, distDir = resolve('dist'), now = Date.now, sendTimeoutMs = 25000 } = {}) {

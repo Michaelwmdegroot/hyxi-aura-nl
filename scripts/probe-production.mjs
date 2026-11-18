@@ -12,6 +12,11 @@ const KNOWLEDGE = [
   { path: '/kennis/prijs-en-installatie/', title: 'HYXI AURA prijs' },
   { path: '/kennis/bestaande-zonnepanelen/', title: 'HYXI AURA bij bestaande zonnepanelen' },
   { path: '/kennis/garantie/', title: 'HYXI AURA garantie' },
+  { path: '/kennis/salderingsregeling-2027/', title: 'HYXI AURA na salderen in 2027' },
+  { path: '/kennis/btw-subsidie/', title: 'HYXI AURA btw terugvragen' },
+  { path: '/kennis/dynamisch-energiecontract/', title: 'HYXI AURA met dynamisch energiecontract' },
+  { path: '/kennis/uitbreiden/', title: 'HYXI AURA uitbreiden' },
+  { path: '/kennis/buiten-plaatsen/', title: 'HYXI AURA buiten plaatsen' },
 ];
 const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
 const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/sitemap.css', '/robots.txt', '/api/beheer/leads'];
@@ -128,7 +133,7 @@ export async function probeProduction(fetcher = fetch) {
       observed['/sitemap.css'].content.includes('loc {'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
       observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/') &&
-      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 13 &&
+      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 18 &&
       KNOWLEDGE.every(item => observed['/sitemap.xml'].content.includes(`<loc>${BASE}${item.path}</loc>`)),
     q7ComparisonDeployed: observed['/kennis/bat-q7-vs-bat-q9/'].status === 200 &&
       observed['/kennis/bat-q7-vs-bat-q9/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/bat-q7-vs-bat-q9/">`) &&
@@ -172,6 +177,41 @@ export async function probeProduction(fetcher = fetch) {
       observed['/kennis/garantie/'].content.includes('50,7 MWh') &&
       observed['/kennis/garantie/'].content.includes('BAT-Q7') &&
       observed['/kennis/garantie/'].content.includes('href="/downloads/hyxi-eu-garantievoorwaarden.pdf"'),
+    salderen2027GuideDeployed: observed['/kennis/salderingsregeling-2027/'].status === 200 &&
+      observed['/kennis/salderingsregeling-2027/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/salderingsregeling-2027/">`) &&
+      observed['/kennis/salderingsregeling-2027/'].content.includes("Salderen stopt in 2027.") &&
+      observed['/kennis/salderingsregeling-2027/'].content.includes("1 januari 2027") &&
+      observed['/kennis/salderingsregeling-2027/'].content.includes("href=\"/kennis/bestaande-zonnepanelen/\"") &&
+      observed['/kennis/salderingsregeling-2027/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/salderingsregeling-2027/"'),
+    btwSubsidyGuideDeployed: observed['/kennis/btw-subsidie/'].status === 200 &&
+      observed['/kennis/btw-subsidie/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/btw-subsidie/">`) &&
+      observed['/kennis/btw-subsidie/'].content.includes("HYXI AURA btw terugvragen") &&
+      observed['/kennis/btw-subsidie/'].content.includes("Belastingdienst") &&
+      observed['/kennis/btw-subsidie/'].content.includes("href=\"/kennis/prijs-en-installatie/\"") &&
+      observed['/kennis/btw-subsidie/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/btw-subsidie/"'),
+    dynamicContractGuideDeployed: observed['/kennis/dynamisch-energiecontract/'].status === 200 &&
+      observed['/kennis/dynamisch-energiecontract/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/dynamisch-energiecontract/">`) &&
+      observed['/kennis/dynamisch-energiecontract/'].content.includes("HYXI AURA met dynamisch energiecontract") &&
+      observed['/kennis/dynamisch-energiecontract/'].content.includes("EMS") &&
+      observed['/kennis/dynamisch-energiecontract/'].content.includes("href=\"/kennis/noodstroom/\"") &&
+      observed['/kennis/dynamisch-energiecontract/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/dynamisch-energiecontract/"'),
+    batteryExpansionGuideDeployed: observed['/kennis/uitbreiden/'].status === 200 &&
+      observed['/kennis/uitbreiden/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/uitbreiden/">`) &&
+      observed['/kennis/uitbreiden/'].content.includes("HYXI AURA uitbreiden") &&
+      observed['/kennis/uitbreiden/'].content.includes("BAT-Q9") &&
+      observed['/kennis/uitbreiden/'].content.includes("href=\"/kennis/garantie/\"") &&
+      observed['/kennis/uitbreiden/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/uitbreiden/"'),
+    outdoorPlacementGuideDeployed: observed['/kennis/buiten-plaatsen/'].status === 200 &&
+      observed['/kennis/buiten-plaatsen/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/buiten-plaatsen/">`) &&
+      observed['/kennis/buiten-plaatsen/'].content.includes("HYXI AURA buiten plaatsen") &&
+      observed['/kennis/buiten-plaatsen/'].content.includes("IP66") &&
+      observed['/kennis/buiten-plaatsen/'].content.includes("href=\"/kennis/garantie/\"") &&
+      observed['/kennis/buiten-plaatsen/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/buiten-plaatsen/"'),
     installationCheckDeployed: observed['/kennis/installatiecheck/'].status === 200 &&
       observed['/kennis/installatiecheck/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/installatiecheck/">`) &&
       observed['/kennis/installatiecheck/'].content.includes('HYXI AURA installatiecheck') &&

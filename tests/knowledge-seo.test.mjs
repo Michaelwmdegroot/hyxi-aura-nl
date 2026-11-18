@@ -57,7 +57,7 @@ test('public discovery includes both guides and links back to conversion flows',
     assert.ok(sitemap.includes(`<loc>${base}${path}</loc>`), path);
     assert.ok(config.includes(`'kennis/${slug}/index.html'`), path);
   }
-  assert.equal((sitemap.match(/<loc>/g) || []).length,13);
+  assert.equal((sitemap.match(/<loc>/g) || []).length,18);
 });
 
 test('horizontally scrollable knowledge tables have keyboard focus and accessible names', async () => {
