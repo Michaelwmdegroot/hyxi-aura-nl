@@ -79,3 +79,11 @@ Na het live publiceren van de 13-pagina topicclusters is de complete site opnieu
 De eigenaar bevestigde alle oorspronkelijke 13 pagina's als geïndexeerd en vroeg proactieve keywordresearch en nieuwe sterke SEO-pagina's. Het [nieuwe brongetrouwe keyword- en topicplan](SEO-KEYWORD-GROWTH-2026-11-18.md) bouwt 5 zelfstandige gidsen om naar 18 HTML-pagina's te groeien: salderen vanaf 2027, BTW/subsidie/Warmtefonds, dynamisch contract/EMS, batterij later uitbreiden en buitenplaatsing/IP66. Hun zoekintentie is expliciet anders dan de bestaande prijs-, model-, Q7/Q9-, installatie- en noodstroomgidsen.
 
 Nog niet bewezen: echte maandelijkse zoekvolumes, stijgende impressions/klikken of extra leads uit deze 5 gidsen. De eigen GSC-queryrapportage is de toekomstige beslisbron. Niet zelfstandig 30 bijna gelijke modelcode-/plaatsnaampagina's bouwen, geen valse fabrikantprijzen of financiële beloftes. Voor publicatie zijn 3/3 PR CI, 3/3 postmerge en 27/27 werkelijke Hostinger-readinesschecks vereist.
+
+
+
+## HYXI POWER-comparison hub — 18 november 2026, nieuwe productgebaseerde SEO-groei
+
+[SEO-MARKET-COMPARISONS-2026-11-18.md](SEO-MARKET-COMPARISONS-2026-11-18.md) bevat de uitgebreide keuze: van 18 naar **31 publieke pagina's** met een uit 21 marktseries opgebouwde vergelijkingshub, negen unieke merk-/modelvergelijkingen en drie HYXI-specifieke fabrikant-/capaciteit-/monitoringgidsen. Alle concurrerende fabrikanten hebben directe bronlinks; BYD/Huawei/SolarEdge met externe omvormers worden niet vals gelijkgesteld aan HYXI AURA all-in-one. De verkooppartij NIVO Groep Holland B.V./Thuisbatterij Team is expliciet genoemd. Bestaande aanvraag→leads-mail→Odoo blijft ongewijzigd.
+
+**Releasegates:** PR Build & verify 3/3 plus domeinpreflight, postmerge 3/3, Hostinger read-only productie **40/40 PASS**. 31 URLs in sitemap en lokale canonicals, geen onnauwkeurige fabrikantprijzen of vermeende Search Console-indexatie van de 13 nieuwe URL's. Daarna echte Search Console-vraag/CTR voor NL bekijken; pas vervolgens aanvullende SKU- of merkvergelijkingen toevoegen op bewijs.
