@@ -27,7 +27,14 @@ jobs:
         with:
           node-version: '24'
       - name: Validate public and live XML sitemap with crawler-like requests
-        run: python3 scripts/audit-sitemap.py public/sitemap.xml --css public/sitemap.css --live
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Branch content is not deployed yet. Validate its XML and CSS locally.
+            python3 scripts/audit-sitemap.py public/sitemap.xml --css public/sitemap.css
+          else
+            # On main the live Hostinger sitemap must match this exact release.
+            python3 scripts/audit-sitemap.py public/sitemap.xml --css public/sitemap.css --live
+          fi
 
       - name: Read-only domain, redirects and sitemap preflight
         run: node scripts/gsc-domain-preflight.mjs
