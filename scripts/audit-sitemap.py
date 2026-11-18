@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """HYXI AURA — standards-based sitemap audit (stdlib, no external deps).
 
-Validate well-formed sitemap XML and browser XSL. On --live, also read actual
+Validate well-formed sitemap XML and browser CSS. On --live, also read actual
 public HTTP responses, headers and a Googlebot-*like* User-Agent probe.
 A spoofed User-Agent is NOT evidence of what verified Googlebot sees.
 Never send credentials, use Search Console APIs or submit live form data.
@@ -17,7 +17,6 @@ from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 
 SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9"
-XSL_NS = "http://www.w3.org/1999/XSL/Transform"
 BASE = "https://hyxi-aura.nl"
 COUNT = 13
 UA_TESTS = {
@@ -74,10 +73,14 @@ def validate_xml(data, label):
     return found
 
 
-def check_xsl(path):
-    root = ET.parse(path).getroot()
-    if root.tag not in (f"{{{XSL_NS}}}stylesheet", f"{{{XSL_NS}}}transform"):
-        raise ValueError("XSL stylesheet does not contain a valid xsl:stylesheet root")
+def check_css(path):
+    text = Path(path).read_text(encoding="utf-8")
+    if not text.startswith('@charset "UTF-8";'):
+        raise ValueError("Sitemap CSS lacks UTF-8 declaration")
+    if '@namespace url("http://www.sitemaps.org/schemas/sitemap/0.9");' not in text:
+        raise ValueError("Sitemap CSS lacks the correct XML namespace")
+    if not all(selector in text for selector in ("urlset {", "url {", "loc {")):
+        raise ValueError("Sitemap CSS does not style the XML elements")
 
 
 def inspect_live(label, ua, expected):
@@ -119,18 +122,18 @@ def inspect_live(label, ua, expected):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("file", help="Sitemap XML file (e.g. dist/sitemap.xml)")
-    parser.add_argument("--xsl", help="Browser stylesheet, e.g. dist/sitemap.xsl")
+    parser.add_argument("--css", help="Browser stylesheet, e.g. dist/sitemap.css")
     parser.add_argument("--live", action="store_true", help="Check live HTTP headers and bot-like UA")
     args = parser.parse_args()
     raw = Path(args.file).read_bytes()
     urls = validate_xml(raw, args.file)
     print(f"PASS local XML: {len(urls)} unique canonical URLs; "
           "correct urlset namespace and UTF-8 document")
-    if args.xsl:
-        check_xsl(args.xsl)
-        if b'<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>' not in raw:
-            raise ValueError("Missing XML stylesheet processing instruction")
-        print("PASS browser-only XSL: valid XML and linked from sitemap")
+    if args.css:
+        check_css(args.css)
+        if b'<?xml-stylesheet type="text/css" href="/sitemap.css"?>' not in raw:
+            raise ValueError("Missing CSS stylesheet processing instruction")
+        print("PASS browser-only CSS: correct XML namespace and linked from sitemap")
     if args.live:
         for label, ua in UA_TESTS.items():
             inspect_live(label, ua, urls)
