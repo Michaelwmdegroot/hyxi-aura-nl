@@ -216,7 +216,9 @@ async function configurations(page,label) {
 
 async function contactJourney(page, fixture, label, phase, count) {
   await setModules(page, phase, count);
-  const opener = page.locator('.site-header [data-open-lead]');
+  // Test the selected package's own primary CTA rather than the fixed header, whose
+  // Chromium mobile hit-testing can be obscured during automatic scroll correction.
+  const opener = page.locator('.config-cta[data-open-lead]');
   await opener.click();
   await expect(page.locator('#lead-title')).toBeFocused();
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'lead-title');
