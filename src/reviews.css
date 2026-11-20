@@ -1,0 +1,39 @@
+/* Verified customer experiences from Thuisbatterij Team (not HYXI AURA product reviews).
+   Premium quiet layout inspired by the parent company page, without external widgets. */
+.reviews-section{background:#f3f2ec;overflow:clip}
+.reviews-layout{display:grid;grid-template-columns:minmax(0,.83fr) minmax(0,1.17fr);gap:clamp(30px,5vw,78px);align-items:start}
+.reviews-editorial{padding-top:19px;min-width:0}
+.reviews-editorial>.tiny-label{display:block;font-size:11px;letter-spacing:.16em;color:#66705f;margin-bottom:25px}
+.reviews-editorial h2{font-size:clamp(36px,4vw,58px);line-height:1.08;letter-spacing:-.06em;margin-bottom:25px}
+.reviews-intro{max-width:440px;color:#4e554e;font-size:15px;line-height:1.85}
+.reviews-promises{margin-top:36px;max-width:465px;border-top:1px solid #d8d9d0}
+.reviews-promises>div{padding:19px 0 18px;border-bottom:1px solid #d8d9d0}
+.reviews-promises h3{font-size:15px;font-weight:770;letter-spacing:-.025em;line-height:1.4;margin-bottom:5px}
+.reviews-promises p{font-size:12px;line-height:1.7}
+.reviews-clarification{max-width:440px;font-size:11px;line-height:1.8;color:#666e65;margin-top:28px}
+.reviews-card{min-width:0;background:#fff;border:1px solid #ecece6;border-radius:24px;box-shadow:0 16px 46px #33392d09;padding:31px 32px 18px}
+.reviews-card-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding-bottom:20px;border-bottom:1px solid #e6e9e3}
+.reviews-source{display:flex;align-items:center;gap:12px;min-width:0}
+.reviews-google-g{font-size:30px;line-height:1;font-weight:800;font-family:Arial,sans-serif;background:conic-gradient(from -20deg,#4285f4 0deg 100deg,#34a853 100deg 178deg,#fbbc05 178deg 245deg,#ea4335 245deg 310deg,#4285f4 310deg);background-clip:text;-webkit-background-clip:text;color:transparent;flex-shrink:0}
+.reviews-source strong,.reviews-source span:not(.reviews-google-g){display:block}
+.reviews-source strong{font-size:13px;line-height:1.4;font-weight:800}
+.reviews-source div>span{font-size:10px;line-height:1.6;color:#6d746b;margin-top:4px}
+.reviews-rating{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.reviews-rating>strong{font-size:25px;letter-spacing:-.065em;font-weight:730;line-height:1}
+.reviews-rating>strong span{font-size:12px;font-weight:650;letter-spacing:0;color:#6c7367}
+.review-stars{display:inline-block;color:#26834f;letter-spacing:.055em;white-space:nowrap;font-size:12px;line-height:1.5}
+.reviews-rating>small{font-size:9px;line-height:1.5;color:#7a8076}
+.reviews-list{padding:0;margin:0;list-style:none}
+.review-entry{display:grid;grid-template-columns:36px minmax(105px,137px) minmax(0,1fr);column-gap:12px;align-items:start;padding:17px 0;border-bottom:1px solid #eceee9;min-width:0}
+.review-avatar{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;background:#edf4e9;color:#54724e;font-size:12px;font-weight:760}
+.review-person{min-width:0}
+.review-person strong{display:block;font-size:11px;line-height:1.4;font-weight:780;overflow-wrap:break-word}
+.review-person .review-stars{margin-top:3px;font-size:11px}
+.review-entry p{font-size:11px;line-height:1.7;color:#555f57;overflow-wrap:break-word}
+.reviews-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:13px 20px;padding:19px 0 3px}
+.reviews-card-footer a{font-size:12px;font-weight:780;text-underline-offset:4px}
+.reviews-card-footer a:hover{text-decoration:underline;color:#9f512d}
+.reviews-card-footer a:focus-visible{outline:3px solid #b34423;outline-offset:5px}
+@media(max-width:1050px){.reviews-layout{grid-template-columns:1fr;gap:38px}.reviews-editorial{padding-top:0}.reviews-promises{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border-top:0;max-width:none;margin-top:24px}.reviews-promises>div{border-top:1px solid #d8d9d0;padding-top:15px}.reviews-clarification{margin-top:20px}.reviews-card{max-width:860px;width:100%}}
+@media(max-width:700px){.reviews-section{padding-block:60px}.reviews-layout{gap:28px}.reviews-editorial>.tiny-label{font-size:10px;margin-bottom:16px}.reviews-editorial h2{margin-bottom:16px}.reviews-intro{font-size:13px;line-height:1.75}.reviews-promises{grid-template-columns:1fr;gap:0;margin-top:24px}.reviews-promises>div{padding:12px 0;border-top:0}.reviews-promises>div:first-child{border-top:1px solid #d8d9d0}.reviews-clarification{margin-top:17px}.reviews-card{padding:22px 19px 15px;border-radius:18px}.reviews-card-heading{padding-bottom:14px}.reviews-source{gap:8px}.reviews-source strong{font-size:12px}.reviews-source div>span{font-size:9px}.reviews-rating>strong{font-size:23px}.reviews-rating>small{max-width:108px}.review-entry{grid-template-columns:34px minmax(0,1fr);gap:0 11px;padding:15px 0}.review-avatar{height:32px;width:32px}.review-person{align-self:center}.review-entry p{grid-column:2;font-size:11px;margin-top:6px}.reviews-card-footer{gap:12px}.reviews-card-footer a{font-size:11px}}
+@media(max-width:360px){.reviews-card{padding:19px 14px 13px}.reviews-source strong{font-size:11px}.reviews-google-g{font-size:24px}.reviews-rating>strong{font-size:20px}.reviews-rating>small{font-size:8px}.reviews-card-heading{gap:8px}}
