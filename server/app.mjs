@@ -291,7 +291,16 @@ export function createApp({ config, transport = null, leadStore = null, notifica
       } else if (file.endsWith('/sitemap.css') || file.endsWith('\\sitemap.css')) {
         res.set('Content-Type', 'text/css; charset=UTF-8');
       }
-      res.set('Cache-Control', immutable ? 'public, max-age=31536000, immutable' : /\.(?:html|xml|txt)$/.test(file) ? 'public, max-age=0, must-revalidate' : 'public, max-age=86400');
+      const htmlDocument = /\.html$/i.test(file);
+      if (htmlDocument) {
+        // Prevent stale landing pages from surviving after Hostinger redeploys.
+        // Immutable, fingerprinted build assets retain their long-lived cache.
+        res.set('Cache-Control', 'no-store, max-age=0');
+        res.set('CDN-Cache-Control', 'no-store');
+        res.set('Surrogate-Control', 'no-store');
+      } else {
+        res.set('Cache-Control', immutable ? 'public, max-age=31536000, immutable' : /\.(?:xml|txt)$/.test(file) ? 'public, max-age=0, must-revalidate' : 'public, max-age=86400');
+      }
     },
   }));
   app.use((_req, res) => {

@@ -36,3 +36,9 @@
  .lead-dialog .form-summary>span:last-child{white-space:nowrap;margin-left:auto}
  .lead-dialog .form-actions{min-width:0}
 }
+
+/* Defense in depth: if a stale, partially cached HTML document still contains the retired secondary quote CTA, hide its entire line. The current homepage source no longer contains this link. */
+.config-controls > p:has(> .config-quote-link),
+.config-controls > p:has(> [data-quote-link]),
+.config-quote-link,
+[data-quote-link] { display: none !important; }

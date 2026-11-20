@@ -3,7 +3,18 @@ import { energyScenario } from './energy-model.mjs';
 import { mountFallbackScene } from './fallback-scene.mjs';
 
 const $ = selector => document.querySelector(selector);
-const $$ = selector => [...document.querySelectorAll(selector)];
+const $ = selector => [...document.querySelectorAll(selector)];
+// Remove any retired secondary quote link that might still exist in an old
+// HTML document paired with this newer JS bundle. Primary advice CTA stays.
+document.querySelectorAll('.config-quote-link, [data-quote-link]').forEach(link => {
+  const paragraph = link.closest('p');
+  if (paragraph && paragraph.querySelectorAll('a').length === 1 &&
+      paragraph.textContent.trim() === link.textContent.trim()) {
+    paragraph.remove();
+  } else {
+    link.remove();
+  }
+});
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="/icons.svg#${name}"></use></svg>`;
 let chosen = configuration();
 let mode = 'solar';

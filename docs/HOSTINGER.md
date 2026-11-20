@@ -168,3 +168,17 @@ Bij een onderbroken of mislukte meting kunnen sommige rapportbestanden ontbreken
 Beoordelingsdoelen: **performance minimaal 90**, en **accessibility, best practices en SEO 100**. Lagere scores veroorzaken reviewwaarschuwingen en blijven zichtbaar in het rapport. Een onvolledig rapport of runtimefout laat de auditstap mislukken. Een groene workflow is dus geen claim dat elk scoredoel gehaald is.
 
 Deze laboratoriummeting gebruikt de GitHub-runner en Lighthouse-throttling. Zij is geen meting van echte bezoekers of veld-Core Web Vitals en omvat niet de uiteindelijke Hostinger-latency, DNS, TLS of CDN. Controleer na de domeinkoppeling ook de daadwerkelijke publieke website en mailboxaflevering.
+
+## 20 november 2026 — zichtbaar verouderde homepage na GitHub-release
+
+De geconstateerde situatie: de bron op `main` bevat géén link `Offerte voor deze opstelling` meer, terwijl een Safari-screenshot nog de vorige uitrol toont. De wijziging zit al in GitHub; dit is een **live Hostinger-versie-, edge-cache- of browsercacheverschil** totdat de actieve deployment is gecontroleerd. Een GitHub-commit bewijst niet dat Hostinger deze editie serveert.
+
+**Extra waarborgen vanaf deze release:** openbare HTML-antwoorden krijgen `Cache-Control: no-store`, `CDN-Cache-Control: no-store` en `Surrogate-Control: no-store`; vingerafdruk-assets blijven onveranderd gecachet. `src/offerings.css` en `src/app.mjs` verbergen/verwijderen defensief een eventueel oud offertelinkelement bij gedeeltelijk gecachete combinaties van assets en HTML. De pagina bevat een controleerbare bronmarker `hyxi-ui-release=secondary-offer-link-removed-r4`, die geen klantgegevens bevat.
+
+**Handmatige livecontrole (geen GitHub Actions nodig):**
+1. Controleer in Hostinger dat de Node.js-webapp vanaf de actuele `main` is gedeployed en dat `npm run build` is uitgevoerd, met de actieve app opnieuw gestart. **Neem niet aan** dat een GitHub-push of `[skip ci]` automatisch is gepubliceerd.
+2. Open `https://hyxi-aura.nl/?ui-check=secondary-offer-link-removed-r4#samenstellen` in een nieuw Safari-privévenster. Controleer de browserpaginabron op `secondary-offer-link-removed-r4` en dat `Offerte voor deze opstelling` niet meer voorkomt. Gebruik bij een bestaande Safari-tab opnieuw laden vanaf de oorsprong.
+3. Is de marker afwezig, controleer Hostinger `hbuilds/current/nodejs/dist/index.html` op de actieve deploy, en eventuele Hostinger edge/sitecache. **Pas geen productie-bestand handmatig aan als structurele oplossing**; deploy de nieuwe GitHub-`main` opnieuw en wis verouderde cache.
+4. Geen echte klant- of Odoo-aanvraag verzenden om een presentatiewijziging te testen.
+
+Deze notitie is bedoeld voor het voorkomen van foutieve releasebevestigingen. Controle vanuit de ontwikkelomgeving is niet hetzelfde als livepublicatiebewijs.
