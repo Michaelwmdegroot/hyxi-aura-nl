@@ -1,0 +1,15 @@
+/* Premium Q9-only commercial configurator */
+.module-fieldset .module-option strong{letter-spacing:-.045em}
+.module-fieldset .module-option em{font-size:12px}
+#offer-capacity-ticks span{white-space:nowrap;font-size:11px}
+#offer-inverter{font-size:12px;font-weight:760;line-height:1.55;color:#4d5b4e;margin-bottom:4px}
+.config-preview-header .preview-live{white-space:normal;text-align:right;line-height:1.5}
+.config-preview .capacity-result{min-width:0}
+.configurator-section .source-note{max-width:860px}
+@media(max-width:700px){
+.module-fieldset .module-option strong{font-size:23px}
+.module-fieldset .module-option em{font-size:10px}
+#offer-inverter{font-size:10px;line-height:1.35;overflow-wrap:break-word}
+#offer-capacity-ticks span{font-size:10px}
+}
+@media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}}
