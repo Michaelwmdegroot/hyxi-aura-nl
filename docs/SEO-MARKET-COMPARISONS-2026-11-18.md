@@ -1,5 +1,8 @@
 # HYXI POWER / HYXI AURA — marktvergelijkingen en SEO-uitbreiding
 
+> **Actueel besluit 20 november 2026:** de oude Q7/Q9-keuzegids `/kennis/bat-q7-vs-bat-q9/` is vervallen. De URL verwijst met HTTP 301 naar `/modellen/`; de actuele sitemap bevat **30** canonieke pagina's. De onderstaande eerdere plannen en historische 31-pagina-overzichten zijn geen instructie om de gids terug te plaatsen. Ons verkoopaanbod blijft uitsluitend vijf BAT-Q9-pakketten.
+
+
 **Datum:** 18 november 2026  
 **Project:** HYXI AURA, een gespecialiseerde premium HYXI AURA-site van NIVO Groep Holland B.V. / Thuisbatterij Team B.V.  
 **Doel:** bezoekers die HYXI POWER zoeken én mensen die verschillende thuisbatterijmerken onderzoeken met correcte, unieke informatie helpen; primair informeren, daarna pas een passende HYXI AURA-offerte aanbieden.  

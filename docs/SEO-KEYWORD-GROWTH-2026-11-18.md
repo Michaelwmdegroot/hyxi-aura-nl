@@ -1,5 +1,8 @@
 # HYXI AURA — keywordonderzoek en gerichte contentgroei
 
+> **Actueel besluit 20 november 2026:** de oude Q7/Q9-keuzegids `/kennis/bat-q7-vs-bat-q9/` is vervallen. De URL verwijst met HTTP 301 naar `/modellen/`; de actuele sitemap bevat **30** canonieke pagina's. De onderstaande eerdere plannen en historische 31-pagina-overzichten zijn geen instructie om de gids terug te plaatsen. Ons verkoopaanbod blijft uitsluitend vijf BAT-Q9-pakketten.
+
+
 **Datum van inventarisatie en SERP-verkenning:** 18 november 2026.  
 **Site:** [hyxi-aura.nl](https://hyxi-aura.nl/) · **Google Search Console:** 13 URL's als geïndexeerd gemeld door eigenaar op 18 november.  
 **Doel:** de HYXI AURA-hoofdlanding versterken met originele, nuttige, zoekvraaggerichte content, zonder keywordkannibalisatie of doorway-/pseudo-SKU-pagina's.  
