@@ -16,3 +16,9 @@
 
 /* Keep modal centered in the visual viewport after long configurator interactions. */
 .lead-dialog[open]{position:fixed;inset:0;margin:auto;max-width:calc(100vw - 22px)}
+
+/* The two-column Q9 specification table contains longer row values than the old three-column table. */
+.specs-table-wrap{min-width:0;max-width:100%;}
+.specs-table{table-layout:fixed}
+.specs-table td{white-space:normal;overflow-wrap:break-word;hyphens:auto}
+@media(max-width:700px){.specs-table td,.specs-table th{overflow-wrap:break-word;hyphens:auto}}
