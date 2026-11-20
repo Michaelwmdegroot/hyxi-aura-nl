@@ -93,6 +93,28 @@ async function assertNoOverflow(page, label) {
   }
 }
 
+async function assertReadableBenefitCards(page, label) {
+  const measured = await page.locator('.benefit-card').evaluateAll(cards => cards.map(card => {
+    const title = card.querySelector('h3');
+    const description = card.querySelector('p:not(.benefit-footnote)');
+    const icon = card.querySelector('.card-icon');
+    const metrics = el => {
+      const box = el.getBoundingClientRect();
+      return { top: box.top, bottom: box.bottom, left: box.left, right: box.right, height: box.height };
+    };
+    return { name: card.className, card: metrics(card), icon: metrics(icon), title: metrics(title),
+      description: metrics(description), display: getComputedStyle(card).display };
+  }));
+  assert.equal(measured.length, 3, label + ': three HYXI benefit cards should be present');
+  for (const item of measured) {
+    assert.equal(item.display, 'flex', label + ': the mobile card must use natural-height flex layout: ' + item.name);
+    assert.ok(item.icon.bottom + 4 <= item.title.top, label + ': icon overlaps heading: ' + JSON.stringify(item));
+    assert.ok(item.title.bottom + 6 <= item.description.top, label + ': title overlaps body: ' + JSON.stringify(item));
+    assert.ok(item.title.left >= item.card.left - 1 && item.description.right <= item.card.right + 1,
+      label + ': text protrudes outside the card: ' + JSON.stringify(item));
+  }
+}
+
 async function assertImages(page, label) {
   const images = page.locator('img');
   for (let index = 0; index < await images.count(); index++) {
@@ -342,6 +364,7 @@ try {
     await expect(page.locator('.benefit-backup')).toContainText('geïntegreerd');
     await expect(page.locator('.benefit-backup .backup-learn-link')).toHaveAttribute('href','/kennis/noodstroom/');
     await expect(page.locator('.benefit-backup .benefit-footnote')).toContainText('geschikte installatie');
+    if (viewport.width <= 700) await assertReadableBenefitCards(page, viewport.label);
     await expect(page.locator('.config-preview .preview-live')).toHaveText('1 fase · 5 kW');
     const footerOwner=await page.locator('.site-footer .footer-presenter .presenter-owner').boundingBox();
     const footerLine=await page.locator('.site-footer .footer-presenter .presenter-subline').boundingBox();
@@ -404,6 +427,7 @@ try {
     await page.goto(live.origin);
     await assertImages(page, viewport.label);
     await assertNoOverflow(page, viewport.label);
+    if (viewport.width <= 700) await assertReadableBenefitCards(page, viewport.label);
     await setModules(page, 'three', 3);
     await expect(page.locator('#nominal-capacity')).toHaveText('27,12');
     await assertNoOverflow(page, `${viewport.label}/maximum-stack`);
