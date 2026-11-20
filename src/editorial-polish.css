@@ -35,7 +35,7 @@
   /* Core mobile stylesheet also uses flex: never allocate a fixed 25px grid row to two-line titles. */
   .benefits-section .benefit-card{display:flex;flex-direction:column;min-height:0;height:auto;grid-template-columns:none;grid-template-rows:none}
   .benefit-card .card-icon{margin-bottom:22px;flex-shrink:0}
-  .benefits-section .benefit-card h3{position:static;flex:0 0 auto;margin:0 0 16px;line-height:1.13}
+  .benefits-section .benefit-card h3{position:static;flex:0 0 auto;margin:12px 0 16px;line-height:1.13}
   .benefits-section .benefit-card>p:not(.benefit-footnote){position:static;flex:0 0 auto;max-width:100%;margin:0;line-height:1.7}
   .benefit-backup .backup-learn-link{margin-top:10px;margin-bottom:10px}
   .benefit-backup .benefit-footnote{margin-top:10px}
