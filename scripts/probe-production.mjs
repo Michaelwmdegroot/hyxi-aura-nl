@@ -100,7 +100,7 @@ export async function probeProduction(fetcher = fetch) {
       observed['/'].content.includes('id="ervaringen"') &&
       observed['/'].content.includes('Jan Molema van der veen') &&
       observed['/'].content.includes('Lydia Wagenborg') &&
-      observed['/'].content.includes('Momentopname: 20 november 2026') &&
+      !observed['/'].content.includes('Momentopname: 20 november 2026') &&
       observed['/'].content.includes('niet specifiek een beoordeling van het HYXI AURA-product') &&
       observed['/'].content.includes('https://www.trustpilot.com/review/thuisbatterijteam.nl'),
     // Distinct from generic health/readiness: this verifies the new TBT-first

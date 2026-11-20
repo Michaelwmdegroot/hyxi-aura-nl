@@ -11,7 +11,7 @@ test('homepage shows genuine Thuisbatterij Team reviews and labels the correct s
   for(const html of [source,dist]){
     assert.match(html,/<section class="section reviews-section" id="ervaringen" aria-labelledby="reviews-title">/);
     assert.match(html,/<h2 id="reviews-title">/);
-    assert.match(html,/Momentopname: 20 november 2026/);
+    assert.doesNotMatch(html,/Momentopname: 20 november 2026/);
     assert.match(html,/niet specifiek een beoordeling van het HYXI AURA-product/);
     assert.match(html,/Google beoordelingen/);
     for(const name of ['Jan Molema van der veen','Edwin','Carlos Barbosa','Mateusz Pohl','Lydia Wagenborg']){
