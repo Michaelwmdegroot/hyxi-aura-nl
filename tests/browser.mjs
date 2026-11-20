@@ -80,7 +80,17 @@ async function assertNoOverflow(page, label) {
       return {tag: el.tagName.toLowerCase(), className: typeof el.className === 'string' ? el.className.slice(0,75) : '',
         left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width)};
     }).filter(x => x.width > 0 && (x.right > innerWidth + 2 || x.left < -2)).sort((a,b)=>b.right-a.right).slice(0,18));
-    assert.fail(`${label}: horizontal overflow ${JSON.stringify(geometry)} offenders ${JSON.stringify(overshoot)}`);
+    const scrollOwners = await page.evaluate(() => [...document.querySelectorAll('body *')].map(el => {
+      const style=getComputedStyle(el),r=el.getBoundingClientRect();
+      return {
+        tag:el.tagName.toLowerCase(),
+        id:el.id, className:typeof el.className==='string'?el.className.slice(0,70):'',
+        scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,
+        overflowX:style.overflowX,whiteSpace:style.whiteSpace,
+        x:Math.round(r.x),width:Math.round(r.width),
+      };
+    }).filter(x=>x.scrollWidth>x.clientWidth+5).sort((a,b)=>(b.scrollWidth-b.clientWidth)-(a.scrollWidth-a.clientWidth)).slice(0,20));
+    assert.fail(`${label}: horizontal overflow ${JSON.stringify(geometry)} offenders ${JSON.stringify(overshoot)} scrollOwners ${JSON.stringify(scrollOwners)}`);
   }
   const dialog = page.locator('#lead-dialog');
   if (await dialog.isVisible()) {
