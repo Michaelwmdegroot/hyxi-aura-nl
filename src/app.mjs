@@ -311,7 +311,7 @@ function setSending(value) {
   $('#form-back').disabled = value;
   $('.dialog-close').disabled = value;
   form.setAttribute('aria-busy', String(value));
-  $('#form-submit').innerHTML = value ? 'Je aanvraag wordt verstuurd…' : `Vraag mijn advies aan ${icon('arrow-up')}`;
+  $('#form-submit').textContent = value ? 'Je aanvraag wordt verstuurd…' : 'Vraag mijn advies aan';
 }
 
 form.addEventListener('submit', async event => {

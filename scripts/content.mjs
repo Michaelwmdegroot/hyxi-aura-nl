@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { faqs } from '../src/product-data.mjs';
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-const faqMarkup = faqs.map(faq => `<details><summary>${escape(faq.question)}</summary><p>${escape(faq.answer)}</p>${faq.sourceUrl ? `<a class="faq-source" href="${escape(faq.sourceUrl)}" target="_blank" rel="noopener">${escape(faq.sourceLabel)} ↗</a>` : ''}</details>`).join('\n');
+const faqMarkup = faqs.map(faq => `<details><summary>${escape(faq.question)}</summary><p>${escape(faq.answer)}</p>${faq.sourceUrl ? `<a class="faq-source" href="${escape(faq.sourceUrl)}" target="_blank" rel="noopener">${escape(faq.sourceLabel)}</a>` : ''}</details>`).join('\n');
 const structured = {
   '@context': 'https://schema.org', '@graph': [
     { '@type': 'Organization', '@id': 'https://hyxi-aura.nl/#organization', name: 'NIVO Groep Holland B.V.', url: 'https://nivogroepholland.nl/', address: { '@type': 'PostalAddress', streetAddress: 'Lireweg 52', postalCode: '2153 PH', addressLocality: 'Nieuw-Vennep', addressCountry: 'NL' }, contactPoint: { '@type': 'ContactPoint', contactType: 'Advies via Thuisbatterij Team', telephone: '+31858000563', email: 'info@thuisbatterijteam.nl', availableLanguage: 'Dutch' } },
