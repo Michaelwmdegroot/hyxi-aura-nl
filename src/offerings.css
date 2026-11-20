@@ -14,11 +14,17 @@
 }
 @media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}}
 
-/* Keep modal centered in the visual viewport after long configurator interactions. */
-.lead-dialog[open]{max-width:calc(100vw - 22px);margin-inline:auto}
-
 /* The two-column Q9 specification table contains longer row values than the old three-column table. */
 .specs-table-wrap{min-width:0;max-width:100%;}
 .specs-table{table-layout:fixed}
 .specs-table td{white-space:normal;overflow-wrap:break-word;hyphens:auto}
 @media(max-width:700px){.specs-table td,.specs-table th{overflow-wrap:break-word;hyphens:auto}}
+
+/* Mobile modal: action row stays above adjacent form controls while the
+   scrollable dialog settles after focus and validation messages. */
+@media(max-width:700px){
+ .lead-dialog{overscroll-behavior:contain}
+ .lead-dialog .form-footer{position:relative;z-index:2;background:#fcfcf8;isolation:isolate}
+ .lead-dialog .form-actions{position:relative;z-index:3}
+ .lead-dialog #form-next,.lead-dialog #form-submit{position:relative;z-index:4;scroll-margin-block:22px}
+}
