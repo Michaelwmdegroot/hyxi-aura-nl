@@ -281,6 +281,20 @@ test('serves sitemap XML and CSS as publicly readable machine and browser resour
   assert.match(await css.text(), /urlset/);
 });
 
+test('retired Q7/Q9 knowledge URL redirects permanently to the offered five BAT-Q9 packages', async t => {
+  const f = await fixture(t);
+  for (const retired of [
+    '/kennis/bat-q7-vs-bat-q9/',
+    '/kennis/bat-q7-vs-bat-q9',
+    '/kennis/bat-q7-vs-bat-q9/index.html',
+  ]) {
+    const res = await fetch(f.base + retired + '?utm_source=old-guide', { redirect: 'manual' });
+    assert.equal(res.status, 301, retired + ' must not remain a live article');
+    assert.equal(res.headers.get('location'), '/modellen/?utm_source=old-guide');
+    assert.match(res.headers.get('cache-control') || '', /no-store/);
+  }
+});
+
 test('canonical and preview hosts keep queries out of public API responses', async t => {
   const f = await fixture(t, { env: { NODE_ENV: 'production', CANONICAL_REDIRECT: 'true' } });
   const withHost = (path, host) => new Promise((resolve, reject) => {

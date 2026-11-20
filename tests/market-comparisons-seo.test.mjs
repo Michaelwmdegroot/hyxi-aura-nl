@@ -34,8 +34,8 @@ test('all thirteen new longtail URLs build as valuable indexable independent pag
   const urls=new Set(),titles=new Set(),descs=new Set();
   const sitemap=await readFile(resolve(root,'dist/sitemap.xml'),'utf8');
   const sitemapUrls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x=>x[1]);
-  assert.equal(sitemapUrls.length,31);
-  assert.equal(new Set(sitemapUrls).size,31);
+  assert.equal(sitemapUrls.length,30);
+  assert.equal(new Set(sitemapUrls).size,30);
   assert.deepEqual(new Set(sitemapUrls),new Set([...PUBLIC_CANONICAL_PATHS].map(x=>origin+x)));
   for(const route of extra){
     const html=await htmlAt(route),main=html.slice(html.indexOf('<main'),html.indexOf('</main>'));

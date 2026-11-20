@@ -8,8 +8,8 @@ const root = resolve(import.meta.dirname,'..');
 const glyph = /[\u2190-\u21FF\u27F0-\u27FF\u2794\u27A1\u27A4\u2900-\u297F]/u;
 const arrowIcon = /\/icons\.svg#(?:arrow|chevron)(?:-[a-z0-9-]+)?/i;
 
-test('all 31 public pages contain no decorative arrow icons or characters', async () => {
-  assert.equal(PUBLIC_CANONICAL_PATHS.size, 31);
+test('all 30 public pages contain no decorative arrow icons or characters', async () => {
+  assert.equal(PUBLIC_CANONICAL_PATHS.size, 30);
   for (const route of PUBLIC_CANONICAL_PATHS) {
     const html = await readFile(resolve(root,'dist',route.slice(1),'index.html'),'utf8');
     assert.doesNotMatch(html,glyph,'Arrow glyph on '+route);
