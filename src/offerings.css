@@ -28,3 +28,11 @@
  .lead-dialog .form-actions{position:relative;z-index:3}
  .lead-dialog #form-next,.lead-dialog #form-submit{position:relative;z-index:4;scroll-margin-block:22px}
 }
+
+/* A mobile dialog summary should never force a wider layout viewport. */
+@media(max-width:700px){
+ .lead-dialog .form-summary{min-width:0;max-width:100%;flex-wrap:wrap;row-gap:6px}
+ .lead-dialog #form-configuration{min-width:0;flex:1 1 auto;overflow-wrap:break-word;line-height:1.5}
+ .lead-dialog .form-summary>span:last-child{white-space:nowrap;margin-left:auto}
+ .lead-dialog .form-actions{min-width:0}
+}

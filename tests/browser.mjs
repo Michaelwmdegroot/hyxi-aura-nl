@@ -253,7 +253,7 @@ async function contactJourney(page, fixture, label, phase, count) {
   await expect(page.locator('#contact-step-title')).toBeFocused();
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'contact-step-title');
   const nominal = Math.round(9.04 * count * 100) / 100;
-  await expect(page.locator('#form-configuration')).toHaveText((phase === 'single' ? '1 fase · 5 kW' : '3 fasen · 10 kW') + ' · ' + nl(nominal) + ' kWh');
+  await expect(page.locator('#form-configuration')).toHaveText((phase === 'single' ? '1 fase' : '3 fasen') + ' · ' + (count * 9) + ' kWh');
   await page.locator('#fullName').fill(`Browsercontrole ${label}`);
   await page.locator('#postcode').fill('1234 AB');
   await page.locator('#email').fill(`${label}@example.test`);
