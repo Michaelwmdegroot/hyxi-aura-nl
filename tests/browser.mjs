@@ -84,6 +84,8 @@ async function assertNoOverflow(page, label) {
   }
   const dialog = page.locator('#lead-dialog');
   if (await dialog.isVisible()) {
+    // Wait for opening movement before measuring modal bounds.
+    await dialog.evaluate(el => Promise.all(el.getAnimations().map(a => a.finished.catch(()=>{}))));
     const bounds = await dialog.boundingBox();
     assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= geometry.width + 1, `${label}: dialog extends outside viewport: ${JSON.stringify({bounds,geometry})}`);
     const interior = await dialog.evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }));
