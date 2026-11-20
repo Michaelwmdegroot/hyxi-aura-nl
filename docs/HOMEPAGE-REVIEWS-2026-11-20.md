@@ -21,3 +21,6 @@
 - De bestaande Chromium/axe- en viewportchecks (1440 / 390 / 320px) blijven verantwoordelijk voor visuele en toegankelijkheidsregressies.
 - De 31 SEO-routes uit de al gemergede PR #58 blijven identiek; geen nieuwe URL in de sitemap.
 - Vereist: 3/3 groene PR-CI, domeinpreflight, merge naar `main`, daarna groene postmerge-CI, Hostinger live check en eigenaarreview in Safari. Het design is **niet** automatisch 9/10 of commercieel GO verklaard.
+
+## 20 november — afzonderlijke productie-acceptatie na merge
+Een 41e read-only productiecheck `customerReviewsDeployed` controleert de echte Hostinger-homepage op de reviewsectie, twee bevestigde namen, momentopname, juiste Trustpilot-bedrijfslink en zichtbare scheiding tussen dienstverlening en product. De bestaande homepage GET wordt tijdens de bounded Hostinger-deploymentretry ook op deze nieuwe marker beoordeeld. Er worden geen externe review-API's, klantenbestanden, formulieren of cookies opgevraagd.
