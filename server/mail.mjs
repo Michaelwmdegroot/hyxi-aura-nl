@@ -27,8 +27,10 @@ export function createTransport(config) {
 export function buildLeadMail(config, lead, requestId, now) {
   const p = lead.profile;
   const quote = lead.intent === 'quote';
-  const nominal = (p.moduleType === 7 ? 7.03 : 9.04) * p.moduleCount;
-  const usable = (p.moduleType === 7 ? 6.7 : 8.6) * p.moduleCount;
+  const nominal = 9.04 * p.moduleCount;
+  const usable = 8.6 * p.moduleCount;
+  const offerPhase = p.offerPhase || p.phase;
+  const selected = offerPhase === 'three' ? '3 fasen · 10 kW omvormer' : offerPhase === 'single' ? '1 fase · 5 kW omvormer' : 'Aansluiting te bevestigen';
   const lines = [
     quote ? 'Nieuwe HYXI AURA offerteaanvraag' : 'Nieuwe HYXI AURA adviesaanvraag',
     '',
@@ -47,7 +49,8 @@ export function buildLeadMail(config, lead, requestId, now) {
     `Jaarverbruik: ${p.annualUsage === null ? 'Nog onbekend' : `${p.annualUsage} kWh`}`,
     `Doel: ${LABELS.goal[p.goal]}`,
     `Aansluiting: ${LABELS.phase[p.phase]}`,
-    `Verkende opstelling: ${p.moduleCount} × BAT-Q${p.moduleType}`,
+    `Verkende opstelling: ${p.moduleCount} × BAT-Q9`,
+    `Gekozen pakket: ${selected}, geïntegreerde back-up (groepen na installatiecheck)`,
     `Nominale capaciteit: ${nominal.toFixed(2)} kWh`,
     `Bruikbare capaciteit volgens voorlopige datasheet: ${usable.toFixed(1)} kWh`,
     'Dit is de keuze van de bezoeker, geen technisch installatieadvies of definitieve offerte.',

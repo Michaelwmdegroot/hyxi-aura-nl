@@ -17,9 +17,14 @@ export const leadSchema = z.object({
     annualUsage: z.number().int().min(500).max(100000).nullable(),
     goal: z.enum(['solar', 'prices', 'backup', 'unsure']),
     phase: z.enum(['single', 'three', 'unknown']),
-    moduleType: z.union([z.literal(7), z.literal(9)]),
-    moduleCount: z.number().int().min(1).max(6),
-  }).strict(),
+    moduleType: z.literal(9),
+    moduleCount: z.number().int().min(1).max(3),
+    offerPhase: z.enum(['single','three']).optional(),
+  }).strict().superRefine((p,ctx)=>{
+    if(p.moduleCount===3 && (p.phase==='single' || p.offerPhase==='single' || (p.phase!=='three' && p.offerPhase!=='three'))){
+      ctx.addIssue({code:'custom',path:['moduleCount'],message:'27 kWh is alleen als 3-fasenpakket beschikbaar.'});
+    }
+  }),
   attribution: z.object({
     utm_source: optionalUtm,
     utm_medium: optionalUtm,
