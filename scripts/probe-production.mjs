@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url';
 
 const BASE = 'https://hyxi-aura.nl';
 const KNOWLEDGE = [
-  { path: '/kennis/bat-q7-vs-bat-q9/', title: 'HYXI AURA BAT-Q7 vs BAT-Q9' },
   { path: '/kennis/noodstroom/', title: 'HYXI AURA bij stroomuitval' },
   { path: '/kennis/installatiecheck/', title: 'HYXI AURA installatiecheck' },
   { path: '/kennis/1-fase-of-3-fasen/', title: 'HYXI AURA 1 fase of 3 fasen' },
@@ -32,7 +31,7 @@ const KNOWLEDGE = [
   { path: '/vergelijken/hyxi-aura-vs-sessy/', title: 'HYXI AURA vs' },
 ];
 const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
-const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/sitemap.css', '/robots.txt', '/api/beheer/leads'];
+const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', '/kennis/bat-q7-vs-bat-q9/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/sitemap.css', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
   const observed = {};
@@ -42,7 +41,8 @@ export async function probeProduction(fetcher = fetch) {
     // and static icons get a short bounded retry; API/privacy checks remain
     // strict and immediate. Unit test mocks never wait.
     const brandAsset = BRAND_ASSETS.includes(path);
-    const attempts = (guide || brandAsset) && fetcher === fetch ? 8 : 1;
+    const retiredGuide = path === '/kennis/bat-q7-vs-bat-q9/';
+    const attempts = (guide || brandAsset || retiredGuide) && fetcher === fetch ? 8 : 1;
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
         const response = await fetcher(BASE + path, {
@@ -57,7 +57,7 @@ export async function probeProduction(fetcher = fetch) {
         if (path === '/api/health' || path === '/api/config') {
           try { parsed = JSON.parse(text); } catch { /* treated as failed check */ }
         }
-        observed[path] = { status: response.status, data: parsed, redirectLocation: path === '/index.html' ? response.headers?.get?.('location') : null, content: path.startsWith('/api/') ? '' : text };
+        observed[path] = { status: response.status, data: parsed, redirectLocation: (path === '/index.html' || retiredGuide) ? response.headers?.get?.('location') : null, content: path.startsWith('/api/') ? '' : text };
       } catch {
         observed[path] = { status: 0, data: null, content: '' };
       }
@@ -77,7 +77,8 @@ export async function probeProduction(fetcher = fetch) {
       const assetReady = brandAsset && observed[path].status === 200 &&
         (path.endsWith('.png') ? observed[path].content.length > 64 :
           observed[path].content.includes('"HYXI AURA — Thuisbatterij Team"'));
-      if ((!guide && !brandAsset) || assetReady || (guide && observed[path].status === 200 &&
+      const retiredReady = retiredGuide && observed[path].status === 301 && observed[path].redirectLocation === '/modellen/';
+      if ((!guide && !brandAsset && !retiredGuide) || retiredReady || assetReady || (guide && observed[path].status === 200 &&
         observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
         observed[path].content.includes(guide.title) && rootV6)) break;
       if (attempt + 1 < attempts) await new Promise(resolve => setTimeout(resolve, 10000));
@@ -155,12 +156,11 @@ export async function probeProduction(fetcher = fetch) {
       observed['/sitemap.css'].content.includes('loc {'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
       observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/') &&
-      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 31 &&
+      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 30 &&
+      !observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/') &&
       KNOWLEDGE.every(item => observed['/sitemap.xml'].content.includes(`<loc>${BASE}${item.path}</loc>`)),
-    q7ComparisonDeployed: observed['/kennis/bat-q7-vs-bat-q9/'].status === 200 &&
-      observed['/kennis/bat-q7-vs-bat-q9/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/bat-q7-vs-bat-q9/">`) &&
-      observed['/kennis/bat-q7-vs-bat-q9/'].content.includes('HYXI AURA BAT-Q7 vs BAT-Q9') &&
-      observed['/kennis/bat-q7-vs-bat-q9/'].content.includes('href="/offerte/"'),
+    retiredQ7GuideRedirects: observed['/kennis/bat-q7-vs-bat-q9/'].status === 301 &&
+      observed['/kennis/bat-q7-vs-bat-q9/'].redirectLocation === '/modellen/',
     backupGuideDeployed: observed['/kennis/noodstroom/'].status === 200 &&
       observed['/kennis/noodstroom/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/noodstroom/">`) &&
       observed['/kennis/noodstroom/'].content.includes('HYXI AURA bij stroomuitval') &&

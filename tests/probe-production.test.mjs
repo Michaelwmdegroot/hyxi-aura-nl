@@ -15,7 +15,7 @@ const good = {
   '/privacy/': [200, 'Privacyverklaring · versie 16 november 2026; versleuteld op in een beveiligde database; Odoo CRM'],
   '/bronnen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/bronnen/"><p>Bronnen gecontroleerd op 16 november 2026</p><a class="secondary-presenter" href="/">Thuisbatterij Team</a><p>De HTA2-datasheet vermeldt onterecht HSA2 en 160000 W</p><a href="/kennis/1-fase-of-3-fasen/">Faseuitleg</a>'],
   '/offerte/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/offerte/"><form id="quoteForm"></form>'],
-  '/kennis/bat-q7-vs-bat-q9/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/"><title>HYXI AURA BAT-Q7 vs BAT-Q9</title><a href="/offerte/">'],
+  '/kennis/bat-q7-vs-bat-q9/': [301, ''],
   '/kennis/noodstroom/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/noodstroom/"><title>HYXI AURA bij stroomuitval</title><a href="/offerte/">'],
   '/kennis/installatiecheck/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/installatiecheck/"><title>HYXI AURA installatiecheck</title><form id="installation-check-form" action="/offerte/" method="get">'],
   '/modellen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/modellen/"><title>HYXI AURA modellen</title><p>HSA2 BAT-Q9</p><a href="/datasheet/">PDF</a><a href="/offerte/">Offerte</a>'],
@@ -42,7 +42,7 @@ const good = {
   '/kennis/buiten-plaatsen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/buiten-plaatsen/"><title>HYXI AURA buiten plaatsen</title><p>IP66</p><a href="/kennis/garantie/">Further</a><a href="/offerte/">Offerte</a>'],
   '/kennis/garantie/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/garantie/"><title>HYXI AURA garantie</title><p>BAT-Q7 BAT-Q9 50,7 MWh</p><a href="/downloads/hyxi-eu-garantievoorwaarden.pdf">Garantie PDF</a>'],
   '/kennis/1-fase-of-3-fasen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/"><title>HYXI AURA 1 fase of 3 fasen</title><a href="/offerte/">'],
-  '/sitemap.xml': [200, '<?xml-stylesheet type="text/css" href="/sitemap.css"?>' + "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc><loc>https://hyxi-aura.nl/kennis/salderingsregeling-2027/</loc><loc>https://hyxi-aura.nl/kennis/btw-subsidie/</loc><loc>https://hyxi-aura.nl/kennis/dynamisch-energiecontract/</loc><loc>https://hyxi-aura.nl/kennis/uitbreiden/</loc><loc>https://hyxi-aura.nl/kennis/buiten-plaatsen/</loc><loc>https://hyxi-aura.nl/vergelijken/</loc><loc>https://hyxi-aura.nl/hyxi-power/</loc><loc>https://hyxi-aura.nl/kennis/hoeveel-kwh-nodig/</loc><loc>https://hyxi-aura.nl/kennis/app-monitoring/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-sigenergy/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-alphaess/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-tesla-powerwall/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-enphase/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-huawei/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-byd/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-solaredge/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-ecoflow/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-sessy/</loc>"],
+  '/sitemap.xml': [200, '<?xml-stylesheet type="text/css" href="/sitemap.css"?>' + "<loc>https://hyxi-aura.nl/</loc><loc>https://hyxi-aura.nl/modellen/</loc><loc>https://hyxi-aura.nl/datasheet/</loc><loc>https://hyxi-aura.nl/kennis/prijs-en-installatie/</loc><loc>https://hyxi-aura.nl/kennis/bestaande-zonnepanelen/</loc><loc>https://hyxi-aura.nl/kennis/garantie/</loc><loc>https://hyxi-aura.nl/bronnen/</loc><loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc><loc>https://hyxi-aura.nl/kennis/installatiecheck/</loc><loc>https://hyxi-aura.nl/kennis/1-fase-of-3-fasen/</loc><loc>https://hyxi-aura.nl/privacy/</loc><loc>https://hyxi-aura.nl/kennis/salderingsregeling-2027/</loc><loc>https://hyxi-aura.nl/kennis/btw-subsidie/</loc><loc>https://hyxi-aura.nl/kennis/dynamisch-energiecontract/</loc><loc>https://hyxi-aura.nl/kennis/uitbreiden/</loc><loc>https://hyxi-aura.nl/kennis/buiten-plaatsen/</loc><loc>https://hyxi-aura.nl/vergelijken/</loc><loc>https://hyxi-aura.nl/hyxi-power/</loc><loc>https://hyxi-aura.nl/kennis/hoeveel-kwh-nodig/</loc><loc>https://hyxi-aura.nl/kennis/app-monitoring/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-sigenergy/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-alphaess/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-tesla-powerwall/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-enphase/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-huawei/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-byd/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-solaredge/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-ecoflow/</loc><loc>https://hyxi-aura.nl/vergelijken/hyxi-aura-vs-sessy/</loc>"],
   '/sitemap.css': [200, '@namespace "http://www.sitemaps.org/schemas/sitemap/0.9"; urlset::before {content:"XML-sitemap"} loc {display:block}'],
   '/robots.txt': [200, 'Sitemap: https://hyxi-aura.nl/sitemap.xml'],
   '/api/beheer/leads': [401, '{}'],
@@ -50,7 +50,7 @@ const good = {
 const mock = (data) => async url => {
   const path = new URL(url).pathname;
   const [status,body] = data[path] ?? [404,''];
-  return {status,text:async()=>body,headers:{get:name=>name.toLowerCase()==='location' && path==='/index.html' ? 'https://hyxi-aura.nl/' : null}};
+  return {status,text:async()=>body,headers:{get:name=>name.toLowerCase()==='location' ? (path==='/index.html' ? 'https://hyxi-aura.nl/' : path==='/kennis/bat-q7-vs-bat-q9/' ? '/modellen/' : null) : null}};
 };
 
 test('productieprobe leest uitsluitend publieke metadata en rapporteert alle P0-beveiligingschecks',async()=>{
@@ -82,7 +82,7 @@ test('public readiness detects missing or mismatched live knowledge content', as
   assert.equal(missing.checks.backupGuideDeployed,false);
   assert.equal(missing.ok,false);
   const wrong = await probeProduction(mock({...good,'/kennis/bat-q7-vs-bat-q9/':[200,good['/offerte/'][1]]}));
-  assert.equal(wrong.checks.q7ComparisonDeployed,false);
+  assert.equal(wrong.checks.retiredQ7GuideRedirects,false);
   assert.equal(wrong.ok,false);
 });
 test('public readiness checks that both distinct guide URLs occur in live sitemap', async () => {
@@ -95,7 +95,7 @@ test('public installation check must be deployed, canonical and in sitemap',asyn
   const unavailable=await probeProduction(mock({...good,'/kennis/installatiecheck/':[404,'']}));
   assert.equal(unavailable.checks.installationCheckDeployed,false);
   assert.equal(unavailable.ok,false);
-  const oldSitemap=await probeProduction(mock({...good,'/sitemap.xml':[200,'<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/bat-q7-vs-bat-q9/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc>']}));
+  const oldSitemap=await probeProduction(mock({...good,'/sitemap.xml':[200,'<loc>https://hyxi-aura.nl/offerte/</loc><loc>https://hyxi-aura.nl/kennis/noodstroom/</loc>']}));
   assert.equal(oldSitemap.checks.sitemapPresent,false);
 });
 
