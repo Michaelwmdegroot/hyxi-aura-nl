@@ -3,8 +3,17 @@ const $ = id => document.getElementById(id);
 const form = $('quoteForm'),button=$('submitQuote');
 let config=null,configPromise=null,submitting=false,complete=false,key=null;
 function selection(){
-  const count=Number($('moduleCount').value);
-  $('selectionLabel').textContent='Je verkent: '+count+' × BAT-Q'+$('moduleType').value;
+  const offeredPhase=$('phase').value==='three'?'three':'single';
+  const countField=$('moduleCount');
+  const third=countField.querySelector('option[value="3"]');
+  third.disabled=offeredPhase!=='three';
+  if(third.disabled && countField.value==='3')countField.value='2';
+  const count=Number(countField.value);
+  $('offerPhase').value=offeredPhase;
+  const phaseName=offeredPhase==='three'?'3 fasen':'1 fase';
+  const inverter=offeredPhase==='three'?'10 kW':'5 kW';
+  const nominal=(9.04*count).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
+  $('selectionLabel').textContent=phaseName+' · '+inverter+' omvormer · '+nominal+' kWh · '+count+' × BAT-Q9 · back-up inbegrepen';
 }
 function error(message,withFallback=false){
   $('quoteError').textContent=message;$('quoteError').hidden=false;
@@ -51,8 +60,9 @@ function payload(){
       annualUsage:usage?Number(usage):null,
       goal:String(data.get('goal')||''),
       phase:String(data.get('phase')||''),
-      moduleType:Number(data.get('moduleType')),
+      moduleType:9,
       moduleCount:Number(data.get('moduleCount')),
+      offerPhase:$('offerPhase').value,
     },
   };
   const details=String(data.get('projectDetails')||'').trim();
@@ -62,17 +72,19 @@ function payload(){
 }
 form.addEventListener('input',()=>{if(!submitting){key=null;clearError();}});
 const preset=new URLSearchParams(location.search);
-if(['7','9'].includes(preset.get('moduleType')))$('moduleType').value=preset.get('moduleType');
-if(/^[1-6]$/.test(preset.get('moduleCount')||''))$('moduleCount').value=preset.get('moduleCount');
-// Accept only known anonymous answer values from the public installation precheck.
-// No names, phone numbers, addresses or free text are accepted from the URL.
+// Legacy BAT-Q7 and 4-6-module URLs are deliberately not accepted as offers.
+// Only anonymous, allowlisted installation-check answers may be prefilled.
 let prefilled=false;
 for(const [field,allowed] of Object.entries({solar:['yes','planned','no'],phase:['single','three','unknown'],goal:['solar','prices','backup','unsure']})){
   const value=preset.get(field);
-  if(value!==null&&allowed.includes(value)){$(field).value=value;prefilled=true;}
+  if(value!==null && allowed.includes(value)){$(field).value=value;prefilled=true;}
+}
+if(preset.get('moduleType')==='9' && /^[1-3]$/.test(preset.get('moduleCount')||'')){
+  const count=Number(preset.get('moduleCount'));
+  if(count<=2 || $('phase').value==='three')$('moduleCount').value=String(count);
 }
 if(prefilled)$('check-prefill-note').hidden=false;
-$('moduleType').addEventListener('change',selection);
+$('phase').addEventListener('change',selection);
 $('moduleCount').addEventListener('change',selection);
 selection();
 form.addEventListener('submit',async event=>{

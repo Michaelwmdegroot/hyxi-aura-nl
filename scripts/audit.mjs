@@ -154,7 +154,7 @@ try {
   for (const device of ['desktop', 'mobile']) {
     try {
       chrome = await chromeLauncher.launch({
-        chromePath: chromium.executablePath(),
+        chromePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || chromium.executablePath(),
         chromeFlags: ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage'],
         logLevel: 'error',
         connectionPollInterval: 200,

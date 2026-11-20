@@ -47,7 +47,7 @@ export const faqs = Object.freeze([
   },
   {
     question: 'Kan ik klein beginnen en later uitbreiden?',
-    answer: 'Ja, de AURA is modulair. De fabrikant beschrijft één tot zes batterijmodules per controller en het combineren van 7- en 9-kWh-modules. Een BAT-Q7 heeft 6,7 kWh bruikbare opslag; een BAT-Q9 8,6 kWh. Laat een uitbreiding vooraf controleren op compatibiliteit, installatievoorwaarden en beschikbaarheid. Een groter systeem is niet automatisch voordeliger.',
+    answer: 'AURA is technisch modulair. Wij bieden hier vijf BAT-Q9-pakketten aan: 9 en 18 kWh bij 1 fase (5 kW) en 9, 18 en 27 kWh bij 3 fasen (10 kW). De fabrikant beschrijft ook andere modules, maar die maken geen deel uit van ons standaardaanbod. Geschiktheid, latere uitbreiding en back-upgroepen beoordelen we per woning.',
     sourceUrl: sourceUrls.singlePhase,
     sourceLabel: 'Batterijgegevens in de datasheet',
   },

@@ -83,12 +83,12 @@
           </fieldset>
           <fieldset>
             <legend><span class="step">02</span> Gewenste AURA-opstelling</legend>
-            <p class="field-hint">Je keuze is indicatief. Een installateur beoordeelt welke configuratie geschikt is. <a href="/kennis/bat-q7-vs-bat-q9/">Vergelijk Q7 en Q9</a>. <a href="/kennis/1-fase-of-3-fasen/">1 fase of 3 fasen?</a></p>
+            <p class="field-hint">Thuisbatterij Team biedt hier uitsluitend vijf standaardpakketten met BAT-Q9 aan. Bij 1 fase hoort een 5 kW omvormer (9 of 18 kWh); bij 3 fasen een 10 kW omvormer (9, 18 of 27 kWh). <a href="/kennis/1-fase-of-3-fasen/">Welke aansluiting heb ik?</a></p>
             <div class="two">
-              <div class="field"><label for="moduleType">Batterijmodule</label><select id="moduleType" name="moduleType" required><option value="7">BAT-Q7</option><option value="9" selected>BAT-Q9</option></select></div>
-              <div class="field"><label for="moduleCount">Aantal modules</label><select id="moduleCount" name="moduleCount" required><option value="1">1 module</option><option value="2" selected>2 modules</option><option value="3">3 modules</option><option value="4">4 modules</option><option value="5">5 modules</option><option value="6">6 modules</option></select></div>
+              <div class="field"><label for="fixedModule">Batterijmodule</label><p class="fixed-offer" id="fixedModule">BAT-Q9 · 9,04 kWh per module</p><input type="hidden" id="moduleType" name="moduleType" value="9"><input type="hidden" id="offerPhase" name="offerPhase" value="single"></div>
+              <div class="field"><label for="moduleCount">Aantal modules</label><select id="moduleCount" name="moduleCount" required><option value="1" selected>9 kWh · 1 module</option><option value="2">18 kWh · 2 modules</option><option value="3" disabled>27 kWh · 3 modules (alleen 3 fasen)</option></select></div>
             </div>
-            <p class="selection" id="selectionLabel" aria-live="polite">Je verkent: 2 × BAT-Q9</p>
+            <p class="selection" id="selectionLabel" aria-live="polite">1 fase · 5 kW omvormer · 9,04 kWh · back-up inbegrepen</p>
             <div class="field"><label for="projectDetails">Wensen of opmerkingen <span class="optional">(optioneel)</span></label><textarea id="projectDetails" name="projectDetails" rows="3" maxlength="1000" placeholder="Bijvoorbeeld: bestaande omvormer, specifieke back-upwens of gewenste planning"></textarea></div>
           </fieldset>
           <fieldset>

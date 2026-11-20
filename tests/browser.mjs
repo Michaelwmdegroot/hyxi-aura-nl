@@ -84,8 +84,10 @@ async function assertNoOverflow(page, label) {
   }
   const dialog = page.locator('#lead-dialog');
   if (await dialog.isVisible()) {
+    // Wait for opening movement before measuring modal bounds.
+    await dialog.evaluate(el => Promise.all(el.getAnimations().map(a => a.finished.catch(()=>{}))));
     const bounds = await dialog.boundingBox();
-    assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= geometry.width + 1, `${label}: dialog extends outside viewport`);
+    assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= geometry.width + 1, `${label}: dialog extends outside viewport: ${JSON.stringify({bounds,geometry})}`);
     const interior = await dialog.evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }));
     assert.ok(interior.scroll <= interior.client + 1, `${label}: dialog content overflows horizontally`);
   }
@@ -185,33 +187,40 @@ async function scenarios(page, label) {
   record(`${label}: all six energy scenarios match their visible values and conserve energy`);
 }
 
-async function setModules(page, type, count) {
-  await page.locator(`.module-option:has(input[value="${type}"])`).click();
+async function setModules(page, phase, count) {
+  await page.locator('.module-option:has(input[value="' + phase + '"])').click();
   const slider = page.locator('#module-count');
   await slider.focus();
   await slider.press('Home');
-  for (let index = 1; index < count; index++) await slider.press('ArrowRight');
+  for(let index=1;index<count;index++) await slider.press('ArrowRight');
 }
 
-async function configurations(page, label) {
-  for (const type of [7, 9]) {
-    for (let count = 1; count <= 6; count++) {
-      await setModules(page, type, count);
-      const nominal = Math.round((type === 7 ? 7.03 : 9.04) * count * 100) / 100;
-      const usable = Math.round((type === 7 ? 6.7 : 8.6) * count * 10) / 10;
+async function configurations(page,label) {
+  for(const [phase,counts] of [['single',[1,2]],['three',[1,2,3]]]) {
+    for(const count of counts) {
+      await setModules(page,phase,count);
+      const nominal=Math.round(9.04*count*100)/100;
+      const usable=Math.round(8.6*count*10)/10;
       await expect(page.locator('#nominal-capacity')).toHaveText(nl(nominal));
-      await expect(page.locator('#usable-capacity')).toHaveText(`${nl(usable)} kWh`);
-      await expect(page.locator('#stack-count')).toHaveText(`${count}× BAT-Q${type}`);
+      await expect(page.locator('#usable-capacity')).toHaveText(nl(usable)+' kWh');
+      await expect(page.locator('#stack-count')).toHaveText(count+'× BAT-Q9');
       await expect(page.locator('#stack-modules .stack-module')).toHaveCount(count);
-      await assertNoOverflow(page, `${label}/BAT-Q${type}/${count}`);
+      await expect(page.locator('#offer-inverter')).toContainText(phase==='single'?'5 kW':'10 kW');
+      await expect(page.locator('#module-count-label')).toContainText((count*9)+' kWh');
+      await assertNoOverflow(page,label+'/'+phase+'/'+count);
     }
   }
-  record(`${label}: both module sizes and all one-to-six-module totals update correctly`);
+  await setModules(page,'three',3);
+  await page.locator('.module-option:has(input[value="single"])').click();
+  await expect(page.locator('#module-count')).toHaveValue('2'); // clamp 27 -> 18 kWh
+  record(label+': five valid Q9 packages, correct kWh/kW and phase clamping');
 }
 
-async function contactJourney(page, fixture, label, type, count) {
-  await setModules(page, type, count);
-  const opener = page.locator('.site-header [data-open-lead]');
+async function contactJourney(page, fixture, label, phase, count) {
+  await setModules(page, phase, count);
+  // Test the selected package's own primary CTA rather than the fixed header, whose
+  // Chromium mobile hit-testing can be obscured during automatic scroll correction.
+  const opener = page.locator('.config-cta[data-open-lead]');
   await opener.click();
   await expect(page.locator('#lead-title')).toBeFocused();
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'lead-title');
@@ -239,12 +248,12 @@ async function contactJourney(page, fixture, label, type, count) {
     assert.equal(fixture.calls.length, callsBefore, 'Invalid usage must never send mail');
   }
   await page.locator('#annualUsage').fill('4200');
-  await page.locator('label:has(input[name="phase"][value="three"])').click();
+  await page.locator('label:has(input[name="phase"][value="' + phase + '"])').click();
   await page.locator('#form-next').click();
   await expect(page.locator('#contact-step-title')).toBeFocused();
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'contact-step-title');
-  const nominal = Math.round((type === 7 ? 7.03 : 9.04) * count * 100) / 100;
-  await expect(page.locator('#form-configuration')).toHaveText(`${nl(nominal)} kWh · ${count} ${count === 1 ? 'module' : 'modules'}`);
+  const nominal = Math.round(9.04 * count * 100) / 100;
+  await expect(page.locator('#form-configuration')).toHaveText((phase === 'single' ? '1 fase' : '3 fasen') + ' · ' + (count * 9) + ' kWh');
   await page.locator('#fullName').fill(`Browsercontrole ${label}`);
   await page.locator('#postcode').fill('1234 AB');
   await page.locator('#email').fill(`${label}@example.test`);
@@ -275,7 +284,7 @@ async function contactJourney(page, fixture, label, type, count) {
   await expect(page.locator('#request-id')).toHaveText(receipt.requestId);
   await expect(page.locator('#success-title')).toBeFocused();
   const submitted = response.request().postDataJSON();
-  assert.deepEqual(submitted.profile, { solar: 'planned', annualUsage: 4200, goal: 'backup', phase: 'three', moduleType: type, moduleCount: count });
+  assert.deepEqual(submitted.profile, { solar: 'planned', annualUsage: 4200, goal: 'backup', phase, moduleType: 9, moduleCount: count, offerPhase: phase });
   assert.equal(submitted.postcode, '1234AB');
   assert.equal(submitted.consent, true);
   assert.deepEqual(submitted.attribution, { utm_source: 'browser-qa', utm_medium: 'test' });
@@ -284,7 +293,8 @@ async function contactJourney(page, fixture, label, type, count) {
   assert.equal(mail.replyTo.address, `${label}@example.test`);
   assert.match(mail.text, /Bron: https:\/\/hyxi-aura\.nl/);
   assert.ok(mail.text.includes(receipt.requestId));
-  assert.ok(mail.text.includes(`${count} × BAT-Q${type}`));
+  assert.ok(mail.text.includes(`${count} × BAT-Q9`));
+  assert.ok(mail.text.includes(phase === 'single' ? '1 fase · 5 kW omvormer' : '3 fasen · 10 kW omvormer'));
   assert.equal(await page.locator('#fullName').inputValue(), '');
   assert.equal(await page.evaluate(() => localStorage.length + sessionStorage.length), 0);
   assert.ok(!page.url().includes('example.test'), 'Contact data must not appear in the URL');
@@ -326,7 +336,7 @@ try {
     await expect(page.locator('.benefit-backup')).toContainText('geïntegreerd');
     await expect(page.locator('.benefit-backup .backup-learn-link')).toHaveAttribute('href','/kennis/noodstroom/');
     await expect(page.locator('.benefit-backup .benefit-footnote')).toContainText('geschikte installatie');
-    await expect(page.locator('.config-preview .preview-live')).toHaveText('Indicatieve opstelling');
+    await expect(page.locator('.config-preview .preview-live')).toHaveText('1 fase · 5 kW');
     const footerOwner=await page.locator('.site-footer .footer-presenter .presenter-owner').boundingBox();
     const footerLine=await page.locator('.site-footer .footer-presenter .presenter-subline').boundingBox();
     assert.ok(footerLine.y >= footerOwner.y + footerOwner.height - 2, 'Footer HYXI credit must sit below TBT owner');
@@ -371,7 +381,7 @@ try {
     await scenarios(page, viewport.label);
     await captureExperience(page, viewport.label);
     await configurations(page, viewport.label);
-    await contactJourney(page, live, viewport.label, viewport.label === 'desktop' ? 7 : 9, viewport.label === 'desktop' ? 3 : 2);
+    await contactJourney(page, live, viewport.label, viewport.label === 'desktop' ? 'single' : 'three', viewport.label === 'desktop' ? 2 : 3);
     await context.close();
   }
   // Narrow-phone and tablet guards complement the complete journeys above.
@@ -388,8 +398,8 @@ try {
     await page.goto(live.origin);
     await assertImages(page, viewport.label);
     await assertNoOverflow(page, viewport.label);
-    await setModules(page, 9, 6);
-    await expect(page.locator('#nominal-capacity')).toHaveText('54,24');
+    await setModules(page, 'three', 3);
+    await expect(page.locator('#nominal-capacity')).toHaveText('27,12');
     await assertNoOverflow(page, `${viewport.label}/maximum-stack`);
     if (viewport.width <= 700) {
       const [moduleChoice, preview, slider] = await Promise.all(['.module-fieldset', '.config-preview', '.count-control'].map(selector => page.locator(selector).boundingBox()));
@@ -413,14 +423,17 @@ try {
   const quotePage=await quoteContext.newPage();
   currentPage=quotePage;
   quotePage.on('pageerror',error=>report.browserErrors.push({viewport:'quote',message:error.message}));
-  await quotePage.goto(live.origin+'/offerte/?moduleType=7&moduleCount=3');
-  await expect(quotePage.locator('#moduleType')).toHaveValue('7');
+  await quotePage.goto(live.origin+'/offerte/?moduleType=7&moduleCount=6');
+  await expect(quotePage.locator('#moduleType')).toHaveValue('9');
+  await expect(quotePage.locator('#moduleCount')).toHaveValue('1');
+  await quotePage.goto(live.origin+'/offerte/?phase=three&moduleType=9&moduleCount=3');
+  await expect(quotePage.locator('#moduleType')).toHaveValue('9');
   await expect(quotePage.locator('#moduleCount')).toHaveValue('3');
-  await expect(quotePage.locator('#selectionLabel')).toContainText('3 × BAT-Q7');
+  await expect(quotePage.locator('#selectionLabel')).toContainText('27,12 kWh');
   await quotePage.locator('#solar').selectOption('yes');
   await quotePage.locator('#phase').selectOption('three');
   await quotePage.locator('#annualUsage').fill('3500');
-  await quotePage.locator('#moduleType').selectOption('9');
+  await expect(quotePage.locator("#offerPhase")).toHaveValue("three");
   await quotePage.locator('#moduleCount').selectOption('2');
   await quotePage.locator('#projectDetails').fill('Fictieve behoefte: passende installatie beoordelen.');
   await quotePage.locator('#fullName').fill('Fictieve Browserofferte');

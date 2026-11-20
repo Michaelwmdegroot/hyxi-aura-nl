@@ -51,9 +51,21 @@ jobs:
       - name: Check SEO, links, assets and public build contents
         run: npm run check
 
-      - name: Install Playwright Chromium and system dependencies
+      - name: Prepare Chromium for Playwright and Lighthouse
         id: chromium
-        run: npx --no-install playwright install --with-deps chromium
+        run: |
+          # ubuntu-24.04 runners ship a working Chrome; using it avoids
+          # repeated APT mirror outages on every prelaunch iteration.
+          CHROME_BIN=""
+          for candidate in /usr/bin/google-chrome /usr/bin/google-chrome-stable /usr/bin/chromium /usr/bin/chromium-browser; do
+            if [ -x "$candidate" ]; then CHROME_BIN="$candidate"; break; fi
+          done
+          if [ -n "$CHROME_BIN" ]; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+            "$CHROME_BIN" --version
+          else
+            npx --no-install playwright install --with-deps chromium
+          fi
 
       - name: Verify desktop, mobile and accessible browser journeys
         timeout-minutes: 10

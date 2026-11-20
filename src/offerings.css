@@ -1,0 +1,38 @@
+/* Premium Q9-only commercial configurator */
+.module-fieldset .module-option strong{letter-spacing:-.045em}
+.module-fieldset .module-option em{font-size:12px}
+#offer-capacity-ticks span{white-space:nowrap;font-size:11px}
+#offer-inverter{font-size:12px;font-weight:760;line-height:1.55;color:#4d5b4e;margin-bottom:4px}
+.config-preview-header .preview-live{white-space:normal;text-align:right;line-height:1.5}
+.config-preview .capacity-result{min-width:0}
+.configurator-section .source-note{max-width:860px}
+@media(max-width:700px){
+.module-fieldset .module-option strong{font-size:23px}
+.module-fieldset .module-option em{font-size:10px}
+#offer-inverter{font-size:10px;line-height:1.35;overflow-wrap:break-word}
+#offer-capacity-ticks span{font-size:10px}
+}
+@media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}}
+
+/* The two-column Q9 specification table contains longer row values than the old three-column table. */
+.specs-table-wrap{min-width:0;max-width:100%;}
+.specs-table{table-layout:fixed}
+.specs-table td{white-space:normal;overflow-wrap:break-word;hyphens:auto}
+@media(max-width:700px){.specs-table td,.specs-table th{overflow-wrap:break-word;hyphens:auto}}
+
+/* Mobile modal: action row stays above adjacent form controls while the
+   scrollable dialog settles after focus and validation messages. */
+@media(max-width:700px){
+ .lead-dialog{overscroll-behavior:contain}
+ .lead-dialog .form-footer{position:relative;z-index:2;background:#fcfcf8;isolation:isolate}
+ .lead-dialog .form-actions{position:relative;z-index:3}
+ .lead-dialog #form-next,.lead-dialog #form-submit{position:relative;z-index:4;scroll-margin-block:22px}
+}
+
+/* A mobile dialog summary should never force a wider layout viewport. */
+@media(max-width:700px){
+ .lead-dialog .form-summary{min-width:0;max-width:100%;flex-wrap:wrap;row-gap:6px}
+ .lead-dialog #form-configuration{min-width:0;flex:1 1 auto;overflow-wrap:break-word;line-height:1.5}
+ .lead-dialog .form-summary>span:last-child{white-space:nowrap;margin-left:auto}
+ .lead-dialog .form-actions{min-width:0}
+}
