@@ -91,23 +91,43 @@ if ('IntersectionObserver' in window) {
   sceneObserver.observe($('#experience-card'));
 } else startScene();
 
+
 function updateConfiguration() {
-  chosen = configuration(Number($('input[name="module-type"]:checked').value), Number($('#module-count').value));
-  const moduleText = `${chosen.count} ${chosen.count === 1 ? 'module' : 'modules'}`;
-  $('#module-count-label').textContent = moduleText;
-  $('#module-count').style.setProperty('--range-progress', `${(chosen.count - 1) * 20}%`);
+  const phase = $('input[name="offer-phase"]:checked').value;
+  const slider = $('#module-count');
+  slider.max = phase === 'single' ? '2' : '3';
+  if (Number(slider.value) > Number(slider.max)) slider.value = slider.max;
+  chosen = configuration(phase, Number(slider.value));
+  const moduleText = chosen.count + (chosen.count === 1 ? ' module' : ' modules');
+  $('#module-count-label').textContent = chosen.advertisedKwh + ' kWh · ' + moduleText;
+  slider.setAttribute('aria-valuetext', chosen.advertisedKwh + ' kWh · ' + moduleText);
+  slider.style.setProperty('--range-progress', ((chosen.count - 1) * 100 / (Number(slider.max) - 1)) + '%');
+  const ticks = Array.from({length: Number(slider.max)}, (_, i) => {
+    const mark = document.createElement('span');
+    mark.textContent = ((i + 1) * 9) + ' kWh';
+    return mark;
+  });
+  $('#offer-capacity-ticks').replaceChildren(...ticks);
   $('#nominal-capacity').textContent = decimal(chosen.nominal);
-  $('#usable-capacity').textContent = `${decimal(chosen.usable)} kWh`;
-  $('#stack-count').textContent = `${chosen.count}× BAT-Q${chosen.type}`;
-  $('#stack-module-caption').textContent = `${decimal(chosen.module.nominal)} kWh per module`;
-  $('#capacity-description').textContent = chosen.count === 1 ? 'Een compacte start met ruimte om te groeien.' : chosen.count < 4 ? 'Meer ruimte om energie naar een later moment te verplaatsen.' : 'Veel opslagruimte. Laat goed toetsen of je die ook benut.';
+  $('#usable-capacity').textContent = decimal(chosen.usable) + ' kWh';
+  $('#stack-count').textContent = chosen.count + '× BAT-Q9';
+  $('#stack-module-caption').textContent = '9,04 kWh per module';
+  $('#offer-preview-label').textContent = chosen.phaseLabel + ' · ' + chosen.inverterKw + ' kW';
+  $('#offer-inverter').textContent = chosen.phaseLabel + ' · ' + chosen.inverterKw + ' kW omvormer · back-up inbegrepen';
+  $('#capacity-description').textContent = chosen.count === 1 ? 'Een compacte start met ruimte om te groeien.' : 'Meer BAT-Q9-modules voor later gebruik van je zonnestroom.';
   const stack = $('#stack-modules');
   while (stack.children.length > chosen.count) stack.lastElementChild.remove();
-  while (stack.children.length < chosen.count) { const module = document.createElement('div'); module.className = 'stack-module'; stack.append(module); }
-  $('#form-configuration').textContent = `${decimal(chosen.nominal)} kWh · ${moduleText}`;
-  $$('[data-quote-link]').forEach(link => { link.href = `/offerte/?moduleType=${chosen.type}&moduleCount=${chosen.count}`; });
+  while (stack.children.length < chosen.count) {
+    const module = document.createElement('div');
+    module.className = 'stack-module';
+    stack.append(module);
+  }
+  $('#form-configuration').textContent = chosen.phaseLabel + ' · ' + chosen.inverterKw + ' kW · ' + decimal(chosen.nominal) + ' kWh';
+  $$('[data-quote-link]').forEach(link => {
+    link.href = '/offerte/?phase=' + chosen.phase + '&moduleType=9&moduleCount=' + chosen.count;
+  });
 }
-$$('input[name="module-type"]').forEach(input => input.addEventListener('change', updateConfiguration));
+$$('input[name="offer-phase"]').forEach(input => input.addEventListener('change', updateConfiguration));
 $('#module-count').addEventListener('input', updateConfiguration);
 updateConfiguration();
 
@@ -195,6 +215,8 @@ function openRequest(event) {
   if (dialog.open) return;
   dialog.showModal();
   updateConfiguration();
+  const matchingPhase = form.querySelector('input[name="phase"][value="' + chosen.phase + '"]');
+  if (matchingPhase) matchingPhase.checked = true;
   if (!completed) {
     setStep(formStep);
     loadApiConfig().then(contactAvailability);
@@ -236,7 +258,7 @@ function payload() {
     phone: String(data.get('phone') || '').trim(), postcode: String(data.get('postcode') || '').replace(/\s/g, '').toUpperCase(),
     consent: data.get('consent') === 'on', website: String(data.get('website') || ''),
     profile: { solar: data.get('solar'), annualUsage: data.get('annualUsage') ? Number(data.get('annualUsage')) : null,
-      goal: data.get('goal'), phase: data.get('phase'), moduleType: chosen.type, moduleCount: chosen.count }, attribution,
+      goal: data.get('goal'), phase: data.get('phase'), moduleType: 9, moduleCount: chosen.count, offerPhase: chosen.phase }, attribution,
   };
 }
 
