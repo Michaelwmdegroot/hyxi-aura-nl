@@ -15,7 +15,7 @@
 @media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}}
 
 /* Keep modal centered in the visual viewport after long configurator interactions. */
-.lead-dialog[open]{position:fixed;inset:0;margin:auto;max-width:calc(100vw - 22px)}
+.lead-dialog[open]{max-width:calc(100vw - 22px);margin-inline:auto}
 
 /* The two-column Q9 specification table contains longer row values than the old three-column table. */
 .specs-table-wrap{min-width:0;max-width:100%;}
