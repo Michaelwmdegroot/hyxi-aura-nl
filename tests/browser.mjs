@@ -85,7 +85,7 @@ async function assertNoOverflow(page, label) {
   const dialog = page.locator('#lead-dialog');
   if (await dialog.isVisible()) {
     const bounds = await dialog.boundingBox();
-    assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= geometry.width + 1, `${label}: dialog extends outside viewport`);
+    assert.ok(bounds.x >= -1 && bounds.x + bounds.width <= geometry.width + 1, `${label}: dialog extends outside viewport: ${JSON.stringify({bounds,geometry})}`);
     const interior = await dialog.evaluate(el => ({ scroll: el.scrollWidth, client: el.clientWidth }));
     assert.ok(interior.scroll <= interior.client + 1, `${label}: dialog content overflows horizontally`);
   }
