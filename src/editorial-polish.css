@@ -2,6 +2,9 @@
    layout and V5 showroom. This sheet owns only the deliberately simplified UI. */
 .hero .hero-bottom{justify-content:flex-end}.hero .hero-bottom>.team-endorsement{margin-left:auto}
 .hero .hero-content{padding-top:25px}
+.hero-snapshot{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-top:17px;max-width:480px;color:#626a5e;font-size:11px;line-height:1.6}
+.hero-snapshot span+span{margin-left:12px;padding-left:12px;border-left:1px solid #d6d9cf}
+.hero-snapshot strong{color:#313a2e;font-weight:800}
 .feature-strip strong{letter-spacing:-.02em}
 .capacity-float .float-icon{background:#eef2e8}
 .capacity-float .float-icon .icon{color:#637b60}
@@ -26,6 +29,8 @@
 @media(max-width:700px){
   .hero .hero-bottom{min-height:57px;justify-content:center}
   .hero .hero-bottom>.team-endorsement{margin-inline:auto}
+  .hero-snapshot{font-size:10px;margin-top:14px}
+  .hero-snapshot span+span{margin-left:9px;padding-left:9px}
   .operator-proof{gap:12px}
   .benefit-card{display:flex;flex-direction:column;min-height:330px}
   .benefit-card .card-icon{margin-bottom:20px}

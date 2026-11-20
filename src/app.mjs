@@ -3,7 +3,7 @@ import { energyScenario } from './energy-model.mjs';
 import { mountFallbackScene } from './fallback-scene.mjs';
 
 const $ = selector => document.querySelector(selector);
-const $ = selector => [...document.querySelectorAll(selector)];
+const $$ = selector => [...document.querySelectorAll(selector)];
 // Remove any retired secondary quote link that might still exist in an old
 // HTML document paired with this newer JS bundle. Primary advice CTA stays.
 document.querySelectorAll('.config-quote-link, [data-quote-link]').forEach(link => {
@@ -126,6 +126,10 @@ function updateConfiguration() {
   $('#offer-preview-label').textContent = chosen.phaseLabel + ' · ' + chosen.inverterKw + ' kW';
   $('#offer-inverter').textContent = chosen.phaseLabel + ' · ' + chosen.inverterKw + ' kW omvormer · back-up inbegrepen';
   $('#capacity-description').textContent = chosen.count === 1 ? 'Een compacte start met ruimte om te groeien.' : 'Meer BAT-Q9-modules voor later gebruik van je zonnestroom.';
+  $$('.package-option').forEach(option => {
+    const active = option.dataset.phase === chosen.phase && Number(option.dataset.count) === chosen.count;
+    option.setAttribute('aria-pressed', String(active));
+  });
   const stack = $('#stack-modules');
   while (stack.children.length > chosen.count) stack.lastElementChild.remove();
   while (stack.children.length < chosen.count) {
@@ -137,6 +141,13 @@ function updateConfiguration() {
 }
 $$('input[name="offer-phase"]').forEach(input => input.addEventListener('change', updateConfiguration));
 $('#module-count').addEventListener('input', updateConfiguration);
+$$('.package-option').forEach(option => option.addEventListener('click', () => {
+  const phaseInput = $(`input[name="offer-phase"][value="${option.dataset.phase}"]`);
+  if (!phaseInput) return;
+  phaseInput.checked = true;
+  $('#module-count').value = option.dataset.count;
+  updateConfiguration();
+}));
 updateConfiguration();
 
 const scrollHandler = () => {

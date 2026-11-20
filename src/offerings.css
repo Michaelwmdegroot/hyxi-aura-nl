@@ -6,18 +6,41 @@
 .config-preview-header .preview-live{white-space:normal;text-align:right;line-height:1.5}
 .config-preview .capacity-result{min-width:0}
 .configurator-section .source-note{max-width:860px}
+.config-cta-note{font-size:11px;line-height:1.6;color:#697465;margin-top:10px}
+.package-overview{margin-top:24px;padding:19px 22px 21px;background:#f1f2eb;border:1px solid #e1e4d8;border-radius:18px}
+.package-overview-head{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;margin-bottom:15px}
+.package-overview-head .tiny-label{display:block;font-size:10px;letter-spacing:.14em;margin-bottom:5px}
+.package-overview-head h3{font-size:20px;letter-spacing:-.04em}
+.package-overview-head p{max-width:350px;font-size:11px;line-height:1.65;text-align:right;color:#596557}
+.package-options{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.package-option{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 11px 11px;background:#fff;border:1px solid #dfe4d8;border-radius:12px;text-align:left;transition:border-color .18s,background .18s,box-shadow .18s}
+.package-option:hover{border-color:#9eae93;background:#fbfcf7}
+.package-option[aria-pressed="true"]{border-color:#b34423;background:#fffaf6;box-shadow:inset 0 0 0 1px #b34423}
+.package-option:focus-visible{outline:3px solid #be4b28;outline-offset:3px}
+.package-option>span{font-size:10px;font-weight:750;line-height:1.4;color:#6b7568}
+.package-option>strong{font-size:18px;line-height:1.15;letter-spacing:-.045em;color:#293228}
+.package-option>small{font-size:10px;line-height:1.5;color:#5f695d;white-space:nowrap}
 @media(max-width:700px){
 .module-fieldset .module-option strong{font-size:23px}
 .module-fieldset .module-option em{font-size:10px}
 #offer-inverter{font-size:10px;line-height:1.35;overflow-wrap:break-word}
 #offer-capacity-ticks span{font-size:10px}
+.package-overview{margin-top:18px;padding:18px 16px 17px}
+.package-overview-head{display:block;margin-bottom:13px}
+.package-overview-head h3{font-size:18px}
+.package-overview-head p{max-width:none;margin-top:7px;text-align:left;font-size:11px}
+.package-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.package-option{padding:11px 10px 10px}
+.package-option:last-child{grid-column:1 / -1}
+.package-option>strong{font-size:17px}
+.package-option>small{font-size:9.5px}
 }
-@media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}}
+@media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}.package-overview{padding-inline:13px}.package-option{padding-inline:8px}.package-option>strong{font-size:16px}.package-option>small{font-size:9px}}
 
 /* The two-column Q9 specification table contains longer row values than the old three-column table. */
 .specs-table-wrap{min-width:0;max-width:100%;}
 .specs-table{table-layout:fixed}
-.specs-table td{white-space:normal;overflow-wrap:break-word;hyphens:auto}
+.specs-section .specs-table td{white-space:normal;overflow-wrap:anywhere;hyphens:auto}
 @media(max-width:700px){.specs-table td,.specs-table th{overflow-wrap:break-word;hyphens:auto}}
 
 /* Mobile modal: action row stays above adjacent form controls while the

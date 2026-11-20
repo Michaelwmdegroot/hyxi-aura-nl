@@ -210,10 +210,16 @@ async function configurations(page,label) {
       await assertNoOverflow(page,label+'/'+phase+'/'+count);
     }
   }
+  for (const [phase, count, capacity] of [['single', 1, 9], ['single', 2, 18], ['three', 1, 9], ['three', 2, 18], ['three', 3, 27]]) {
+    await page.locator(`.package-option[data-phase="${phase}"][data-count="${count}"]`).click();
+    await expect(page.locator(`.package-option[data-phase="${phase}"][data-count="${count}"]`)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#form-configuration')).toHaveText((phase === 'single' ? '1 fase' : '3 fasen') + ' · ' + capacity + ' kWh');
+    await assertNoOverflow(page, label + '/package-option/' + phase + '/' + count);
+  }
   await setModules(page,'three',3);
   await page.locator('.module-option:has(input[value="single"])').click();
   await expect(page.locator('#module-count')).toHaveValue('2'); // clamp 27 -> 18 kWh
-  record(label+': five valid Q9 packages, correct kWh/kW and phase clamping');
+  record(label+': five valid Q9 packages, direct package selection and phase clamping');
 }
 
 async function contactJourney(page, fixture, label, phase, count) {
