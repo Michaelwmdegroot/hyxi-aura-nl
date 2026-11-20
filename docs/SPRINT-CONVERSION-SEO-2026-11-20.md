@@ -35,12 +35,12 @@ Geen backend, database, SMTP, Odoo-mailimport, privacy/auth, officiële productb
 - `npm test` — 114/114 geslaagd.
 - `npm run check` — 4.115 checks over 31 pagina’s geslaagd.
 - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' npm run test:browser` — geslaagd op desktop 1440, mobiel 390, narrow 320, tablet 768, no-WebGL, adviesflow en offerteflow; geïnjecteerde SMTP-testtransport, geen echte e-mail.
-- Read-only `node scripts/probe-production.mjs` — 41/41 productiechecks geslaagd op de vóór-deploy live versie.
+- Read-only `node scripts/probe-production.mjs` — 41/41 productiechecks geslaagd vóór de deploy én opnieuw na Hostinger-deploy van commit `054842b`.
 - Read-only `node scripts/gsc-domain-preflight.mjs` — vereiste canonieke homepage, sitemap, robots en `index.html`-redirect geslaagd. GSC-indexatie blijft eigenaar-/accountafhankelijk.
 
 ## Nog open na deze sprint
 
 - Definitieve eigenaarreview van desktop en echte iPhone Safari; technische QA is geen automatische designscore van 9/10.
 - Search Console URL-inspecties, daadwerkelijke indexatie, zoekdata en conversiemeting.
-- Verificatie van de daadwerkelijke Hostinger-deployment na push naar `main`; de read-only productieprobe bewijst alleen de versie die op het moment van de controle live stond.
+- Hostinger-deployment van commit `054842b` is bevestigd via de live hero-/pakketmarkers en de opnieuw geslaagde 41/41 productieprobe.
 - Werkelijke mailbox-inboxaflevering en salesopvolging blijven operationele controles buiten deze lokale teststraat.
