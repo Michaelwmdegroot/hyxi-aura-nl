@@ -43,7 +43,6 @@ export const PUBLIC_CANONICAL_PATHS = new Set([
   "/privacy/",
   "/bronnen/",
   "/offerte/",
-  "/kennis/bat-q7-vs-bat-q9/",
   "/kennis/noodstroom/",
   "/kennis/installatiecheck/",
   "/kennis/1-fase-of-3-fasen/",
@@ -161,6 +160,14 @@ export function createApp({ config, transport = null, leadStore = null, notifica
       return res.redirect(308, `${canonical.origin}${cleanPath}${query}`);
     }
     next();
+  });
+
+  // Retired technical BAT-Q7/BAT-Q9 choice guide; current sales offer is Q9-only.
+  // Redirect the old indexed URL and its .html alias to the live five-package overview.
+  app.get(['/kennis/bat-q7-vs-bat-q9', '/kennis/bat-q7-vs-bat-q9/', '/kennis/bat-q7-vs-bat-q9/index.html'], (req, res) => {
+    const query = req.originalUrl.slice(req.path.length);
+    res.set('Cache-Control', 'no-store');
+    return res.redirect(301, '/modellen/' + query);
   });
 
   app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });

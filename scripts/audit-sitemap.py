@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 
 SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9"
 BASE = "https://hyxi-aura.nl"
-COUNT = 31
+COUNT = 30
 UA_TESTS = {
     "standard-client": "Mozilla/5.0 (compatible; SitemapAudit/1.0; +https://hyxi-aura.nl/)",
     "Googlebot-like-UA-not-verified": "Googlebot/2.1 (+http://www.google.com/bot.html)",
