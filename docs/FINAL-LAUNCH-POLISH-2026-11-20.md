@@ -56,3 +56,9 @@ Er zijn geen bekende P0/P1-blockers voor de technische lancering op basis van de
 
 - `test-results/final-launch/live-benefit-cards-320.png`
 - `test-results/final-launch/live-benefit-cards-390.png`
+
+## 20 november, 18:34 — mobiele decoratieve iconen verwijderd
+
+De eigenaar heeft op echte iPhone bevestigd dat de kaarttekst goed staat, maar wil de drie **ronde iconen vóór de titels** verwijderen en de content omhoog. `src/editorial-polish.css` verbergt ze nu alleen op schermbreedtes tot 700px; de bovenruimte van een kaart wordt 24px en de kop begint direct, zonder extra bovenmarge. De 16px tussen kop en beschrijving blijft. De grafiek, back-upillustratie en veiligheidsillustratie behouden hun bestaande werking en de desktop-icoontjes blijven zichtbaar.
+
+`tests/browser.mjs` controleert op 390 en 320px de verborgen iconen, titelpositie en minimale afstand naar beschrijving; op desktop controleert de test dat de iconen juist zichtbaar blijven. De wijziging is met `[skip ci]` rechtstreeks op `main` gepubliceerd wegens uitgeputte Actions-minuten. De toegevoegde browserasserties zijn niet in deze ChatGPT-omgeving uitgevoerd, dus daadwerkelijke live Safari-verificatie blijft een afzonderlijke controle.

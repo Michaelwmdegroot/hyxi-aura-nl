@@ -102,14 +102,17 @@ async function assertReadableBenefitCards(page, label) {
       const box = el.getBoundingClientRect();
       return { top: box.top, bottom: box.bottom, left: box.left, right: box.right, height: box.height };
     };
-    return { name: card.className, card: metrics(card), icon: metrics(icon), title: metrics(title),
+    return { name: card.className, card: metrics(card), icon: metrics(icon),
+      iconDisplay: getComputedStyle(icon).display, title: metrics(title),
       description: metrics(description), display: getComputedStyle(card).display };
   }));
   assert.equal(measured.length, 3, label + ': three HYXI benefit cards should be present');
   for (const item of measured) {
     assert.equal(item.display, 'flex', label + ': the mobile card must use natural-height flex layout: ' + item.name);
-    assert.ok(item.icon.bottom + 4 <= item.title.top, label + ': icon overlaps heading: ' + JSON.stringify(item));
-    assert.ok(item.title.bottom + 6 <= item.description.top, label + ': title overlaps body: ' + JSON.stringify(item));
+    assert.equal(item.iconDisplay, 'none', label + ': decorative icon must not be visible on mobile: ' + item.name);
+    assert.ok(item.title.top >= item.card.top + 12 && item.title.top <= item.card.top + 38,
+      label + ': mobile heading should start near the top of the card: ' + JSON.stringify(item));
+    assert.ok(item.title.bottom + 12 <= item.description.top, label + ': title overlaps body: ' + JSON.stringify(item));
     assert.ok(item.title.left >= item.card.left - 1 && item.description.right <= item.card.right + 1,
       label + ': text protrudes outside the card: ' + JSON.stringify(item));
   }
@@ -365,6 +368,10 @@ try {
     await expect(page.locator('.benefit-backup .backup-learn-link')).toHaveAttribute('href','/kennis/noodstroom/');
     await expect(page.locator('.benefit-backup .benefit-footnote')).toContainText('geschikte installatie');
     if (viewport.width <= 700) await assertReadableBenefitCards(page, viewport.label);
+    else {
+      await expect(page.locator('.benefit-card > .card-icon')).toHaveCount(3);
+      await expect(page.locator('.benefit-card > .card-icon').first()).toBeVisible();
+    }
     await expect(page.locator('.config-preview .preview-live')).toHaveText('1 fase · 5 kW');
     const footerOwner=await page.locator('.site-footer .footer-presenter .presenter-owner').boundingBox();
     const footerLine=await page.locator('.site-footer .footer-presenter .presenter-subline').boundingBox();
