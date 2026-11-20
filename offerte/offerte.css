@@ -49,4 +49,6 @@ footer{border-top:1px solid #e6e8e1;display:flex;justify-content:space-between;g
 /* Useful contextual preparation links without altering the quote form or first-screen layout. */
 .quote-reading{font-size:12px;line-height:1.8;max-width:720px;margin-top:14px;color:#596157}
 .quote-reading a{font-weight:750;color:#9b4932;text-decoration:underline;text-underline-offset:3px}
-\n/* Single Q9 commercial module in the five-package quote intake */\n.fixed-offer{display:flex;align-items:center;min-height:49px;padding:13px;border:1px solid #dfe5dd;background:#f5f8f3;border-radius:12px;font-size:12px;font-weight:780;color:#38493b;margin:0}\n
+
+/* Single Q9 commercial module in the five-package quote intake */
+.fixed-offer{display:flex;align-items:center;min-height:49px;padding:13px;border:1px solid #dfe5dd;background:#f5f8f3;border-radius:12px;font-size:12px;font-weight:780;color:#38493b;margin:0}
