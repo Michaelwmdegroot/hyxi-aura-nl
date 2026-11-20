@@ -23,9 +23,9 @@ test('offer CTAs remain while redundant note and generated FAQ arrows stay absen
     readFile(resolve(root,'src/app.mjs'),'utf8'),
     readFile(resolve(root,'scripts/content.mjs'),'utf8'),
   ]);
-  assert.match(home,/data-quote-link/);
+  assert.doesNotMatch(home,/data-quote-link|config-quote-link|Offerte voor deze opstelling/);
   assert.match(home,/data-open-lead/);
-  assert.match(home,/Offerte voor deze opstelling/);
+  assert.match(home,/Ontvang advies over deze opstelling/);
   assert.doesNotMatch(home,/<p class="config-note">/);
   assert.doesNotMatch(app,/icon\(['"](?:arrow|chevron)/);
   assert.doesNotMatch(faq,glyph);

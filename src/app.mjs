@@ -123,9 +123,6 @@ function updateConfiguration() {
     stack.append(module);
   }
   $('#form-configuration').textContent = chosen.phaseLabel + ' · ' + chosen.advertisedKwh + ' kWh';
-  $$('[data-quote-link]').forEach(link => {
-    link.href = '/offerte/?phase=' + chosen.phase + '&moduleType=9&moduleCount=' + chosen.count;
-  });
 }
 $$('input[name="offer-phase"]').forEach(input => input.addEventListener('change', updateConfiguration));
 $('#module-count').addEventListener('input', updateConfiguration);
