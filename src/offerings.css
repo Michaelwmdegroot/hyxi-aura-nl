@@ -13,3 +13,6 @@
 #offer-capacity-ticks span{font-size:10px}
 }
 @media(max-width:360px){.module-fieldset .module-option{padding:12px 9px}.module-fieldset .module-option strong{font-size:20px}}
+
+/* Keep modal centered in the visual viewport after long configurator interactions. */
+.lead-dialog[open]{position:fixed;inset:0;margin:auto;max-width:calc(100vw - 22px)}
