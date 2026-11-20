@@ -1,13 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { MODULES, sourceUrls } from '../src/product-data.mjs';
+import { sourceUrls } from '../src/product-data.mjs';
 
 const root = new URL('../', import.meta.url);
 const file = async path => readFile(new URL(path, root), 'utf8');
 const base = 'https://hyxi-aura.nl';
-const routes = ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen'];
-const nl = value => new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2 }).format(value);
+const routes = ['noodstroom', '1-fase-of-3-fasen'];
 
 test('each knowledge article is independently useful, canonical, sourced and indexable', async () => {
   for (const slug of routes) {
@@ -37,16 +36,12 @@ test('each knowledge article is independently useful, canonical, sourced and ind
   }
 });
 
-test('Q7/Q9 article capacity numbers agree with the single source of product truth', async () => {
-  const html = await file('kennis/bat-q7-vs-bat-q9/index.html');
-  for (const type of [7,9]) {
-    const data = MODULES[type];
-    for (const val of [data.nominal, data.usable, data.power]) {
-      assert.ok(html.includes(`${nl(val)} kW`) || html.includes(`${nl(val)} kWh`), `missing module fact ${type}: ${val}`);
-    }
-    for (const count of [1,2,3,6]) assert.ok(html.includes(`${nl(data.usable * count)} kWh`), `missing usable capacity ${type}x${count}`);
-  }
-  assert.match(html,/geen voorspellingen van autonomie, besparing of terugverdientijd/i);
+test('retired Q7/Q9 guide is excluded from commercial links and the five-package model overview is available', async () => {
+  const [home, models, sitemap] = await Promise.all([file('index.html'), file('modellen/index.html'), file('public/sitemap.xml')]);
+  assert.doesNotMatch(home, /href="\/kennis\/bat-q7-vs-bat-q9\/"/);
+  assert.doesNotMatch(sitemap, /<loc>https:\/\/hyxi-aura\.nl\/kennis\/bat-q7-vs-bat-q9\/<\/loc>/);
+  assert.match(models, /BAT-Q9/);
+  assert.match(models, /vijf BAT-Q9/i);
 });
 
 test('public discovery includes both guides and links back to conversion flows', async () => {
@@ -57,7 +52,7 @@ test('public discovery includes both guides and links back to conversion flows',
     assert.ok(sitemap.includes(`<loc>${base}${path}</loc>`), path);
     assert.ok(config.includes(`'kennis/${slug}/index.html'`), path);
   }
-  assert.equal((sitemap.match(/<loc>/g) || []).length,31);
+  assert.equal((sitemap.match(/<loc>/g) || []).length,30);
 });
 
 test('horizontally scrollable knowledge tables have keyboard focus and accessible names', async () => {
@@ -114,7 +109,7 @@ test('pre-GSC phase comparison is independently useful and excludes suspect manu
 test('all standalone pages identify Thuisbatterij Team as the commercial presenter',async()=>{
   for(const route of [
     'bronnen/index.html','privacy/index.html','offerte/index.html',
-    'kennis/bat-q7-vs-bat-q9/index.html','kennis/noodstroom/index.html',
+    'kennis/noodstroom/index.html',
     'kennis/installatiecheck/index.html','kennis/1-fase-of-3-fasen/index.html'
   ]){
     const html=await file(route);

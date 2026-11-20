@@ -42,7 +42,7 @@ try {
     const response = await page.goto(origin + '/sitemap.xml', {waitUntil:'networkidle'});
     assert.equal(response.status(),200,'XML sitemap must be served to the browser');
     await expect(page.locator('urlset')).toHaveCount(1);
-    await expect(page.locator('url')).toHaveCount(31);
+    await expect(page.locator('url')).toHaveCount(30);
     const paint = await page.evaluate(() => ({
       background:getComputedStyle(document.documentElement).backgroundColor,
       scroll:document.documentElement.scrollWidth,
@@ -52,11 +52,11 @@ try {
     assert.ok(paint.scroll <= paint.width + 1,`Sitemap ${width}px overflow: ${JSON.stringify(paint)}`);
     // Chromium can stall when capturing screenshots of XML documents;
     // DOM structure, computed CSS and viewport overflow are asserted above.
-    console.log(`PASS sitemap ${width}px: parsed 31 URLs, styled XML, no overflow`);
+    console.log(`PASS sitemap ${width}px: parsed 30 URLs, styled XML, no overflow`);
     await context.close();
   }
 
-  for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen']) {
+  for (const slug of ['noodstroom', '1-fase-of-3-fasen']) {
     for (const width of [1440,390,320]) {
       const ctx = await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});
       const page = await ctx.newPage();

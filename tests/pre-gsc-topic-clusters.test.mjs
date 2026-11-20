@@ -10,7 +10,7 @@ const dist = resolve(root, 'dist');
 const urls = [
   '/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/',
   '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/', '/bronnen/',
-  '/offerte/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/',
+  '/offerte/', '/kennis/noodstroom/',
   '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/',
   '/kennis/salderingsregeling-2027/', '/kennis/btw-subsidie/', '/kennis/dynamisch-energiecontract/', '/kennis/uitbreiden/', '/kennis/buiten-plaatsen/', '/vergelijken/', '/hyxi-power/', '/kennis/hoeveel-kwh-nodig/', '/kennis/app-monitoring/', '/vergelijken/hyxi-aura-vs-sigenergy/', '/vergelijken/hyxi-aura-vs-alphaess/', '/vergelijken/hyxi-aura-vs-tesla-powerwall/', '/vergelijken/hyxi-aura-vs-enphase/', '/vergelijken/hyxi-aura-vs-huawei/', '/vergelijken/hyxi-aura-vs-byd/', '/vergelijken/hyxi-aura-vs-solaredge/', '/vergelijken/hyxi-aura-vs-ecoflow/', '/vergelijken/hyxi-aura-vs-sessy/', '/privacy/'
 ];
@@ -24,15 +24,15 @@ const structured = html => [...html.matchAll(/<script\b[^>]*type=["']application
 const titleOf = html => html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.trim();
 const descriptionOf = html => html.match(/<meta name="description" content="([^"]+)"/)?.[1];
 
-test('all thirty-one canonical public URLs are unique and configured as separate build entries',async()=>{
+test('all thirty canonical public URLs are unique and configured as separate build entries',async()=>{
   const [sitemap,vite] = await Promise.all([
     readFile(resolve(dist,'sitemap.xml'),'utf8'),
     readFile(resolve(root,'vite.config.mjs'),'utf8')
   ]);
   const urlsInMap=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x=>x[1]);
-  assert.equal(urlsInMap.length,31);
+  assert.equal(urlsInMap.length,30);
   assert.deepEqual(new Set(urlsInMap),new Set(urls.map(x=>origin+x)));
-  assert.equal(new Set(urlsInMap).size,31);
+  assert.equal(new Set(urlsInMap).size,30);
   assert.deepEqual(new Set(PUBLIC_CANONICAL_PATHS),new Set(urls),'Express 308 alias redirects must track the whole live sitemap');
   for(const target of topics){
     const path = target.substring(1)+'index.html';
@@ -131,7 +131,7 @@ test('homepage and existing knowledge routes link editorially to the new topical
     assert.ok(home.includes('href="'+topic+'"'),'home discovers '+topic);
   }
   for(const old of [
-    '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/',
+    '/kennis/noodstroom/',
     '/kennis/1-fase-of-3-fasen/', '/kennis/installatiecheck/'
   ]){
     const html=await readRoute(old);
