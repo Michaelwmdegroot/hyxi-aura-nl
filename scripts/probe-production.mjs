@@ -72,7 +72,8 @@ export async function probeProduction(fetcher = fetch) {
         observed[path].content.includes('id="backup-usp"') &&
         observed[path].content.includes('footer-presenter') &&
         observed[path].content.includes('src="/vendor/gsap.min.js"') &&
-        observed[path].content.includes('href="/favicon.png"'));
+        observed[path].content.includes('href="/favicon.png"') &&
+        observed[path].content.includes('id="ervaringen"'));
       const assetReady = brandAsset && observed[path].status === 200 &&
         (path.endsWith('.png') ? observed[path].content.length > 64 :
           observed[path].content.includes('"HYXI AURA — Thuisbatterij Team"'));
@@ -94,6 +95,14 @@ export async function probeProduction(fetcher = fetch) {
       !observed['/'].content.includes('class="hero-eyebrow"') &&
       !observed['/'].content.includes('class="section-number"') &&
       !observed['/'].content.includes('operator-proof-icon'),
+    // Static homepage-only review proof, not a claim of live Google API synchronization.
+    customerReviewsDeployed: observed['/'].status === 200 &&
+      observed['/'].content.includes('id="ervaringen"') &&
+      observed['/'].content.includes('Jan Molema van der veen') &&
+      observed['/'].content.includes('Lydia Wagenborg') &&
+      observed['/'].content.includes('Momentopname: 20 november 2026') &&
+      observed['/'].content.includes('niet specifiek een beoordeling van het HYXI AURA-product') &&
+      observed['/'].content.includes('https://www.trustpilot.com/review/thuisbatterijteam.nl'),
     // Distinct from generic health/readiness: this verifies the new TBT-first
     // homepage is actually on Hostinger, not only committed to GitHub.
     heroTbtShowroomDeployed: observed['/'].status === 200 &&
