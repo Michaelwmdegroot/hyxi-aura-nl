@@ -207,12 +207,42 @@ function setStep(step) {
   $(`.form-step[data-step="${step}"] h2`).focus({ preventScroll: true });
 }
 
+// Mobile Chromium/Safari may expand their layout viewport when a native modal
+// contains wide dynamic content. Bound the dialog to the actual display width
+// before opening so a 390px phone never receives a 492px modal.
+function fitRequestDialog() {
+  const screenWidth = Math.min(
+    window.innerWidth,
+    window.screen?.width || window.innerWidth,
+    window.visualViewport?.width || window.innerWidth,
+  );
+  const props = ['position','left','right','top','bottom','margin','width','max-width'];
+  if (screenWidth > 700) {
+    for (const name of props) dialog.style.removeProperty(name);
+    return;
+  }
+  const gutter = 11;
+  const width = Math.max(1, Math.floor(screenWidth - gutter * 2));
+  dialog.style.position = 'fixed';
+  dialog.style.left = gutter + 'px';
+  dialog.style.right = 'auto';
+  dialog.style.top = gutter + 'px';
+  dialog.style.bottom = 'auto';
+  dialog.style.margin = '0';
+  dialog.style.width = width + 'px';
+  dialog.style.maxWidth = width + 'px';
+}
+window.addEventListener('resize', () => {
+  if (dialog.open) fitRequestDialog();
+});
+
 function openRequest(event) {
   // Preserve browser modified-link behavior and all ordinary non-JavaScript links.
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
   opener = event.currentTarget;
   if (dialog.open) return;
+  fitRequestDialog();
   dialog.showModal();
   updateConfiguration();
   const matchingPhase = form.querySelector('input[name="phase"][value="' + chosen.phase + '"]');
