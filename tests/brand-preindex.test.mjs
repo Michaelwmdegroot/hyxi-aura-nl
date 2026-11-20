@@ -23,6 +23,19 @@ const routes = new Map([
   ['/kennis/dynamisch-energiecontract/', 'kennis/dynamisch-energiecontract/index.html'],
   ['/kennis/uitbreiden/', 'kennis/uitbreiden/index.html'],
   ['/kennis/buiten-plaatsen/', 'kennis/buiten-plaatsen/index.html'],
+  ['/vergelijken/', 'vergelijken/index.html'],
+  ['/hyxi-power/', 'hyxi-power/index.html'],
+  ['/kennis/hoeveel-kwh-nodig/', 'kennis/hoeveel-kwh-nodig/index.html'],
+  ['/kennis/app-monitoring/', 'kennis/app-monitoring/index.html'],
+  ['/vergelijken/hyxi-aura-vs-sigenergy/', 'vergelijken/hyxi-aura-vs-sigenergy/index.html'],
+  ['/vergelijken/hyxi-aura-vs-alphaess/', 'vergelijken/hyxi-aura-vs-alphaess/index.html'],
+  ['/vergelijken/hyxi-aura-vs-tesla-powerwall/', 'vergelijken/hyxi-aura-vs-tesla-powerwall/index.html'],
+  ['/vergelijken/hyxi-aura-vs-enphase/', 'vergelijken/hyxi-aura-vs-enphase/index.html'],
+  ['/vergelijken/hyxi-aura-vs-huawei/', 'vergelijken/hyxi-aura-vs-huawei/index.html'],
+  ['/vergelijken/hyxi-aura-vs-byd/', 'vergelijken/hyxi-aura-vs-byd/index.html'],
+  ['/vergelijken/hyxi-aura-vs-solaredge/', 'vergelijken/hyxi-aura-vs-solaredge/index.html'],
+  ['/vergelijken/hyxi-aura-vs-ecoflow/', 'vergelijken/hyxi-aura-vs-ecoflow/index.html'],
+  ['/vergelijken/hyxi-aura-vs-sessy/', 'vergelijken/hyxi-aura-vs-sessy/index.html'],
 ]);
 const htmlAt = path => readFile(resolve(root, 'dist', path), 'utf8');
 const attribute = (html, tagName, field, needle, attrName) => {
@@ -65,7 +78,7 @@ test('Site manifest uses real installed assets, truthful brand ownership and no 
   ]);
 });
 
-test('All eighteen public pages have branded favicon, share preview, trustworthy metadata and exactly one H1',async()=>{
+test('All thirty-one public pages have branded favicon, share preview, trustworthy metadata and exactly one H1',async()=>{
   const titles=new Set(),descriptions=new Set();
   for(const [url,path] of routes){
     const html=await htmlAt(path);
@@ -110,10 +123,10 @@ test('Homepage title and structured data match without fake offers, reviews or m
   assert.match(home,/geen officiële HYXI-website/i);
 });
 
-test('Eighteen canonical URLs remain in sitemap; private Beheer remains noindex',async()=>{
+test('Thirty-one canonical URLs remain in sitemap; private Beheer remains noindex',async()=>{
   const sitemap=await readFile(resolve(root,'dist/sitemap.xml'),'utf8');
   const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x=>x[1]);
-  assert.equal(urls.length,18);
+  assert.equal(urls.length,31);
   assert.deepEqual(new Set(urls),new Set([...routes.keys()].map(x=>`https://hyxi-aura.nl${x}`)));
   const beheer=await readFile(resolve(root,'admin/beheer.html'),'utf8');
   assert.match(beheer,/name="robots" content="noindex,nofollow,noarchive"/);

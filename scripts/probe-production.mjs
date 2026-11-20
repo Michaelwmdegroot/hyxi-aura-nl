@@ -17,6 +17,19 @@ const KNOWLEDGE = [
   { path: '/kennis/dynamisch-energiecontract/', title: 'HYXI AURA met dynamisch energiecontract' },
   { path: '/kennis/uitbreiden/', title: 'HYXI AURA uitbreiden' },
   { path: '/kennis/buiten-plaatsen/', title: 'HYXI AURA buiten plaatsen' },
+  { path: '/vergelijken/', title: 'Thuisbatterijen vergelijken' },
+  { path: '/hyxi-power/', title: 'HYXI POWER' },
+  { path: '/kennis/hoeveel-kwh-nodig/', title: 'Hoeveel kWh HYXI AURA' },
+  { path: '/kennis/app-monitoring/', title: 'HYXI AURA app' },
+  { path: '/vergelijken/hyxi-aura-vs-sigenergy/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-alphaess/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-tesla-powerwall/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-enphase/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-huawei/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-byd/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-solaredge/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-ecoflow/', title: 'HYXI AURA vs' },
+  { path: '/vergelijken/hyxi-aura-vs-sessy/', title: 'HYXI AURA vs' },
 ];
 const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
 const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/sitemap.css', '/robots.txt', '/api/beheer/leads'];
@@ -133,7 +146,7 @@ export async function probeProduction(fetcher = fetch) {
       observed['/sitemap.css'].content.includes('loc {'),
     sitemapPresent: observed['/sitemap.xml'].status === 200 &&
       observed['/sitemap.xml'].content.includes('https://hyxi-aura.nl/offerte/') &&
-      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 18 &&
+      (observed['/sitemap.xml'].content.match(/<loc>/g)||[]).length === 31 &&
       KNOWLEDGE.every(item => observed['/sitemap.xml'].content.includes(`<loc>${BASE}${item.path}</loc>`)),
     q7ComparisonDeployed: observed['/kennis/bat-q7-vs-bat-q9/'].status === 200 &&
       observed['/kennis/bat-q7-vs-bat-q9/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/bat-q7-vs-bat-q9/">`) &&
@@ -212,6 +225,84 @@ export async function probeProduction(fetcher = fetch) {
       observed['/kennis/buiten-plaatsen/'].content.includes("href=\"/kennis/garantie/\"") &&
       observed['/kennis/buiten-plaatsen/'].content.includes('href="/offerte/"') &&
       observed['/'].content.includes('href="/kennis/buiten-plaatsen/"'),
+    marketHubDeployed: observed['/vergelijken/'].status === 200 &&
+      observed['/vergelijken/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/">`) &&
+      observed['/vergelijken/'].content.includes("Thuisbatterijen vergelijken") &&
+      observed['/vergelijken/'].content.includes("SigenStor") &&
+      observed['/vergelijken/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/vergelijken/"'),
+    hyxiPowerGuideDeployed: observed['/hyxi-power/'].status === 200 &&
+      observed['/hyxi-power/'].content.includes(`<link rel="canonical" href="${BASE}/hyxi-power/">`) &&
+      observed['/hyxi-power/'].content.includes("HYXI POWER") &&
+      observed['/hyxi-power/'].content.includes("HYXI Halo") &&
+      observed['/hyxi-power/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/hyxi-power/"'),
+    capacitySizingGuideDeployed: observed['/kennis/hoeveel-kwh-nodig/'].status === 200 &&
+      observed['/kennis/hoeveel-kwh-nodig/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/hoeveel-kwh-nodig/">`) &&
+      observed['/kennis/hoeveel-kwh-nodig/'].content.includes("Hoeveel kWh HYXI AURA") &&
+      observed['/kennis/hoeveel-kwh-nodig/'].content.includes("6,7 kWh") &&
+      observed['/kennis/hoeveel-kwh-nodig/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/hoeveel-kwh-nodig/"'),
+    hyxiAppGuideDeployed: observed['/kennis/app-monitoring/'].status === 200 &&
+      observed['/kennis/app-monitoring/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/app-monitoring/">`) &&
+      observed['/kennis/app-monitoring/'].content.includes("HYXI AURA app") &&
+      observed['/kennis/app-monitoring/'].content.includes("HYXI Cloud") &&
+      observed['/kennis/app-monitoring/'].content.includes('href="/offerte/"') &&
+      observed['/'].content.includes('href="/kennis/app-monitoring/"'),
+    compare1GuideDeployed: observed['/vergelijken/hyxi-aura-vs-sigenergy/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-sigenergy/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-sigenergy/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-sigenergy/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-sigenergy/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-sigenergy/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-sigenergy/"'),
+    compare2GuideDeployed: observed['/vergelijken/hyxi-aura-vs-alphaess/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-alphaess/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-alphaess/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-alphaess/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-alphaess/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-alphaess/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-alphaess/"'),
+    compare3GuideDeployed: observed['/vergelijken/hyxi-aura-vs-tesla-powerwall/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-tesla-powerwall/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-tesla-powerwall/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-tesla-powerwall/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-tesla-powerwall/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-tesla-powerwall/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-tesla-powerwall/"'),
+    compare4GuideDeployed: observed['/vergelijken/hyxi-aura-vs-enphase/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-enphase/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-enphase/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-enphase/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-enphase/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-enphase/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-enphase/"'),
+    compare5GuideDeployed: observed['/vergelijken/hyxi-aura-vs-huawei/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-huawei/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-huawei/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-huawei/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-huawei/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-huawei/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-huawei/"'),
+    compare6GuideDeployed: observed['/vergelijken/hyxi-aura-vs-byd/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-byd/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-byd/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-byd/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-byd/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-byd/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-byd/"'),
+    compare7GuideDeployed: observed['/vergelijken/hyxi-aura-vs-solaredge/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-solaredge/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-solaredge/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-solaredge/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-solaredge/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-solaredge/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-solaredge/"'),
+    compare8GuideDeployed: observed['/vergelijken/hyxi-aura-vs-ecoflow/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-ecoflow/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-ecoflow/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-ecoflow/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-ecoflow/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-ecoflow/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-ecoflow/"'),
+    compare9GuideDeployed: observed['/vergelijken/hyxi-aura-vs-sessy/'].status === 200 &&
+      observed['/vergelijken/hyxi-aura-vs-sessy/'].content.includes(`<link rel="canonical" href="${BASE}/vergelijken/hyxi-aura-vs-sessy/">`) &&
+      observed['/vergelijken/hyxi-aura-vs-sessy/'].content.includes("HYXI AURA vs") &&
+      observed['/vergelijken/hyxi-aura-vs-sessy/'].content.includes("HYXI AURA") &&
+      observed['/vergelijken/hyxi-aura-vs-sessy/'].content.includes('href="/offerte/"') &&
+      observed['/vergelijken/'].content.includes('href="/vergelijken/hyxi-aura-vs-sessy/"'),
     installationCheckDeployed: observed['/kennis/installatiecheck/'].status === 200 &&
       observed['/kennis/installatiecheck/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/installatiecheck/">`) &&
       observed['/kennis/installatiecheck/'].content.includes('HYXI AURA installatiecheck') &&

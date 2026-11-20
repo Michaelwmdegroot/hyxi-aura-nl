@@ -42,7 +42,7 @@ try {
     const response = await page.goto(origin + '/sitemap.xml', {waitUntil:'networkidle'});
     assert.equal(response.status(),200,'XML sitemap must be served to the browser');
     await expect(page.locator('urlset')).toHaveCount(1);
-    await expect(page.locator('url')).toHaveCount(18);
+    await expect(page.locator('url')).toHaveCount(31);
     const paint = await page.evaluate(() => ({
       background:getComputedStyle(document.documentElement).backgroundColor,
       scroll:document.documentElement.scrollWidth,
@@ -52,7 +52,7 @@ try {
     assert.ok(paint.scroll <= paint.width + 1,`Sitemap ${width}px overflow: ${JSON.stringify(paint)}`);
     // Chromium can stall when capturing screenshots of XML documents;
     // DOM structure, computed CSS and viewport overflow are asserted above.
-    console.log(`PASS sitemap ${width}px: parsed 18 URLs, styled XML, no overflow`);
+    console.log(`PASS sitemap ${width}px: parsed 31 URLs, styled XML, no overflow`);
     await context.close();
   }
 
@@ -93,7 +93,20 @@ try {
     {url:'/kennis/btw-subsidie/',slug:'btw-subsidie'},
     {url:'/kennis/dynamisch-energiecontract/',slug:'dynamisch-energiecontract'},
     {url:'/kennis/uitbreiden/',slug:'uitbreiden'},
-    {url:'/kennis/buiten-plaatsen/',slug:'buiten-plaatsen'}
+    {url:'/kennis/buiten-plaatsen/',slug:'buiten-plaatsen'},
+    {url:'/vergelijken/',slug:'vergelijken'},
+    {url:'/hyxi-power/',slug:'hyxi-power'},
+    {url:'/kennis/hoeveel-kwh-nodig/',slug:'hoeveel-kwh-nodig'},
+    {url:'/kennis/app-monitoring/',slug:'app-monitoring'},
+    {url:'/vergelijken/hyxi-aura-vs-sigenergy/',slug:'hyxi-aura-vs-sigenergy'},
+    {url:'/vergelijken/hyxi-aura-vs-alphaess/',slug:'hyxi-aura-vs-alphaess'},
+    {url:'/vergelijken/hyxi-aura-vs-tesla-powerwall/',slug:'hyxi-aura-vs-tesla-powerwall'},
+    {url:'/vergelijken/hyxi-aura-vs-enphase/',slug:'hyxi-aura-vs-enphase'},
+    {url:'/vergelijken/hyxi-aura-vs-huawei/',slug:'hyxi-aura-vs-huawei'},
+    {url:'/vergelijken/hyxi-aura-vs-byd/',slug:'hyxi-aura-vs-byd'},
+    {url:'/vergelijken/hyxi-aura-vs-solaredge/',slug:'hyxi-aura-vs-solaredge'},
+    {url:'/vergelijken/hyxi-aura-vs-ecoflow/',slug:'hyxi-aura-vs-ecoflow'},
+    {url:'/vergelijken/hyxi-aura-vs-sessy/',slug:'hyxi-aura-vs-sessy'}
   ]) {
     for (const width of [1440,390,320]) {
       const ctx=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce',locale:'nl-NL'});

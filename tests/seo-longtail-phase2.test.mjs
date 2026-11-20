@@ -26,7 +26,7 @@ const schemaOf = source => {
 test('new longtail cluster consists of five complete, distinct, directly discoverable pages',async()=>{
   const home = await htmlAt('/');
   const sitemap = await readFile(resolve(root,'dist/sitemap.xml'),'utf8');
-  assert.equal((sitemap.match(/<loc>/g)||[]).length,18);
+  assert.equal((sitemap.match(/<loc>/g)||[]).length,31);
   const titles = new Set(), descriptions = new Set();
   for(const url of routes) {
     const html = await htmlAt(url);
