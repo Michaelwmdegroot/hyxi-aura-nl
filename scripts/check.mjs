@@ -150,13 +150,15 @@ ensure(/^Disallow:\s*\/api\//im.test(robots), 'robots.txt excludes API routes');
 ensure(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt points to canonical sitemap');
 const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8').catch(() => '');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => decode(match[1]));
-ensure(sitemapUrls.length === 31 && new Set(sitemapUrls).size === 31, 'sitemap lists the thirty-one distinct public pages');
+ensure(sitemapUrls.length === 30 && new Set(sitemapUrls).size === 30, 'sitemap lists the thirty distinct public pages');
+ensure(!sitemapUrls.includes(origin + '/kennis/bat-q7-vs-bat-q9/'), 'retired Q7/Q9 article is absent from the sitemap');
+ensure(!htmlFiles.some(file => route(file) === '/kennis/bat-q7-vs-bat-q9/'), 'retired Q7/Q9 article must not be built');
 for (const url of sitemapUrls) await localReference(url, '/', 'sitemap.xml');
-for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/bat-q7-vs-bat-q9/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/', '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/', '/kennis/salderingsregeling-2027/', '/kennis/btw-subsidie/', '/kennis/dynamisch-energiecontract/', '/kennis/uitbreiden/', '/kennis/buiten-plaatsen/', '/vergelijken/', '/hyxi-power/', '/kennis/hoeveel-kwh-nodig/', '/kennis/app-monitoring/', '/vergelijken/hyxi-aura-vs-sigenergy/', '/vergelijken/hyxi-aura-vs-alphaess/', '/vergelijken/hyxi-aura-vs-tesla-powerwall/', '/vergelijken/hyxi-aura-vs-enphase/', '/vergelijken/hyxi-aura-vs-huawei/', '/vergelijken/hyxi-aura-vs-byd/', '/vergelijken/hyxi-aura-vs-solaredge/', '/vergelijken/hyxi-aura-vs-ecoflow/', '/vergelijken/hyxi-aura-vs-sessy/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
+for (const page of ['/', '/bronnen/', '/offerte/', '/privacy/', '/kennis/noodstroom/', '/kennis/installatiecheck/', '/kennis/1-fase-of-3-fasen/', '/modellen/', '/datasheet/', '/kennis/prijs-en-installatie/', '/kennis/bestaande-zonnepanelen/', '/kennis/garantie/', '/kennis/salderingsregeling-2027/', '/kennis/btw-subsidie/', '/kennis/dynamisch-energiecontract/', '/kennis/uitbreiden/', '/kennis/buiten-plaatsen/', '/vergelijken/', '/hyxi-power/', '/kennis/hoeveel-kwh-nodig/', '/kennis/app-monitoring/', '/vergelijken/hyxi-aura-vs-sigenergy/', '/vergelijken/hyxi-aura-vs-alphaess/', '/vergelijken/hyxi-aura-vs-tesla-powerwall/', '/vergelijken/hyxi-aura-vs-enphase/', '/vergelijken/hyxi-aura-vs-huawei/', '/vergelijken/hyxi-aura-vs-byd/', '/vergelijken/hyxi-aura-vs-solaredge/', '/vergelijken/hyxi-aura-vs-ecoflow/', '/vergelijken/hyxi-aura-vs-sessy/']) ensure(sitemapUrls.includes(`${origin}${page}`), `sitemap includes ${page}`);
 
 
 // Knowledge pages must remain real, indexable static HTML and part of the user journey.
-for (const slug of ['bat-q7-vs-bat-q9', 'noodstroom', '1-fase-of-3-fasen']) {
+for (const slug of ['noodstroom', '1-fase-of-3-fasen']) {
   const filename = resolve(dist, 'kennis', slug, 'index.html');
   const article = documentCache.get(filename) || '';
   const url = `${origin}/kennis/${slug}/`;
@@ -177,7 +179,7 @@ ensure(Boolean(checkPage), 'Installation check: static HTML in production build'
 ensure(checkPage.includes('<form class="check-form" id="installation-check-form" action="/offerte/" method="get">'), 'Installation check: native GET to existing quote page');
 for (const field of ['solar', 'phase', 'goal']) ensure(checkPage.includes(`name="${field}"`), `Installation check: ${field} present`);
 for (const field of ['fullName','email','phone','postcode']) ensure(!new RegExp(`name=["']${field}["']`).test(checkPage), `Installation check: no ${field} collected`);
-ensure(checkPage.includes('Preliminary') && checkPage.includes('href="/kennis/noodstroom/"') && checkPage.includes('href="/kennis/bat-q7-vs-bat-q9/"'), 'Installation check: original source-backed content and internal links');
+ensure(checkPage.includes('Preliminary') && checkPage.includes('href="/kennis/noodstroom/"') && checkPage.includes('href="/modellen/"'), 'Installation check: original source-backed content and internal links');
 ensure(home.includes('href="/kennis/installatiecheck/"'), 'Installation check: homepage discovery');
 ensure(checkPage.includes('href="/downloads/hyxi-aura-1-fase-datasheet.pdf"'), 'Installation check: official manufacturer source');
 const checkSchema = [...checkPage.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].flatMap(match=>{try {const json=JSON.parse(match[1]);return json['@graph']||[json];}catch{return[];}});
