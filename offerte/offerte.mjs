@@ -13,7 +13,8 @@ function selection(){
   const phaseName=offeredPhase==='three'?'3 fasen':'1 fase';
   const inverter=offeredPhase==='three'?'10 kW':'5 kW';
   const nominal=(9.04*count).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
-  $('selectionLabel').textContent=phaseName+' · '+inverter+' omvormer · '+nominal+' kWh · '+count+' × BAT-Q9 · back-up inbegrepen';
+  const phaseUnknown=$('phase').value==='unknown';
+  $('selectionLabel').textContent=(phaseUnknown?'Voorlopige keuze, aansluiting nog controleren · ':'')+phaseName+' · '+inverter+' omvormer · '+nominal+' kWh · '+count+' × BAT-Q9 · back-up inbegrepen';
 }
 function error(message,withFallback=false){
   $('quoteError').textContent=message;$('quoteError').hidden=false;
