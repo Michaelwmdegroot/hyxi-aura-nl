@@ -106,7 +106,8 @@ test('HYXI short keywords, smart monitoring and independent sizing keep unique i
   assert.ok(brand.includes('hyxipower.com/nl/ProductsDetail/hyxi-halo'));
   const cap=await htmlAt('/kennis/hoeveel-kwh-nodig/');
   assert.match(cap,/twaalf zonnepanelen|twaalf panelen/i);
-  assert.match(cap,/6,7 kWh/);
+  assert.doesNotMatch(cap,/<th scope="row">1 × BAT-Q7<\/th>/,'Q7 is not an offered sizing option');
+  assert.match(cap,/vijf BAT-Q9-pakketten/i);
   assert.match(cap,/8,6 kWh/);
   assert.match(cap,/geen gegarandeerde/i);
   const app=await htmlAt('/kennis/app-monitoring/');

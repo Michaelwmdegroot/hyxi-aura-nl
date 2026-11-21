@@ -63,7 +63,7 @@ test('new longtail cluster consists of five complete, distinct, directly discove
 
 test('saldering guide uses real 2027 rules and does not promise battery savings',async()=>{
   const html=await htmlAt('/kennis/salderingsregeling-2027/');
-  for(const v of ['1 januari 2027','50% van het kale leveringstarief','Rijksoverheid','eigen verbruik','BAT-Q7','BAT-Q9'])
+  for(const v of ['1 januari 2027','50% van het kale leveringstarief','Rijksoverheid','eigen verbruik','vijf BAT-Q9-pakketten','BAT-Q9'])
     assert.ok(html.includes(v),'source-based '+v);
   assert.match(html,/Geen gegarandeerde terugverdientijd|geen gegarandeerde terugverdientijd/i);
   assert.ok(html.includes('rijksoverheid.nl'));
