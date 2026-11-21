@@ -35,7 +35,7 @@ export const faqs = Object.freeze([
   },
   {
     question: 'Is de AURA geschikt voor 1 fase én 3 fasen?',
-    answer: 'De fabrikant beschrijft een 1-faseserie van 3 tot 12 kW en een 3-fasenserie van 5 tot 30 kW. Dat betekent niet dat elke uitvoering op jouw aansluiting past. De installateur kiest het vermogen bij je hoofdaansluiting, verbruik en batterijopbouw. De huidige datasheets zijn voorlopig; de definitieve uitvoering staat in je voorstel.',
+    answer: 'Thuisbatterij Team biedt 1-fasepakketten met een 5 kW omvormer en 9 of 18 kWh BAT-Q9-opslag, en 3-fasenpakketten met een 10 kW omvormer en 9, 18 of 27 kWh BAT-Q9-opslag. De fabrikant beschrijft daarnaast andere vermogens, maar die bieden wij hier niet aan. De installateur controleert je aansluiting, gewenste back-upgroepen en de uiteindelijke uitvoering.',
     sourceUrl: sourceUrls.productEnglish,
     sourceLabel: 'Datasheets van beide uitvoeringen',
   },
@@ -53,7 +53,7 @@ export const faqs = Object.freeze([
   },
   {
     question: 'Hoe zit het met de garantie?',
-    answer: 'De Europese voorwaarden van september 2026 noemen 10 jaar voor de vermelde AURA-omvormers en BAT-Q9, met aanvullende voorwaarden en batterijlimieten. BAT-Q7 staat nog niet in die tabel. Een ontwerp voor 15 jaar gebruik is geen garantie van 15 jaar. Je ontvangt de voorwaarden die horen bij jouw aangeboden uitvoering.',
+    answer: 'De Europese voorwaarden van september 2026 noemen 10 jaar voor de vermelde AURA-omvormers en BAT-Q9, met aanvullende voorwaarden en batterijlimieten. Een ontwerp voor 15 jaar gebruik is geen garantie van 15 jaar. Je ontvangt de actuele voorwaarden die horen bij het aangeboden BAT-Q9-pakket en de bijbehorende omvormer.',
     sourceUrl: sourceUrls.warranty,
     sourceLabel: 'Europese garantievoorwaarden',
   },

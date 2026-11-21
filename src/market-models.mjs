@@ -14,10 +14,10 @@ export const MARKET_MODELS = Object.freeze([
     "brand": "HYXI",
     "model": "AURA",
     "category": "hybride",
-    "identity": "HYXI AURA all-in-one, HSA2 / HTA2 en BAT-Q7 / BAT-Q9",
+    "identity": "Ons HYXI AURA-aanbod: 1 fase met 5 kW en 9/18 kWh, of 3 fasen met 10 kW en 9/18/27 kWh; uitsluitend BAT-Q9",
     "source": "https://www.hyxipower.com/nl/ProductsDetail/hyxi-aura",
-    "capacity": "6,7 of 8,6 kWh bruikbaar per batterijmodule",
-    "limits": "Geïntegreerde hybride omvormer met ATS; exacte configuratie controleren",
+    "capacity": "8,6 kWh bruikbaar per BAT-Q9-module; vijf aangeboden pakketten",
+    "limits": "Geïntegreerde ATS; alleen vijf BAT-Q9-pakketten worden door ons aangeboden; fase- en back-upgroepen controleren",
     "scope": "aanbod"
   },
   {
