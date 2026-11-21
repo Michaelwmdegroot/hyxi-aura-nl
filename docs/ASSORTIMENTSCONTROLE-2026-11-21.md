@@ -34,3 +34,14 @@ Het is via deze omgeving niet mogelijk Hostinger live HTML of fabrikantwebsites 
 Regressietest `tests/offer-catalog-integrity.test.mjs` waarborgt het vijfpakketregister, commerciële Q9-only-vergelijkingen, correcte aanbiedingsteksten en de offerte. Bestaande tests `tests/market-comparisons-seo.test.mjs` en `tests/seo-longtail-phase2.test.mjs` zijn in lijn gebracht met de nieuwe inhoud, zonder technische fabrikantbronnen te verwijderen.
 
 Run in de Node24-omgeving: `npm run build && npm test && npm run check`, plus bestaande browser-/productieprobes waar beschikbaar. GitHub Actions zijn niet vereist. **Publiceer pas na een codecheck op de final branch; een push naar main is nog geen bewijs dat Hostinger daadwerkelijk is gedeployed.**
+
+## Uitgevoerde broncode-QA (21 november 2026)
+- Branch bevat 30 publieke HTML-bronpagina's; de verwijderde Q7/Q9-keuzeroute staat niet in de sitemap of Vite-ingangen.
+- **16/16** handmatige bronasserties op homepage, modellen, offerte, Q9-capaciteit/uitbreiding, HYXI POWER, centrale marktdata, prijscaveat en gegenereerde FAQ-bron zijn geslaagd.
+- **9/9** merkvergelijkingen bevatten nu BAT-Q9, geen BAT-Q7 als vergelijking van het commerciële HYXI-aanbod, een expliciet HYXI AURA-offertelabel en relevante concurrentievoorbehouden. Ze behouden minimaal 900 leesbare woorden per artikel.
+- Alle **30/30** pagina's zijn op één H1, bestaande canonieke URL, meta-descriptionlengte en interne links naar de vervallen Q7-keuzegids statisch gecontroleerd. Er zijn geen verwijzingen naar die oude route aangetroffen.
+- Regres­sietest `tests/offer-catalog-integrity.test.mjs` toegevoegd en de twee eerdere keyword-/longtailtests aangepast. **Deze tests zijn niet hier uitgevoerd**: geen volledige lokale checkout en Node 24-runtime. De code is wel statisch geverifieerd.
+- Actuele voorraad-, daadwerkelijke installatie-inclusie, fabrikantbeschikbaarheid en verkoopprijzen vergen een afzonderlijke, schriftelijke eigenaarscontrole. De site publiceert geen onbevestigde consumentprijzen.
+
+## Betekenis voor de lancering
+De **commerciële teksten en pakketkeuzemogelijkheden** zijn consistent gemaakt met het door de eigenaar goedgekeurde assortiment. Een broncontrole of GitHub-push is niet gelijk aan live-Hostinger-deployment of bewijs van productvoorraad. Controleer de gepubliceerde pagina's op productie vóór actieve campagnes. Geen echte proefleads of Odoo-tests nodig voor deze inhoudelijke correctie.
