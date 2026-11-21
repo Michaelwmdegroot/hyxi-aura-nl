@@ -14,7 +14,7 @@ test('published HYXI AURA offering is exactly the five owner-approved BAT-Q9 pac
     ['single',1,5,9,true],['single',2,5,9,true],
     ['three',1,10,9,true],['three',2,10,9,true],['three',3,10,9,true],
   ]);
-  for(const p of OFFERED_PACKAGES) assert.equal(configuration(p.phase,p.count).nominal,9.04*p.count);
+  for(const p of OFFERED_PACKAGES) assert.equal(configuration(p.phase,p.count).nominal,Math.round(9.04*p.count*100)/100);
   for(const args of [['single',3],['three',4],['single',6]]) assert.throws(()=>configuration(...args));
 });
 
