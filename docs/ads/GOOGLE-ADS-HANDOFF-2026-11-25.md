@@ -8,7 +8,7 @@
 
 **Target-account:** Google Ads-klant `727-613-6831` (alleen deze HYXI-scope)
 
-**Codebranch:** `codex/google-ads-tracking-2026-11-25`
+**Productiecommit:** `main` @ `e7db9cc77774e780f03fe53c1a941c6debc1a918`
 
 ## Besluit in één oogopslag
 
@@ -170,7 +170,18 @@ Niet door deze oplevering bewezen:
 - commerciële eigenaarsscore ≥9/10;
 - rendabele PMax-leadstroom of gekwalificeerde Odoo-opvolging.
 
-## 7. Productie- en beheerprocedure
+## 7. Definitief productiereleasebewijs
+
+De gecontroleerde wijzigingen zijn via PR #64 (website-meetarchitectuur), PR #65 (consentinitialisatie en hero-QA) en PR #66 (actuele BAT-Q9-productieprobe) naar `main` gemerged. De formele checks op de eindcommit zijn groen:
+
+- Hoofd-CI: [run 45677650684](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/45677650684) — build, 127 tests, MySQL-integratie, browserjourney, Lighthouse en production-only install/build.
+- Publieke productieprobe: [run 45677650702](https://github.com/Michaelwmdegroot/hyxi-aura-nl/actions/runs/45677650702) — alle 40 read-only publieke gates PASS.
+- Onafhankelijke eindprobe na deployment: alle 40 gates PASS, inclusief `capacitySizingGuideDeployed` voor de actuele BAT-Q9-waarde `8,6 kWh` bruikbaar per module.
+- Live controle: `/kennis/hoeveel-kwh-nodig/` gaf HTTP 200 met de juiste title en canonical; er zijn geen leads of advertentieconversies verstuurd.
+
+De eerdere productieprobe-fout op de capaciteitspagina was een verouderde monitorassertie voor `6,7 kWh` (BAT-Q7), niet een fout in de live pagina. PR #66 corrigeerde uitsluitend die read-only gate naar `8,6 kWh` (BAT-Q9).
+
+## 8. Productie- en beheerprocedure
 
 ### Voor activering
 
@@ -201,7 +212,7 @@ Controleer wekelijks:
 - Verwijder geen leads en verander geen SMTP/Odoo-instellingen.
 - Controleer daarna publiek dat de website en aanvraagformulieren nog functioneren.
 
-## 8. Definitief advies
+## 9. Definitief advies
 
 **Technische websitebasis: GO voor review.** De code is privacybewust, getest en houdt de bestaande lead- en Odoo-keten intact.
 
