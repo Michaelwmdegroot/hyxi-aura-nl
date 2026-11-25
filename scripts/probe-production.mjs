@@ -30,7 +30,7 @@ const KNOWLEDGE = [
   { path: '/vergelijken/hyxi-aura-vs-ecoflow/', title: 'HYXI AURA vs' },
   { path: '/vergelijken/hyxi-aura-vs-sessy/', title: 'HYXI AURA vs' },
 ];
-const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest'];
+const BRAND_ASSETS = ['/favicon.png', '/apple-touch-icon.png', '/icons/brand-192.png', '/icons/brand-512.png', '/site.webmanifest', '/assets/thuisbatterijteam-logo.svg'];
 const PATHS = [...BRAND_ASSETS, '/index.html', '/', '/api/health', '/api/config', '/privacy/', '/bronnen/', '/offerte/', '/kennis/bat-q7-vs-bat-q9/', ...KNOWLEDGE.map(item => item.path), '/sitemap.xml', '/sitemap.css', '/robots.txt', '/api/beheer/leads'];
 
 export async function probeProduction(fetcher = fetch) {
@@ -76,7 +76,8 @@ export async function probeProduction(fetcher = fetch) {
         observed[path].content.includes('id="ervaringen"'));
       const assetReady = brandAsset && observed[path].status === 200 &&
         (path.endsWith('.png') ? observed[path].content.length > 64 :
-          observed[path].content.includes('"HYXI AURA — Thuisbatterij Team"'));
+          path.endsWith('.svg') ? observed[path].content.includes('<svg') &&
+            observed[path].content.includes('fill="#00EC54"') : observed[path].content.includes('"HYXI AURA — Thuisbatterij Team"'));
       const retiredReady = retiredGuide && observed[path].status === 301 && observed[path].redirectLocation === '/modellen/';
       if ((!guide && !brandAsset && !retiredGuide) || retiredReady || assetReady || (guide && observed[path].status === 200 &&
         observed[path].content.includes(`<link rel="canonical" href="${BASE}${path}">`) &&
@@ -109,7 +110,11 @@ export async function probeProduction(fetcher = fetch) {
     heroTbtShowroomDeployed: observed['/'].status === 200 &&
       observed['/'].content.includes('<link rel="canonical" href="https://hyxi-aura.nl/">') &&
       observed['/'].content.includes('presenter-brand') &&
-      observed['/'].content.includes('presenter-owner') &&
+      observed['/'].content.includes('class="tbt-wordmark"') &&
+      observed['/'].content.includes('src="/assets/thuisbatterijteam-logo.svg"') &&
+      observed['/'].content.includes('id="launch-mobile-nav"') &&
+      observed['/'].content.includes('href="#voordelen"') &&
+      observed['/'].content.includes('href="#team"') &&
       observed['/'].content.includes('Thuisbatterij') &&
       observed['/'].content.includes('presenteert') &&
       observed['/'].content.includes('presenter-product') &&
@@ -128,7 +133,8 @@ export async function probeProduction(fetcher = fetch) {
       observed['/index.html'].redirectLocation === `${BASE}/`,
     brandAssetsDeployed: observed['/'].content.includes('href="/favicon.png"') &&
       observed['/'].content.includes('href="/site.webmanifest"') &&
-      observed['/'].content.includes('src="/icons/brand-192.png"') &&
+      observed['/'].content.includes('src="/assets/thuisbatterijteam-logo.svg"') &&
+      observed['/assets/thuisbatterijteam-logo.svg']?.content.includes('fill="#00EC54"') &&
       BRAND_ASSETS.every(path => observed[path]?.status === 200) &&
       observed['/site.webmanifest'].content.includes('"192x192"') &&
       observed['/site.webmanifest'].content.includes('"512x512"'),
