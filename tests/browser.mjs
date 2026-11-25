@@ -333,7 +333,14 @@ async function contactJourney(page, fixture, label, phase, count) {
   assert.ok(mail.text.includes(`${count} × BAT-Q9`));
   assert.ok(mail.text.includes(phase === 'single' ? '1 fase · 5 kW omvormer' : '3 fasen · 10 kW omvormer'));
   assert.equal(await page.locator('#fullName').inputValue(), '');
-  assert.equal(await page.evaluate(() => localStorage.length + sessionStorage.length), 0);
+  const browserStorage = await page.evaluate(() => ({
+    local: localStorage.length,
+    session: JSON.parse(sessionStorage.getItem('hyxi_campaign_attribution_v1') || '{}'),
+    values: Object.values(localStorage).concat(Object.values(sessionStorage)).join(' '),
+  }));
+  assert.equal(browserStorage.local, 0, 'No consent choice or contact data should be stored in localStorage');
+  assert.deepEqual(browserStorage.session, { utm_source: 'browser-qa', utm_medium: 'test' }, 'Only allowlisted campaign attribution may persist in sessionStorage');
+  assert.doesNotMatch(browserStorage.values, /Browsercontrole|@example\.test|0612345678|1234AB/, 'Contact data must not enter browser storage');
   assert.ok(!page.url().includes('example.test'), 'Contact data must not appear in the URL');
   await page.screenshot({ path: resolve(resultsDir, `${label}-success.png`) });
   await page.locator('#success-close').click();
@@ -343,10 +350,34 @@ async function contactJourney(page, fixture, label, phase, count) {
   record(`${label}: validated dialog → API → accepted SMTP recipient → matching receipt, with focus restored`);
 }
 
+async function consentJourney(origin) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce', locale: 'nl-NL' });
+  const page = await context.newPage();
+  const gtmRequests = [];
+  await page.route('https://www.googletagmanager.com/**', route => route.abort());
+  page.on('request', request => { if (request.url().includes('googletagmanager.com')) gtmRequests.push(request.url()); });
+  await page.goto(origin, { waitUntil: 'load' });
+  await expect(page.getByRole('button', { name: 'Weigeren', exact: true })).toBeVisible();
+  assert.equal(gtmRequests.length, 0, 'First visit without a choice must not request Google Tag Manager');
+  const defaults = await page.evaluate(() => window.dataLayer?.find(item => Array.isArray(item) && item[0] === 'consent' && item[1] === 'default')?.[2]);
+  assert.deepEqual(defaults, { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', wait_for_update: 500 });
+  await page.getByRole('button', { name: 'Weigeren', exact: true }).click();
+  assert.equal(gtmRequests.length, 0, 'Refusing measurement must keep Google unloaded');
+  await page.getByRole('button', { name: 'Cookievoorkeuren wijzigen', exact: true }).click();
+  await page.getByRole('button', { name: 'Accepteren', exact: true }).click();
+  await expect.poll(() => gtmRequests.length).toBe(1);
+  await page.getByRole('button', { name: 'Cookievoorkeuren wijzigen', exact: true }).click();
+  await page.getByRole('button', { name: 'Weigeren', exact: true }).click();
+  assert.equal(await page.evaluate(() => window.hyxiAdsConsent?.status), 'denied', 'Revoking measurement must update consent state');
+  record('Consent Mode v2: denied by default, opt-in loads one GTM container, revoke returns to denied');
+  await context.close();
+}
+
 try {
   const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined;
   browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   const live = await fixture();
+  await consentJourney(live.origin);
   for (const viewport of [{ label: 'desktop', width: 1440, height: 1000 }, { label: 'mobile', width: 390, height: 844 }]) {
     currentCheck = viewport.label;
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: 1, reducedMotion: 'reduce', locale: 'nl-NL', isMobile: viewport.label === 'mobile', hasTouch: viewport.label === 'mobile' });
@@ -372,7 +403,7 @@ try {
     await expect(page.locator('.benefit-backup h3')).toContainText('Back-up is');
     await expect(page.locator('.benefit-backup h3')).toContainText('ingebouwd.');
     await expect(page.locator('.benefit-backup')).toContainText('geïntegreerd');
-    await expect(page.locator('.benefit-backup .backup-learn-link')).toHaveAttribute('href','/kennis/noodstroom/');
+    await expect(page.locator('.benefit-backup .backup-learn-link')).toHaveAttribute('href','/kennis/noodstroom/?utm_source=browser-qa&utm_medium=test');
     await expect(page.locator('.benefit-backup .benefit-footnote')).toContainText('geschikte installatie');
     if (viewport.width <= 700) await assertReadableBenefitCards(page, viewport.label);
     else {
