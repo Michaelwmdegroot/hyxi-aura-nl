@@ -1,0 +1,299 @@
+{
+  "schema": "hyxi-aura-search-launch-plan-v1",
+  "created": "2026-11-25",
+  "status": "DRAFT_ONLY_NOT_CREATED_IN_GOOGLE_ADS",
+  "approval_context": "€500/maand budget approved, go-ahead to prepare; no spend authorized until account, targeting, conversion measurement and consent validated",
+  "verified_ads_account": "Windsor Google Ads connector present; read blocked by Windsor Free plan (6 connected sources vs plan 1); currency and account owner unverified",
+  "campaign": {
+    "name": "TBT | HYXI AURA | Search | Randstad | 2026-11",
+    "advertising_channel": "SEARCH_ONLY",
+    "initial_status": "PAUSED",
+    "country": "Netherlands",
+    "target_regions": [
+      "Noord-Holland",
+      "Zuid-Holland",
+      "Utrecht"
+    ],
+    "location_option": "PRESENCE: people in or regularly in targeted locations, NOT people merely interested",
+    "language": "nl",
+    "currency_requirement": "EUR (verify account before creating)",
+    "daily_budget_eur": 16.44,
+    "google_30_4_day_monthly_spend_limit_eur": 499.78,
+    "bidding_initial": "MANUAL_CPC (provisional); switch to conversion optimization only after validated lead tracking",
+    "network": "Google Search; review and disable Search Partners where supported and desired; no Display/PMax",
+    "start": "DO_NOT_ENABLE_UNTIL_GO",
+    "schedule": "No unverified business-hour assumptions; revisit after response SLA is known"
+  },
+  "groups": [
+    {
+      "name": "01 | HYXI AURA | Merkgericht",
+      "key": "hyxi_aura_brand",
+      "url": "https://hyxi-aura.nl/",
+      "path1": "hyxi-aura",
+      "path2": "advies",
+      "cpc_advice_eur": 1.5,
+      "keywords": [
+        {
+          "text": "hyxi aura",
+          "match": "EXACT"
+        },
+        {
+          "text": "hyxi aura thuisbatterij",
+          "match": "EXACT"
+        },
+        {
+          "text": "hyxi thuisbatterij",
+          "match": "PHRASE"
+        },
+        {
+          "text": "hyxi aura offerte",
+          "match": "EXACT"
+        },
+        {
+          "text": "hyxi aura kopen",
+          "match": "PHRASE"
+        },
+        {
+          "text": "hyxi power aura",
+          "match": "EXACT"
+        },
+        {
+          "text": "hyxi aura 9 kwh",
+          "match": "PHRASE"
+        },
+        {
+          "text": "hyxi aura 18 kwh",
+          "match": "PHRASE"
+        },
+        {
+          "text": "hyxi aura 27 kwh",
+          "match": "PHRASE"
+        }
+      ],
+      "headlines": [
+        "HYXI AURA Thuisbatterij",
+        "Bekijk 5 AURA Pakketten",
+        "9, 18 of 27 kWh Opslag",
+        "HYXI AURA met Back-up",
+        "Persoonlijk AURA Advies",
+        "Thuisbatterij Team Adviseert",
+        "BAT-Q9 Opslag voor Thuis",
+        "HYXI AURA Offerte",
+        "1 Fase of 3 Fasen",
+        "5 kW of 10 kW Omvormer",
+        "Ontdek de AURA Pakketten",
+        "HYXI Thuisbatterij",
+        "Vrijblijvend Advies",
+        "Bekijk de Specificaties",
+        "Batterijadvies op Maat"
+      ],
+      "descriptions": [
+        "Kies uit vijf HYXI AURA-pakketten met BAT-Q9. Laat jouw situatie persoonlijk beoordelen.",
+        "1 fase: 9 of 18 kWh. 3 fasen: 9, 18 of 27 kWh. Vraag vrijblijvend AURA-advies.",
+        "Thuisbatterij Team beoordeelt je aansluiting, opslagwens en gewenste back-upgroepen.",
+        "Bekijk de specificaties en vraag een voorstel aan voor jouw woning en installatie."
+      ],
+      "status": "PAUSED",
+      "tracking_final_url_suffix": "utm_source=google&utm_medium=cpc&utm_campaign=hyxi_aura_brand"
+    },
+    {
+      "name": "02 | Thuisbatterij | Offerte en backup",
+      "key": "hyxi_aura_installatie",
+      "url": "https://hyxi-aura.nl/offerte/",
+      "path1": "thuisbatterij",
+      "path2": "offerte",
+      "cpc_advice_eur": 2.5,
+      "keywords": [
+        {
+          "text": "thuisbatterij met backup",
+          "match": "PHRASE"
+        },
+        {
+          "text": "thuisbatterij back up",
+          "match": "PHRASE"
+        },
+        {
+          "text": "thuisbatterij 9 kwh",
+          "match": "EXACT"
+        },
+        {
+          "text": "thuisbatterij 18 kwh",
+          "match": "EXACT"
+        },
+        {
+          "text": "thuisbatterij 27 kwh",
+          "match": "EXACT"
+        },
+        {
+          "text": "thuisbatterij 3 fase",
+          "match": "PHRASE"
+        },
+        {
+          "text": "thuisbatterij 1 fase",
+          "match": "PHRASE"
+        },
+        {
+          "text": "thuisbatterij offerte",
+          "match": "PHRASE"
+        },
+        {
+          "text": "thuisaccu met noodstroom",
+          "match": "PHRASE"
+        },
+        {
+          "text": "thuisbatterij zonnepanelen offerte",
+          "match": "PHRASE"
+        }
+      ],
+      "headlines": [
+        "Thuisbatterij met Back-up",
+        "9, 18 of 27 kWh Opslag",
+        "Thuisaccu met Advies",
+        "Geïntegreerde Back-up",
+        "1 Fase of 3 Fasen Batterij",
+        "Thuisbatterij op Maat",
+        "BAT-Q9 Thuisbatterij",
+        "Advies van Installateurs",
+        "Vergelijk 5 HYXI Pakketten",
+        "Vrijblijvende AURA Offerte",
+        "Eigen Zonnestroom Bewaren",
+        "Batterij bij Zonnepanelen",
+        "Persoonlijke Installatiecheck",
+        "5 kW of 10 kW Omvormer",
+        "HYXI AURA voor Thuis"
+      ],
+      "descriptions": [
+        "Zoek je thuisopslag met back-up? Bekijk vijf HYXI AURA-pakketten met BAT-Q9.",
+        "Laat beoordelen of een 1-fase- of 3-fasenopstelling technisch bij jouw woning past.",
+        "Opslag van 9, 18 of 27 kWh, afhankelijk van de fase. Vraag vrijblijvend advies.",
+        "Geen vaste besparingsbelofte. Wel specificaties, installatieadvies en een voorstel."
+      ],
+      "status": "PAUSED",
+      "tracking_final_url_suffix": "utm_source=google&utm_medium=cpc&utm_campaign=hyxi_aura_installatie"
+    }
+  ],
+  "negative_keywords_campaign_level": [
+    {
+      "term": "vacature",
+      "match": "PHRASE"
+    },
+    {
+      "term": "vacatures",
+      "match": "PHRASE"
+    },
+    {
+      "term": "werken bij",
+      "match": "PHRASE"
+    },
+    {
+      "term": "stage",
+      "match": "PHRASE"
+    },
+    {
+      "term": "opleiding",
+      "match": "PHRASE"
+    },
+    {
+      "term": "cursus",
+      "match": "PHRASE"
+    },
+    {
+      "term": "handleiding",
+      "match": "PHRASE"
+    },
+    {
+      "term": "manual",
+      "match": "PHRASE"
+    },
+    {
+      "term": "datasheet",
+      "match": "PHRASE"
+    },
+    {
+      "term": "pdf",
+      "match": "PHRASE"
+    },
+    {
+      "term": "reparatie",
+      "match": "PHRASE"
+    },
+    {
+      "term": "storing oplossen",
+      "match": "PHRASE"
+    },
+    {
+      "term": "marktplaats",
+      "match": "PHRASE"
+    },
+    {
+      "term": "tweedehands",
+      "match": "PHRASE"
+    },
+    {
+      "term": "zelf installeren",
+      "match": "PHRASE"
+    },
+    {
+      "term": "zelfbouw",
+      "match": "PHRASE"
+    },
+    {
+      "term": "diy",
+      "match": "PHRASE"
+    },
+    {
+      "term": "stekkerbatterij",
+      "match": "PHRASE"
+    },
+    {
+      "term": "plug in thuisbatterij",
+      "match": "PHRASE"
+    },
+    {
+      "term": "hyxi halo",
+      "match": "PHRASE"
+    },
+    {
+      "term": "bat-q7",
+      "match": "PHRASE"
+    },
+    {
+      "term": "camper accu",
+      "match": "PHRASE"
+    },
+    {
+      "term": "caravan accu",
+      "match": "PHRASE"
+    },
+    {
+      "term": "auto accu",
+      "match": "PHRASE"
+    },
+    {
+      "term": "12v accu",
+      "match": "PHRASE"
+    }
+  ],
+  "event_contract": {
+    "event_name": "hyxi:lead-accepted",
+    "allowed_intent": [
+      "advice",
+      "quote"
+    ],
+    "sent_only_after_server_confirmed_success": true,
+    "contains_pii": false,
+    "external_google_tag_deployed": false,
+    "advertising_measurement_active": false
+  },
+  "go_gates": [
+    "Confirm Google Ads account owner and currency EUR",
+    "Check existing campaigns and ensure no duplicate active budgets",
+    "Confirm service locations and presence-only targeting",
+    "Install consent-aware Google tag/GA4 integration with explicit EEA consent; do not misread contact consent as marketing consent",
+    "Validate exactly one conversion for server-confirmed advice and quote, zero on errors/invalid forms",
+    "Confirm Google Ads primary lead event and, where possible, separate secondary qualified lead status from Odoo",
+    "Verify 5 BAT-Q9 packages and landing pages live after latest Hostinger deploy",
+    "No lead or tracking personal data in URL or client analytics events",
+    "Enable campaigns and ad groups only after owner sees the paused draft and production preflight"
+  ]
+}
