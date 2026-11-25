@@ -63,6 +63,19 @@ test('Owner-provided brand artwork is shipped at 48, 192, 512 pixels; no placeho
   assert.doesNotMatch(svg,/#ef6c42|<rect width="64"/i,'Old generic orange A icon must not be distributed');
 });
 
+test('Owner-provided TBT vector logo is installed exactly and has no external resources',async()=>{
+  const [original,built]=await Promise.all([
+    readFile(resolve(root,'public/assets/thuisbatterijteam-logo.svg'),'utf8'),
+    readFile(resolve(root,'dist/assets/thuisbatterijteam-logo.svg'),'utf8'),
+  ]);
+  assert.equal(built,original,'Vite must ship the same owner logo vector');
+  assert.match(original, /#000000/);
+  assert.match(original, /#5A5A5A/);
+  assert.match(original, /#00EC54/);
+  assert.match(original, /viewBox="0 0 803\.7988 106\.3379"/);
+  assert.doesNotMatch(original, /<script|foreignObject|<image|@import|<text\b/i,'no external dependencies, fonts or scripts');
+});
+
 test('Site manifest uses real installed assets, truthful brand ownership and no fictitious offline app',async()=>{
   const text=await readFile(resolve(root,'dist/site.webmanifest'),'utf8');
   const manifest=JSON.parse(text);
@@ -100,9 +113,10 @@ test('All thirty public pages have branded favicon, share preview, trustworthy m
     assert.match(attribute(html,'meta','property','og:image:alt','content')||'',/HYXI AURA thuisbatterij/);
     assert.equal(attribute(html,'meta','name','twitter:card','content'),'summary_large_image');
     assert.match(attribute(html,'meta','name','robots','content')||'',/index, follow, max-image-preview:large/);
-    assert.ok(html.includes('site-brand-icon'), 'brand icon present in visible lockup');
-    assert.match(html,/class="site-brand-icon" src="\/icons\/brand-192\.png" width="32" height="32" alt=""/,
-      `${name} user image decorates without replacing readable TBT wordmark`);
+    assert.match(html,/class="tbt-wordmark" src="\/assets\/thuisbatterijteam-logo\.svg" width="804" height="106" alt="Thuisbatterij Team"/,
+      `${name} shows owner-provided new TBT vector wordmark, not an old house-only logo`);
+    assert.match(html,/href="\/src\/launch-brand-nav\.css"/,`${name} shared visual branding and nav CSS`);
+    assert.match(html,/src="\/src\/navigation\.mjs"/,`${name} accessible mobile navigation`);
     assert.doesNotMatch(html,/<link rel="icon" type="image\/svg\+xml" href="\/favicon\.svg">/);
     assert.match(html,/Thuisbatterij/,`${name} presenter identity remains visible`);
   }

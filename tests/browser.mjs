@@ -355,7 +355,8 @@ try {
     // Premium polish: original product remains, decorative stamps disappear,
     // and TBT/backup facts are available to a real visitor.
     await expect(page.locator('.hero-eyebrow, .hero-scroll, .product-label, .section-number, .operator-proof-icon')).toHaveCount(0);
-    await expect(page.locator('.site-footer .footer-presenter .presenter-owner')).toHaveText('Thuisbatterij Team');
+    await expect(page.locator('.site-footer .footer-presenter .tbt-wordmark')).toHaveAttribute('alt','Thuisbatterij Team');
+    await expect(page.locator('.site-header .tbt-wordmark')).toBeVisible();
     await expect(page.locator('.site-footer .footer-presenter .presenter-verb')).toHaveText('presenteert');
     await expect(page.locator('.site-footer .footer-presenter .presenter-product')).toHaveText('HYXI AURA');
     await expect(page.locator('.site-footer .brand-symbol')).toHaveCount(0);
@@ -373,7 +374,7 @@ try {
       await expect(page.locator('.benefit-card > .card-icon').first()).toBeVisible();
     }
     await expect(page.locator('.config-preview .preview-live')).toHaveText('1 fase · 5 kW');
-    const footerOwner=await page.locator('.site-footer .footer-presenter .presenter-owner').boundingBox();
+    const footerOwner=await page.locator('.site-footer .footer-presenter .tbt-wordmark').boundingBox();
     const footerLine=await page.locator('.site-footer .footer-presenter .presenter-subline').boundingBox();
     assert.ok(footerLine.y >= footerOwner.y + footerOwner.height - 2, 'Footer HYXI credit must sit below TBT owner');
     assert.ok(footerLine.width <= footerOwner.width + 2, 'Footer credit cannot exceed TBT wordmark width');
@@ -385,7 +386,28 @@ try {
       'Mobile hero TBT endorsement remains visually centered');
     await page.locator('.site-footer').screenshot({path:resolve(resultsDir,`${viewport.label}-footer-polish.png`)});
     await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
-    record(`${viewport.label}: editorial cleanup, TBT-first footer, source-backed ATS USP`);
+    // Responsive navigation: no stale hashes, no horizontal overflow or inaccessible menu.
+    await expect(page.locator('.desktop-nav a')).toHaveCount(5);
+    await expect(page.locator('#voordelen')).toHaveCount(1);
+    await expect(page.locator('#team')).toHaveCount(1);
+    const menuButton=page.locator('#launch-menu-toggle');
+    const menu=page.locator('#launch-mobile-nav');
+    if(viewport.width<=1100){
+      await expect(menuButton).toBeVisible();
+      await expect(menu).toBeHidden();
+      await menuButton.click();
+      await expect(menuButton).toHaveAttribute('aria-expanded','true');
+      await expect(menu).toBeVisible();
+      await expect(menu.locator('a')).toHaveCount(5);
+      await page.keyboard.press('Escape');
+      await expect(menu).toBeHidden();
+      await expect(menuButton).toHaveAttribute('aria-expanded','false');
+      await expect(menuButton).toBeFocused();
+    } else {
+      await expect(menuButton).toBeHidden();
+      await expect(page.locator('.desktop-nav')).toBeVisible();
+    }
+    record(`${viewport.label}: new TBT SVG wordmark, accessible five-link menu, footer trust and backup USP`);
     // Product stage is the accessible control; no floating selector remains.
     const heroProduct = page.locator('#hero-product-image');
     const productStage = page.locator('#hero-product-stage');
@@ -434,6 +456,14 @@ try {
     await page.goto(live.origin);
     await assertImages(page, viewport.label);
     await assertNoOverflow(page, viewport.label);
+    if(viewport.width <= 1100){
+      await expect(page.locator('#launch-menu-toggle')).toBeVisible();
+      await page.locator('#launch-menu-toggle').click();
+      await expect(page.locator('#launch-mobile-nav a')).toHaveCount(5);
+      await assertNoOverflow(page,viewport.label+'/menu-open');
+      await page.keyboard.press('Escape');
+      await expect(page.locator('#launch-mobile-nav')).toBeHidden();
+    }
     if (viewport.width <= 700) await assertReadableBenefitCards(page, viewport.label);
     await setModules(page, 'three', 3);
     await expect(page.locator('#nominal-capacity')).toHaveText('27,12');

@@ -114,7 +114,7 @@ test('all standalone pages identify Thuisbatterij Team as the commercial present
   ]){
     const html=await file(route);
     assert.match(html,/class="brand secondary-presenter"/,route);
-    assert.match(html,/class="secondary-presenter-owner"/,route);
+    assert.match(html,/class="tbt-wordmark" src="\/assets\/thuisbatterijteam-logo\.svg"/,route);
     assert.match(html,/presenteert/,route);
     assert.match(html,/HYXI AURA/,route);
     assert.ok(html.includes('/src/secondary-brand.css'),route);
