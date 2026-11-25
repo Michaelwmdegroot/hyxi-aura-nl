@@ -1,18 +1,25 @@
-/** First-party conversion-ready signal.
- * Called ONLY after /api/leads returns a confirmed successful receipt.
- * Deliberately emits no personal data, customer id, cookies or network requests.
- * A future Google Ads/GTM integration must separately implement EEA consent.
- */
-export function publishAcceptedLeadSignal(intent, scope = globalThis) {
-  if (intent !== 'advice' && intent !== 'quote') return false;
-  if (!scope || typeof scope.dispatchEvent !== 'function' ||
-      typeof scope.CustomEvent !== 'function') return false;
+const ACCEPTED_INTENTS = new Set(['advice', 'quote']);
+const REFERENCE_PATTERN = /^hxa_[A-Za-z0-9_-]{20,100}$/;
+
+export function createConversionReference(scope = globalThis) {
   try {
-    scope.dispatchEvent(new scope.CustomEvent('hyxi:lead-accepted', {
-      detail: Object.freeze({intent})
-    }));
-    return true;
-  } catch { // A measurement consumer must never break the already-confirmed lead UX.
-    return false;
-  }
+    const uuid = scope?.crypto?.randomUUID?.();
+    if (uuid) return `hxa_${uuid}`;
+    const bytes = new Uint8Array(16);
+    scope?.crypto?.getRandomValues?.(bytes);
+    const fallback = [...bytes].map(value => value.toString(16).padStart(2, '0')).join('');
+    return fallback ? `hxa_${fallback}` : null;
+  } catch { return null; }
 }
+
+export function publishAcceptedLeadSignal(intent, scope = globalThis, conversionRef = null) {
+  if (!ACCEPTED_INTENTS.has(intent) || !scope || typeof scope.dispatchEvent !== 'function' || typeof scope.CustomEvent !== 'function') return false;
+  try {
+    const detail = { intent };
+    if (REFERENCE_PATTERN.test(conversionRef || '')) detail.conversionRef = conversionRef;
+    scope.dispatchEvent(new scope.CustomEvent('hyxi:lead-accepted', { detail: Object.freeze(detail) }));
+    return true;
+  } catch { return false; }
+}
+
+export { ACCEPTED_INTENTS, REFERENCE_PATTERN };

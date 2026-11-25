@@ -30,9 +30,9 @@ function cspFor(directory) {
     } catch { /* Unbuilt checkout or fixture without this public page. */ }
   }
   return [
-    "default-src 'self'", `script-src 'self' ${[...hashes].join(' ')}`.trim(),
-    "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:",
-    "font-src 'self'", "connect-src 'self'", "media-src 'self'",
+    "default-src 'self'", `script-src 'self' https://www.googletagmanager.com ${[...hashes].join(' ')}`.trim(),
+    "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob: https://www.googleadservices.com https://googleads.g.doubleclick.net",
+    "font-src 'self'", "connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net", "media-src 'self'",
     "object-src 'none'", "base-uri 'none'", "frame-ancestors 'none'",
     "form-action 'self' https://thuisbatterijteam.nl", "worker-src 'self' blob:",
   ].join('; ');

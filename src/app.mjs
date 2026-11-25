@@ -1,7 +1,9 @@
+import './ads-consent.mjs';
 import { configuration, decimal } from './configurator-model.mjs';
 import { energyScenario } from './energy-model.mjs';
 import { mountFallbackScene } from './fallback-scene.mjs';
-import { publishAcceptedLeadSignal } from './lead-conversion-signal.mjs';
+import { getCampaignAttribution } from './campaign-attribution.mjs';
+import { createConversionReference, publishAcceptedLeadSignal } from './lead-conversion-signal.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -177,6 +179,7 @@ let completed = false;
 let apiConfig = null;
 let apiPending = null;
 let idempotencyKey = null;
+let conversionRef = null;
 let lastBody = null;
 let opener = null;
 
@@ -296,13 +299,7 @@ $('#form-back').addEventListener('click', () => { if (!submitting) setStep(Math.
 
 function payload() {
   const data = new FormData(form);
-  const attribution = {};
-  const params = new URLSearchParams(location.search);
-  // Only forward bounded campaign codes; ignore arbitrary query parameters.
-  for (const key of ['utm_source', 'utm_medium', 'utm_campaign']) {
-    const value = params.get(key);
-    if (value && /^[a-zA-Z0-9_. -]{1,80}$/.test(value)) attribution[key] = value;
-  }
+  const attribution = getCampaignAttribution(window);
   return {
     fullName: String(data.get('fullName') || '').trim(), email: String(data.get('email') || '').trim(),
     phone: String(data.get('phone') || '').trim(), postcode: String(data.get('postcode') || '').replace(/\s/g, '').toUpperCase(),
@@ -341,7 +338,9 @@ form.addEventListener('submit', async event => {
   clearError();
   if (!validateContact()) return;
   const body = JSON.stringify(payload());
-  if (body !== lastBody || !idempotencyKey) { lastBody = body; idempotencyKey = crypto.randomUUID(); }
+  if (body !== lastBody || !idempotencyKey) {
+    lastBody = body; idempotencyKey = crypto.randomUUID(); conversionRef = createConversionReference(window);
+  }
   setSending(true);
   try {
     const config = await loadApiConfig(true);
@@ -359,16 +358,17 @@ form.addEventListener('submit', async event => {
       return;
     }
     completed = true;
-    // First-party post-acceptance signal only: no personal data, cookies or external tags.
-    publishAcceptedLeadSignal('advice');
     form.hidden = true;
     $('#success-state').hidden = false;
     dialog.setAttribute('aria-labelledby', 'success-title');
     $('#step-label').textContent = 'Aanvraag ontvangen';
     $('#lead-progress').style.width = '100%';
     $('#request-id').textContent = result.requestId;
+    // This signal contains only the intent and an opaque browser-generated
+    // reference. No receipt, CRM ID or contact data enters the dataLayer.
+    publishAcceptedLeadSignal('advice', window, conversionRef);
     // Clear completed contact data from the form and local retry memory.
-    form.reset(); lastBody = null; idempotencyKey = null;
+    form.reset(); lastBody = null; idempotencyKey = null; conversionRef = null;
     $('#success-title').focus({ preventScroll: true });
     dialog.scrollTop = 0;
   } catch {

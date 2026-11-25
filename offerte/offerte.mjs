@@ -1,8 +1,10 @@
-import { publishAcceptedLeadSignal } from '../src/lead-conversion-signal.mjs';
 // Standalone quote intake. Personal data stays in form memory; never in URL/storage/analytics.
+import '../src/ads-consent.mjs';
+import { getCampaignAttribution } from '../src/campaign-attribution.mjs';
+import { createConversionReference, publishAcceptedLeadSignal } from '../src/lead-conversion-signal.mjs';
 const $ = id => document.getElementById(id);
 const form = $('quoteForm'),button=$('submitQuote');
-let config=null,configPromise=null,submitting=false,complete=false,key=null;
+let config=null,configPromise=null,submitting=false,complete=false,key=null,conversionRef=null;
 function selection(){
   const offeredPhase=$('phase').value==='three'?'three':'single';
   const countField=$('moduleCount');
@@ -43,12 +45,7 @@ async function loadConfig(force=false){
 function payload(){
   const data=new FormData(form);
   const usage=data.get('annualUsage')?.toString().trim()||'';
-  const attribution={};
-  const params=new URLSearchParams(location.search);
-  for(const name of ['utm_source','utm_medium','utm_campaign']){
-    const value=params.get(name);
-    if(value && !/[\u0000-\u001f]/.test(value))attribution[name]=value.trim().slice(0,120);
-  }
+  const attribution=getCampaignAttribution(window);
   const body={
     intent:'quote',
     fullName:String(data.get('fullName')||'').trim(),
@@ -72,7 +69,7 @@ function payload(){
   if(Object.keys(attribution).length)body.attribution=attribution;
   return body;
 }
-form.addEventListener('input',()=>{if(!submitting){key=null;clearError();}});
+form.addEventListener('input',()=>{if(!submitting){key=null;conversionRef=null;clearError();}});
 const preset=new URLSearchParams(location.search);
 // Legacy BAT-Q7 and 4-6-module URLs are deliberately not accepted as offers.
 // Only anonymous, allowlisted installation-check answers may be prefilled.
@@ -100,6 +97,7 @@ form.addEventListener('submit',async event=>{
     return;
   }
   key ||= crypto.randomUUID().replaceAll('-','');
+  conversionRef ||= createConversionReference(window);
   setBusy(true);
   try{
     const response=await fetch('/api/leads',{
@@ -115,9 +113,8 @@ form.addEventListener('submit',async event=>{
     try{data=await response.json();}catch{data=null;}
     if((response.status===200||response.status===201)&&data?.ok&&/^AURA-[a-f0-9-]{36}$/.test(data.requestId||'')){
       complete=true;
-      // Only signal a real, confirmed acceptance. No personal data or Google tag is sent.
-      publishAcceptedLeadSignal('quote');
       $('quoteReceipt').textContent=data.requestId;
+      publishAcceptedLeadSignal('quote', window, conversionRef);
       form.hidden=true;
       $('quoteResult').hidden=false;
       $('quoteResult').scrollIntoView({behavior:'smooth',block:'start'});

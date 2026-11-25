@@ -181,7 +181,7 @@ test('serves only dist, uses real 404s, and applies security/cache headers', asy
   const index = await fetch(f.base);
   assert.equal(index.status, 200);
   const csp = index.headers.get('content-security-policy');
-  assert.match(csp, /script-src 'self' 'sha256-/);
+  assert.match(csp, /script-src 'self'(?: https:\/\/www\.googletagmanager\.com)? 'sha256-/);
   assert.doesNotMatch(csp.split(';').find(v => v.includes('script-src')), /unsafe-inline|unsafe-eval/);
   assert.equal(index.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(index.headers.get('x-robots-tag'), 'noindex, nofollow');
