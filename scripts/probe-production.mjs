@@ -255,7 +255,7 @@ export async function probeProduction(fetcher = fetch) {
     capacitySizingGuideDeployed: observed['/kennis/hoeveel-kwh-nodig/'].status === 200 &&
       observed['/kennis/hoeveel-kwh-nodig/'].content.includes(`<link rel="canonical" href="${BASE}/kennis/hoeveel-kwh-nodig/">`) &&
       observed['/kennis/hoeveel-kwh-nodig/'].content.includes("Hoeveel kWh HYXI AURA") &&
-      observed['/kennis/hoeveel-kwh-nodig/'].content.includes("6,7 kWh") &&
+      observed['/kennis/hoeveel-kwh-nodig/'].content.includes("8,6 kWh") &&
       observed['/kennis/hoeveel-kwh-nodig/'].content.includes('href="/offerte/"') &&
       observed['/'].content.includes('href="/kennis/hoeveel-kwh-nodig/"'),
     hyxiAppGuideDeployed: observed['/kennis/app-monitoring/'].status === 200 &&
