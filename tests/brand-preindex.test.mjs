@@ -115,8 +115,9 @@ test('All thirty public pages have branded favicon, share preview, trustworthy m
     assert.match(attribute(html,'meta','name','robots','content')||'',/index, follow, max-image-preview:large/);
     assert.match(html,/class="tbt-wordmark" src="\/assets\/thuisbatterijteam-logo\.svg" width="804" height="106" alt="Thuisbatterij Team"/,
       `${name} shows owner-provided new TBT vector wordmark, not an old house-only logo`);
-    assert.match(html,/href="\/src\/launch-brand-nav\.css"/,`${name} shared visual branding and nav CSS`);
-    assert.match(html,/src="\/src\/navigation\.mjs"/,`${name} accessible mobile navigation`);
+    const sourceHtml=await readFile(resolve(root,path),'utf8');
+    assert.match(sourceHtml,/href="\/src\/launch-brand-nav\.css"/,`${name} source imports shared branding and nav CSS`);
+    assert.match(sourceHtml,/src="\/src\/navigation\.mjs"/,`${name} source imports navigation JS`);
     assert.doesNotMatch(html,/<link rel="icon" type="image\/svg\+xml" href="\/favicon\.svg">/);
     assert.match(html,/Thuisbatterij/,`${name} presenter identity remains visible`);
   }
