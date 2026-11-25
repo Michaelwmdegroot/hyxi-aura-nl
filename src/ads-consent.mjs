@@ -96,6 +96,11 @@ if (isBrowser) {
     openPreferences,
     getCampaignAttribution: () => getCampaignAttribution(window),
   });
-  document.addEventListener('DOMContentLoaded', renderConsentControls, { once: true });
+  function mountConsentControls() {
+    if (banner) return;
+    if (document.body) renderConsentControls();
+    else window.setTimeout(mountConsentControls, 0);
+  }
+  mountConsentControls();
   if (consent === 'granted') { gtag('consent', 'update', MEASUREMENT_CONSENT); loadGtm(); }
 }

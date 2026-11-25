@@ -78,18 +78,19 @@ try {
     const response=await page.goto(base+'/');
     assert.equal(response.status(),200);
     await page.evaluate(async()=>{await document.fonts.ready});
-    await expect(page.locator('.site-header .presenter-owner')).toHaveText('Thuisbatterij Team');
+    const owner = page.locator('.site-header .tbt-wordmark');
+    await expect(owner).toHaveAttribute('alt', 'Thuisbatterij Team');
     await expect(page.locator('.site-header .presenter-verb')).toHaveText('presenteert');
     await expect(page.locator('.site-header .presenter-product')).toHaveText('HYXI AURA');
     // Both words on exactly ONE second line, visually contained under the
-    // full 'Thuisbatterij Team' wordmark — even on 320px screens.
-    const owner = await page.locator('.site-header .presenter-owner').boundingBox();
+    // full TBT wordmark — even on 320px screens.
+    const ownerBox = await owner.boundingBox();
     const subtitle = await page.locator('.site-header .presenter-subline').boundingBox();
     const verb = await page.locator('.site-header .presenter-verb').boundingBox();
     const product = await page.locator('.site-header .presenter-product').boundingBox();
-    assert.ok(subtitle.y >= owner.y + owner.height - 2, 'Presenter subline must sit BELOW the owner name at ' + width);
+    assert.ok(subtitle.y >= ownerBox.y + ownerBox.height - 2, 'Presenter subline must sit BELOW the owner wordmark at ' + width);
     assert.ok(Math.abs(verb.y - product.y) < 4, 'Presenter words must be on the same baseline at ' + width);
-    assert.ok(subtitle.x >= owner.x - 2 && subtitle.x + subtitle.width <= owner.x + owner.width + 2,
+    assert.ok(subtitle.x >= ownerBox.x - 2 && subtitle.x + subtitle.width <= ownerBox.x + ownerBox.width + 2,
       'Presenter subline must fit within TBT brand width at ' + width);
     await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
     await expect(page.locator('.hero-view-instruction')).toHaveCount(0);
@@ -194,6 +195,9 @@ try {
     const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'no-preference'});
     const page=await context.newPage();
     await page.goto(base+'/');
+    const consent=page.locator('.hyxi-consent');
+    await consent.waitFor({state:'attached',timeout:2000}).catch(()=>{});
+    if (await consent.isVisible()) await consent.locator('[data-consent="deny"]').click();
     const stage=page.locator('#hero-product-stage');
     await stage.scrollIntoViewIfNeeded();
     const rect=await stage.boundingBox();
@@ -253,7 +257,7 @@ try {
     await expect(page.locator('#hero-product-image')).toHaveAttribute('src','/images/aura-front.webp');
     await expect(page.locator('.hero-view-switcher')).toHaveCount(0);
     await expect(page.locator('#hero-product-stage')).not.toHaveAttribute('role','slider');
-    await expect(page.locator('.site-header .presenter-brand')).toContainText('Thuisbatterij');
+    await expect(page.locator('.site-header .presenter-brand .tbt-wordmark')).toHaveAttribute('alt', 'Thuisbatterij Team');
     console.log('PASS no-JS front fallback');
     await context.close();
   }
