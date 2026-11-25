@@ -25,7 +25,7 @@ test('each knowledge article is independently useful, canonical, sourced and ind
     assert.ok(html.includes(sourceUrls.product));
     assert.ok(html.includes(sourceUrls.localSinglePhase));
     assert.ok(html.includes(sourceUrls.localThreePhase));
-    assert.doesNotMatch(html, /<script(?![^>]*type="application\/ld\+json"|[^>]*src="\/src\/ads-consent\.mjs")/);
+    assert.doesNotMatch(html, /<script(?![^>]*type="application\/ld\+json"|[^>]*src="\/src\/ads-consent\.mjs"|[^>]*src="\/src\/navigation\.mjs")/);
     assert.doesNotMatch(html, /\sstyle=/i);
     const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
     assert.ok(match, `${slug} structured data present`);

@@ -316,7 +316,10 @@ async function contactJourney(page, fixture, label, phase, count) {
   const receipt = await response.json();
   assert.match(receipt.requestId, /^AURA-[0-9a-f-]{36}$/);
   await expect(page.locator('#success-state')).toBeVisible();
-  assert.deepEqual(await page.evaluate(() => window.__acceptedSignals), [{intent:'advice'}], 'Accepted advice fires exactly one first-party event');
+  const adviceSignals = await page.evaluate(() => window.__acceptedSignals);
+  assert.equal(adviceSignals.length, 1, 'Accepted advice fires exactly one first-party event');
+  assert.equal(adviceSignals[0].intent, 'advice');
+  assert.match(adviceSignals[0].conversionRef, /^hxa_[A-Za-z0-9_-]{20,100}$/);
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'success-title');
   await expect(page.locator('#request-id')).toHaveText(receipt.requestId);
   await expect(page.locator('#success-title')).toBeFocused();
@@ -549,7 +552,10 @@ try {
   await assertNoOverflow(quotePage,'mobile/offerte-complete');
   await quotePage.locator('#submitQuote').click();
   await expect(quotePage.locator('#quoteResult')).toBeVisible({timeout:15000});
-  assert.deepEqual(await quotePage.evaluate(() => window.__acceptedSignals), [{intent:'quote'}], 'Accepted quote fires exactly one first-party event');
+  const quoteSignals = await quotePage.evaluate(() => window.__acceptedSignals);
+  assert.equal(quoteSignals.length, 1, 'Accepted quote fires exactly one first-party event');
+  assert.equal(quoteSignals[0].intent, 'quote');
+  assert.match(quoteSignals[0].conversionRef, /^hxa_[A-Za-z0-9_-]{20,100}$/);
   await expect(quotePage.locator('#quoteReceipt')).toHaveText(/^AURA-[a-f0-9-]{36}$/);
   const sentQuote=live.calls.find(mail=>/Nieuwe offerteaanvraag/.test(mail.subject));
   assert.ok(sentQuote,'A quote must be sent via the existing API and injected SMTP transport');

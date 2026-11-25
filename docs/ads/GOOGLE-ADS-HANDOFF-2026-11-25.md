@@ -153,8 +153,8 @@ Uitgevoerd met Node 24.18.0 en de committed lockfile:
 |---|---|
 | `npm ci` | PASS; 0 kwetsbaarheden gemeld door npm |
 | `npm run build` | PASS |
-| `npm test` | **118/118 PASS** |
-| `npm run check` | **4.234 statische checks PASS op 31 pagina’s** |
+| `npm test` | **127/127 PASS** |
+| `npm run check` | **4.549 statische checks PASS op 30 pagina’s** |
 | `npm run test:browser` | PASS: 22 browserchecks, 13 accessibilitychecks, 3 scene-evidencechecks, 0 browser errors |
 | Consent browsermatrix | PASS: geen GTM vóór keuze of na weigeren; één GTM-load na accepteren; intrekken zet denied terug |
 | Leadbrowserflows | PASS: advies, offerte, retries, disabled-mailfallback, vijf BAT-Q9-pakketten en bestaande mobiele/nauwe layouts |
