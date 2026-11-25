@@ -21,8 +21,9 @@ test('all 30 public pages show the supplied vector wordmark and accessible menu 
     const html=await live(route);
     assert.match(html,/class="tbt-wordmark" src="\/assets\/thuisbatterijteam-logo\.svg" width="804" height="106" alt="Thuisbatterij Team"/,route+' brand');
     assert.doesNotMatch(html,/<(?:span|strong) class="(?:presenter-owner|secondary-presenter-owner)"/,route+' retired text lockup');
-    assert.match(html,/href="\/src\/launch-brand-nav\.css"/,route+' shared stylesheet');
-    assert.match(html,/src="\/src\/navigation\.mjs"/,route+' shared navigation JS');
+    const sourceHtml=await file((route==='/'?'':route.slice(1))+'index.html');
+    assert.match(sourceHtml,/href="\/src\/launch-brand-nav\.css"/,route+' source stylesheet');
+    assert.match(sourceHtml,/src="\/src\/navigation\.mjs"/,route+' source menu script');
     assert.equal((html.match(/id="launch-menu-toggle"/g)||[]).length,1,route+' one toggle');
     assert.equal((html.match(/id="launch-mobile-nav"/g)||[]).length,1,route+' one menu');
     assert.match(html,/aria-controls="launch-mobile-nav" aria-expanded="false" aria-label="Menu openen"/,route+' accessible initial state');
