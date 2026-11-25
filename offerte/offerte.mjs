@@ -1,3 +1,4 @@
+import { publishAcceptedLeadSignal } from '../src/lead-conversion-signal.mjs';
 // Standalone quote intake. Personal data stays in form memory; never in URL/storage/analytics.
 const $ = id => document.getElementById(id);
 const form = $('quoteForm'),button=$('submitQuote');
@@ -114,6 +115,8 @@ form.addEventListener('submit',async event=>{
     try{data=await response.json();}catch{data=null;}
     if((response.status===200||response.status===201)&&data?.ok&&/^AURA-[a-f0-9-]{36}$/.test(data.requestId||'')){
       complete=true;
+      // Only signal a real, confirmed acceptance. No personal data or Google tag is sent.
+      publishAcceptedLeadSignal('quote');
       $('quoteReceipt').textContent=data.requestId;
       form.hidden=true;
       $('quoteResult').hidden=false;

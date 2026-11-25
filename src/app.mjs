@@ -1,6 +1,7 @@
 import { configuration, decimal } from './configurator-model.mjs';
 import { energyScenario } from './energy-model.mjs';
 import { mountFallbackScene } from './fallback-scene.mjs';
+import { publishAcceptedLeadSignal } from './lead-conversion-signal.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -358,6 +359,8 @@ form.addEventListener('submit', async event => {
       return;
     }
     completed = true;
+    // First-party post-acceptance signal only: no personal data, cookies or external tags.
+    publishAcceptedLeadSignal('advice');
     form.hidden = true;
     $('#success-state').hidden = false;
     dialog.setAttribute('aria-labelledby', 'success-title');

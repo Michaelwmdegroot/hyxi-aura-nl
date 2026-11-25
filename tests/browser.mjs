@@ -248,6 +248,10 @@ async function configurations(page,label) {
 }
 
 async function contactJourney(page, fixture, label, phase, count) {
+  await page.evaluate(() => {
+    window.__acceptedSignals=[];
+    window.addEventListener('hyxi:lead-accepted', event => window.__acceptedSignals.push(event.detail));
+  });
   await setModules(page, phase, count);
   // Test the selected package's own primary CTA rather than the fixed header, whose
   // Chromium mobile hit-testing can be obscured during automatic scroll correction.
@@ -293,6 +297,7 @@ async function contactJourney(page, fixture, label, phase, count) {
   await expect(page.locator('#form-error')).toContainText('Geef aan dat Thuisbatterij Team contact mag opnemen');
   await expect(page.locator('#consent')).toBeFocused();
   assert.equal(fixture.calls.length, callsBefore, 'No consent must never send mail');
+  assert.deepEqual(await page.evaluate(() => window.__acceptedSignals), [], 'Invalid/no-consent must never count a lead');
   await page.locator('#consent').check();
   await accessibility(page, `${label}/dialog-contact`);
   await assertNoOverflow(page, `${label}/dialog-contact`);
@@ -311,6 +316,7 @@ async function contactJourney(page, fixture, label, phase, count) {
   const receipt = await response.json();
   assert.match(receipt.requestId, /^AURA-[0-9a-f-]{36}$/);
   await expect(page.locator('#success-state')).toBeVisible();
+  assert.deepEqual(await page.evaluate(() => window.__acceptedSignals), [{intent:'advice'}], 'Accepted advice fires exactly one first-party event');
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'success-title');
   await expect(page.locator('#request-id')).toHaveText(receipt.requestId);
   await expect(page.locator('#success-title')).toBeFocused();
@@ -494,6 +500,7 @@ try {
   await expect(quotePage.locator('#moduleType')).toHaveValue('9');
   await expect(quotePage.locator('#moduleCount')).toHaveValue('1');
   await quotePage.goto(live.origin+'/offerte/?phase=three&moduleType=9&moduleCount=3');
+  await quotePage.evaluate(() => {window.__acceptedSignals=[];window.addEventListener('hyxi:lead-accepted', e=>window.__acceptedSignals.push(e.detail));});
   await expect(quotePage.locator('#moduleType')).toHaveValue('9');
   await expect(quotePage.locator('#moduleCount')).toHaveValue('3');
   await expect(quotePage.locator('#selectionLabel')).toContainText('27,12 kWh');
@@ -511,6 +518,7 @@ try {
   await assertNoOverflow(quotePage,'mobile/offerte-complete');
   await quotePage.locator('#submitQuote').click();
   await expect(quotePage.locator('#quoteResult')).toBeVisible({timeout:15000});
+  assert.deepEqual(await quotePage.evaluate(() => window.__acceptedSignals), [{intent:'quote'}], 'Accepted quote fires exactly one first-party event');
   await expect(quotePage.locator('#quoteReceipt')).toHaveText(/^AURA-[a-f0-9-]{36}$/);
   const sentQuote=live.calls.find(mail=>/Nieuwe offerteaanvraag/.test(mail.subject));
   assert.ok(sentQuote,'A quote must be sent via the existing API and injected SMTP transport');
