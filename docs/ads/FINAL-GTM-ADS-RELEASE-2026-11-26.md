@@ -63,7 +63,7 @@ De bestaande privacyvriendelijke Basic Mode is behouden:
 | Server bevestigt geen aanvraag | Geen intern accepted-event en dus geen Ads-event |
 | Geaccepteerde advies- of offerteaanvraag | Eén opaque `hxa_...`-referentie naar `dataLayer`, zonder naam, e-mail, telefoon, postcode, vrije tekst, Odoo- of databasegegevens |
 
-De UTM-implementatie gebruikt geen browseropslag meer: `hyxi_campaign_attribution_v1` wordt niet gelezen of geschreven. Alleen `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` en `utm_term` uit de actuele URL worden allowlisted en naar same-site interne routes doorgegeven. De leadflow zelf blijft onafhankelijk van advertentietoestemming functioneren en de bestaande `leads@` → Odoo-mailimport is niet gewijzigd.
+De UTM-implementatie gebruikt geen browseropslag meer: `hyxi_campaign_attribution_v1` wordt niet gelezen of geschreven. Alleen `utm_source`, `utm_medium` en `utm_campaign` uit de actuele URL worden allowlisted en naar same-site interne routes doorgegeven. De leadflow zelf blijft onafhankelijk van advertentietoestemming functioneren en de bestaande `leads@` → Odoo-mailimport is niet gewijzigd.
 
 ## 4. Tag Assistant-bewijs
 
@@ -98,6 +98,8 @@ De native Google Ads-UI is gecontroleerd in account `727-613-6831`.
 
 De asset-optimalisatie-instellingen zijn beoordeeld. AI Image Enhancement en AI Video Enhancement staan uit voor maximale controle over de officiële productvisuals. Er zijn geen nieuwe advertentiemedia, claims, prijzen, garanties, schaarste- of besparingsclaims toegevoegd. De campagne is niet hervat en de bestaande TBT-container/accountscope is niet aangepast.
 
+De daadwerkelijke PMax-instelling **Campaign URL options** is read-only gecontroleerd: tracking template leeg, final URL suffix leeg en geen custom parameters. Google Ads voegt op campagneniveau dus geen UTM's toe. De website accepteert en verwerkt uitsluitend de drie ondersteunde velden `utm_source`, `utm_medium` en `utm_campaign` wanneer die in een advertentie-URL aanwezig zijn.
+
 ## 6. Lokale QA
 
 Uitgevoerd met de bestaande Node 24-omgeving en lockfile:
@@ -105,7 +107,7 @@ Uitgevoerd met de bestaande Node 24-omgeving en lockfile:
 | Controle | Resultaat |
 |---|---|
 | `npm run build` | PASS |
-| `npm test` | **128/128 PASS** |
+| `npm test` | **129/129 PASS** |
 | `npm run check` | **4.549 statische checks PASS op 30 pagina’s** |
 | `npm run test:browser` | PASS met lokale Chrome-binary; advies, offerte, consent, retries, deduplicatie, mobile/narrow/tablet, WebGL-fallback en accessibility groen |
 | `git diff --check` | PASS |
@@ -117,9 +119,22 @@ Er is geen nieuwe backend-, database-, SMTP-, Odoo-, authenticatie- of klantgege
 
 ## 7. QA-incident en begrenzing van het bewijs
 
-De eerste eenmalige live probe is afgebroken door een fout in het Playwright-testharnas: een generieke routehandler stond vóór de bedoelde API-stub. Daardoor kon één synthetische adviespayload de live `/api/leads`-route bereiken voordat de veilige probe werd uitgevoerd. De run gebruikte geen echte klantgegevens en geen echte advertentieklikken, maar het is niet volledig vast te stellen of de live intake/mailbox/Odoo-verwerking deze synthetische aanvraag heeft geaccepteerd. Er zijn daarna geen live formulierinzendingen meer gedaan. Dit incident is als releaseblocker voor commerciële vrijgave vastgelegd; de eigenaar moet de downstream-status controleren of het incident intern afhandelen.
+De eerste eenmalige live probe is afgebroken door een fout in het Playwright-testharnas: de generieke `**/*`-routehandler stond na de bedoelde `/api/leads`-stub en `route.continue()` liet de request naar productie door. De lokale trace identificeert exact één adviesaanvraag:
 
-De veilige herhaalprobes gebruikten één afvangende routehandler, lokale stubs voor configuratie en leadacceptatie en aborteerden Ads-meetverkeer vóór externe verzending. De campagne bleef gedurende deze controles gepauzeerd.
+- Tijdstip servermail: `2026-11-26T12:54:12.992Z` UTC;
+- intent: `advice`;
+- profiel: zonnepanelen gepland, 4.200 kWh, back-updoel, 1 fase;
+- gekozen verkenning: `1 × BAT-Q9`, `moduleType=9`, `moduleCount=1`;
+- UTM: `google / cpc / hyxi_aura_pmax`;
+- synthetische identificatiemarker: `Gecontroleerde QA` met uitsluitend `.test`-/dummy-contactwaarden; de exacte contactvelden staan bewust niet in deze publieke repository.
+
+De server heeft deze aanvraag geaccepteerd en een mailreceipt aangemaakt: `AURA-23dd0006-f9f8-49c6-a5e7-0392d93ebe58`. Read-only Hostinger Mail-bewijs toont één bericht in `leads@thuisbatterijteam.nl` INBOX (UID `1365`, `2026-11-26T12:54:13Z`, Message-ID met hetzelfde aanvraagnummer) met de volledige synthetische aanvraag en de verwachte UTM's. Daarmee is **mailbox: AANGETROFFEN** en SMTP/inboxaflevering bewezen. Er is geen echte persoons- of advertentie-informatie gebruikt.
+
+De exacte browser-gegenereerde `Idempotency-Key` en de HTTP-responseheaders zijn niet door de mislukte harness-run gelogd; het aanvraagnummer uit de ontvangen mail is de betrouwbare correlatiemarker. De publieke Beheer-endpoints `/api/beheer/summary`, `/api/beheer/outbox` en `/api/beheer/leads` gaven zonder een bestaande eigenaarssessie `401 LOGIN_REQUIRED`. Er is in deze run geen geautoriseerde Beheer-sessie beschikbaar gesteld: **Beheer/outbox: ONBEKEND**, niet “niet aangetroffen”. Er is geen loginpoging met geraden of nieuwe credentials gedaan. Er is geen geautoriseerde read-only Odoo-connector beschikbaar: **Odoo: ONBEKEND**. De mailboxreceipt is geen bewijs dat Odoo de lead heeft geïmporteerd.
+
+Er is niets verwijderd, gemarkeerd, bevestigd, opnieuw klaargezet of opnieuw verzonden. Er zijn daarna geen live formulier-POSTs of kunstmatige Ads-conversies uitgevoerd. De campagne bleef gepauzeerd.
+
+Voor toekomstige browser-QA is `tests/test-harness-safety.mjs` toegevoegd. Elke testtarget moet een loopback-origin valideren; de fail-closed leadguard blokkeert niet-loopback `/api/leads`-requests vóór verzending. De guard is in de bestaande leadjourney gebruikt en heeft geen productie-POST toegestaan.
 
 ## 8. Definitief GO/NO-GO
 
@@ -128,7 +143,7 @@ De veilige herhaalprobes gebruikten één afvangende routehandler, lokale stubs 
 **NO-GO — commercieel:** de campagne blijft gepauzeerd. Open voor eigenaarbesluit en operationele opvolging zijn:
 
 - expliciete commerciële vrijgave;
-- controle/afhandeling van het QA-incident uit §7;
+- geautoriseerde read-only controle in Beheer/outbox en Odoo, of expliciete eigenaaracceptatie van de resterende onzekerheid;
 - echte, vrijgegeven campagneverkeer- en conversiedata na activatie;
 - de bestaande onafhankelijke ownerreview voor premiumscore en echte iPhone Safari.
 

@@ -15,6 +15,7 @@ import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { createApp } from '../server/app.mjs';
 import { loadConfig } from '../server/config.mjs';
+import { assertSafeBrowserOrigin, installLeadFailClosedGuard } from './test-harness-safety.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const dist = resolve(root, 'dist');
@@ -36,6 +37,7 @@ async function fixture({ enabled = true } = {}) {
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const origin = `http://127.0.0.1:${server.address().port}`;
+  assertSafeBrowserOrigin(origin);
   const config = loadConfig({
     NODE_ENV: 'test', SITE_URL: origin, ALLOWED_ORIGINS: origin,
     LEAD_ENABLED: String(enabled), SMTP_HOST: 'smtp.example.test',
@@ -249,6 +251,7 @@ async function configurations(page,label) {
 
 async function contactJourney(page, fixture, label, phase, count) {
   await page.route('https://www.googletagmanager.com/**', route => route.abort());
+  const assertNoProductionLead = await installLeadFailClosedGuard(page);
   const adsConsent = page.getByRole('button', { name: 'Accepteren', exact: true });
   if (await adsConsent.isVisible()) {
     await adsConsent.click();
@@ -370,6 +373,7 @@ async function contactJourney(page, fixture, label, phase, count) {
   await expect(page.locator('#lead-dialog')).not.toBeVisible();
   await expect(opener).toBeFocused();
   assert.equal(fixture.calls.length, callsBefore + 1);
+  assertNoProductionLead();
   record(`${label}: validated dialog → API → accepted SMTP recipient → matching receipt, with focus restored`);
 }
 
@@ -423,6 +427,7 @@ try {
   const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined;
   browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   const live = await fixture();
+  assertSafeBrowserOrigin(live.origin);
   await consentJourney(live.origin);
   for (const viewport of [{ label: 'desktop', width: 1440, height: 1000 }, { label: 'mobile', width: 390, height: 844 }]) {
     currentCheck = viewport.label;
@@ -571,6 +576,7 @@ try {
   currentCheck = 'standalone-quote-journey';
   const quoteContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce',locale:'nl-NL'});
   const quotePage=await quoteContext.newPage();
+  const assertNoProductionQuote = await installLeadFailClosedGuard(quotePage);
   currentPage=quotePage;
   quotePage.on('pageerror',error=>report.browserErrors.push({viewport:'quote',message:error.message}));
   await quotePage.goto(live.origin+'/offerte/?moduleType=7&moduleCount=6');
@@ -616,6 +622,7 @@ try {
   const sentQuote=live.calls.find(mail=>/Nieuwe offerteaanvraag/.test(mail.subject));
   assert.ok(sentQuote,'A quote must be sent via the existing API and injected SMTP transport');
   assert.match(sentQuote.text,/Fictieve behoefte: passende installatie beoordelen/);
+  assertNoProductionQuote();
   await accessibility(quotePage,'mobile/offerte-confirmation');
   await quotePage.screenshot({path:resolve(resultsDir,'mobile-offerte-success.png'),fullPage:true});
   record('Standalone quote: responsive form → CSRF API → quote-classified mail → matching receipt');
