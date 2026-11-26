@@ -89,7 +89,10 @@ if (isBrowser) {
     dataLayer.push({ event: CONVERSION_EVENT, hyxi_lead_intent: detail.intent, hyxi_conversion_ref: reference });
   }
 
-  document.addEventListener('hyxi:lead-accepted', publishLeadConversion);
+  // Accepted lead signals are dispatched on window by both lead journeys.
+  // Listening on document silently misses them because CustomEvent does not
+  // bubble across EventTarget objects.
+  window.addEventListener('hyxi:lead-accepted', publishLeadConversion);
   preserveCampaignAttribution(document, window);
   window.hyxiAdsConsent = Object.freeze({
     get status() { return consent; },

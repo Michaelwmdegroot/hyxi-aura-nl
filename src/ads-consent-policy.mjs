@@ -1,4 +1,4 @@
-export const GTM_CONTAINER_ID = 'GTM-KRT2VMF3';
+export const GTM_CONTAINER_ID = 'GTM-52MBZWSL';
 export const CONSENT_STORAGE_KEY = 'hyxi_ads_consent_v1';
 export const CONVERSION_EVENT = 'hyxi_lead_success';
 

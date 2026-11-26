@@ -123,7 +123,7 @@ form.addEventListener('submit',async event=>{
       return;
     }
     if(data?.code==='SESSION_EXPIRED')await loadConfig(true);
-    if(data?.code==='REQUEST_CHANGED')key=null;
+    if(data?.code==='REQUEST_CHANGED'){key=null;conversionRef=null;}
     error(data?.message||'Je aanvraag kon niet worden opgeslagen. Probeer opnieuw of neem direct contact op.',[429,503].includes(response.status));
   }catch{
     error('We konden de ontvangst niet bevestigen. Probeer het opnieuw met dezelfde gegevens of neem contact met ons op.',true);

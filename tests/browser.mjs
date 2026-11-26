@@ -248,6 +248,12 @@ async function configurations(page,label) {
 }
 
 async function contactJourney(page, fixture, label, phase, count) {
+  await page.route('https://www.googletagmanager.com/**', route => route.abort());
+  const adsConsent = page.getByRole('button', { name: 'Accepteren', exact: true });
+  if (await adsConsent.isVisible()) {
+    await adsConsent.click();
+    await expect.poll(() => page.evaluate(() => window.hyxiAdsConsent?.status)).toBe('granted');
+  }
   await page.evaluate(() => {
     window.__acceptedSignals=[];
     window.addEventListener('hyxi:lead-accepted', event => window.__acceptedSignals.push(event.detail));
@@ -320,6 +326,17 @@ async function contactJourney(page, fixture, label, phase, count) {
   assert.equal(adviceSignals.length, 1, 'Accepted advice fires exactly one first-party event');
   assert.equal(adviceSignals[0].intent, 'advice');
   assert.match(adviceSignals[0].conversionRef, /^hxa_[A-Za-z0-9_-]{20,100}$/);
+  const adviceConversions = await page.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success'));
+  assert.equal(adviceConversions.length, 1, 'Accepted advice publishes exactly one GTM dataLayer conversion');
+  assert.equal(adviceConversions[0].hyxi_lead_intent, 'advice');
+  assert.equal(adviceConversions[0].hyxi_conversion_ref, adviceSignals[0].conversionRef);
+  assert.doesNotMatch(JSON.stringify(adviceConversions[0]), /Browsercontrole|@example\.test|0612345678|1234AB|AURA-/i,
+    'GTM conversion payload must not contain contact data or the internal receipt');
+  await page.evaluate(reference => window.dispatchEvent(new CustomEvent('hyxi:lead-accepted', {
+    detail: { intent: 'advice', conversionRef: reference },
+  })), adviceSignals[0].conversionRef);
+  assert.equal(await page.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success').length), 1,
+    'Retrying the same accepted advice reference must remain deduplicated');
   await expect(page.locator('#lead-dialog')).toHaveAttribute('aria-labelledby', 'success-title');
   await expect(page.locator('#request-id')).toHaveText(receipt.requestId);
   await expect(page.locator('#success-title')).toBeFocused();
@@ -338,10 +355,13 @@ async function contactJourney(page, fixture, label, phase, count) {
   assert.equal(await page.locator('#fullName').inputValue(), '');
   const browserStorage = await page.evaluate(() => ({
     local: localStorage.length,
+    localKeys: Object.keys(localStorage),
+    consent: localStorage.getItem('hyxi_ads_consent_v1'),
     session: JSON.parse(sessionStorage.getItem('hyxi_campaign_attribution_v1') || '{}'),
     values: Object.values(localStorage).concat(Object.values(sessionStorage)).join(' '),
   }));
-  assert.equal(browserStorage.local, 0, 'No consent choice or contact data should be stored in localStorage');
+  assert.deepEqual(browserStorage.localKeys, ['hyxi_ads_consent_v1'], 'Only the explicit ads consent choice may be stored in localStorage');
+  assert.equal(browserStorage.consent, 'granted', 'The stored local choice must reflect explicit measurement consent');
   assert.deepEqual(browserStorage.session, { utm_source: 'browser-qa', utm_medium: 'test' }, 'Only allowlisted campaign attribution may persist in sessionStorage');
   assert.doesNotMatch(browserStorage.values, /Browsercontrole|@example\.test|0612345678|1234AB/, 'Contact data must not enter browser storage');
   assert.ok(!page.url().includes('example.test'), 'Contact data must not appear in the URL');
@@ -351,6 +371,14 @@ async function contactJourney(page, fixture, label, phase, count) {
   await expect(opener).toBeFocused();
   assert.equal(fixture.calls.length, callsBefore + 1);
   record(`${label}: validated dialog → API → accepted SMTP recipient → matching receipt, with focus restored`);
+}
+
+async function acceptAdsConsent(page) {
+  const button = page.getByRole('button', { name: 'Accepteren', exact: true });
+  if (await button.isVisible()) {
+    await button.click();
+    await expect.poll(() => page.evaluate(() => window.hyxiAdsConsent?.status)).toBe('granted');
+  }
 }
 
 async function consentJourney(origin) {
@@ -365,13 +393,28 @@ async function consentJourney(origin) {
   const defaults = await page.evaluate(() => window.dataLayer?.find(item => Array.isArray(item) && item[0] === 'consent' && item[1] === 'default')?.[2]);
   assert.deepEqual(defaults, { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', wait_for_update: 500 });
   await page.getByRole('button', { name: 'Weigeren', exact: true }).click();
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('hyxi:lead-accepted', {
+    detail: { intent: 'advice', conversionRef: 'hxa_consent_denied_reference_0001' },
+  })));
+  assert.equal(await page.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success').length), 0,
+    'Denied consent must suppress lead conversion dataLayer output');
   assert.equal(gtmRequests.length, 0, 'Refusing measurement must keep Google unloaded');
   await page.getByRole('button', { name: 'Cookievoorkeuren wijzigen', exact: true }).click();
   await page.getByRole('button', { name: 'Accepteren', exact: true }).click();
   await expect.poll(() => gtmRequests.length).toBe(1);
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('hyxi:lead-accepted', {
+    detail: { intent: 'advice', conversionRef: 'hxa_consent_granted_reference_0001' },
+  })));
+  assert.equal(await page.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success').length), 1,
+    'Granted consent must publish an accepted lead to the dataLayer');
   await page.getByRole('button', { name: 'Cookievoorkeuren wijzigen', exact: true }).click();
   await page.getByRole('button', { name: 'Weigeren', exact: true }).click();
   assert.equal(await page.evaluate(() => window.hyxiAdsConsent?.status), 'denied', 'Revoking measurement must update consent state');
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('hyxi:lead-accepted', {
+    detail: { intent: 'quote', conversionRef: 'hxa_consent_revoked_reference_0001' },
+  })));
+  assert.equal(await page.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success').length), 1,
+    'Revoked consent must suppress later lead conversion dataLayer output');
   record('Consent Mode v2: denied by default, opt-in loads one GTM container, revoke returns to denied');
   await context.close();
 }
@@ -534,6 +577,8 @@ try {
   await expect(quotePage.locator('#moduleType')).toHaveValue('9');
   await expect(quotePage.locator('#moduleCount')).toHaveValue('1');
   await quotePage.goto(live.origin+'/offerte/?phase=three&moduleType=9&moduleCount=3');
+  await quotePage.route('https://www.googletagmanager.com/**', route => route.abort());
+  await acceptAdsConsent(quotePage);
   await quotePage.evaluate(() => {window.__acceptedSignals=[];window.addEventListener('hyxi:lead-accepted', e=>window.__acceptedSignals.push(e.detail));});
   await expect(quotePage.locator('#moduleType')).toHaveValue('9');
   await expect(quotePage.locator('#moduleCount')).toHaveValue('3');
@@ -556,6 +601,17 @@ try {
   assert.equal(quoteSignals.length, 1, 'Accepted quote fires exactly one first-party event');
   assert.equal(quoteSignals[0].intent, 'quote');
   assert.match(quoteSignals[0].conversionRef, /^hxa_[A-Za-z0-9_-]{20,100}$/);
+  const quoteConversions = await quotePage.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success'));
+  assert.equal(quoteConversions.length, 1, 'Accepted quote publishes exactly one GTM dataLayer conversion');
+  assert.equal(quoteConversions[0].hyxi_lead_intent, 'quote');
+  assert.equal(quoteConversions[0].hyxi_conversion_ref, quoteSignals[0].conversionRef);
+  assert.doesNotMatch(JSON.stringify(quoteConversions[0]), /Fictieve|@example\.test|0612345678|1234AB|AURA-/i,
+    'GTM quote conversion payload must not contain contact data or the internal receipt');
+  await quotePage.evaluate(reference => window.dispatchEvent(new CustomEvent('hyxi:lead-accepted', {
+    detail: { intent: 'quote', conversionRef: reference },
+  })), quoteSignals[0].conversionRef);
+  assert.equal(await quotePage.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success').length), 1,
+    'Retrying the same accepted quote reference must remain deduplicated');
   await expect(quotePage.locator('#quoteReceipt')).toHaveText(/^AURA-[a-f0-9-]{36}$/);
   const sentQuote=live.calls.find(mail=>/Nieuwe offerteaanvraag/.test(mail.subject));
   assert.ok(sentQuote,'A quote must be sent via the existing API and injected SMTP transport');

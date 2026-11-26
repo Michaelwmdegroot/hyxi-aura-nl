@@ -7,6 +7,7 @@ export function createConversionReference(scope = globalThis) {
     if (uuid) return `hxa_${uuid}`;
     const bytes = new Uint8Array(16);
     scope?.crypto?.getRandomValues?.(bytes);
+    if (!bytes.some(Boolean)) return null;
     const fallback = [...bytes].map(value => value.toString(16).padStart(2, '0')).join('');
     return fallback ? `hxa_${fallback}` : null;
   } catch { return null; }

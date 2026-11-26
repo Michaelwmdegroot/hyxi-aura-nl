@@ -29,3 +29,10 @@ test('a missing or malformed conversion reference does not make the event invali
   assert.equal(publishAcceptedLeadSignal('quote', target, 'not-a-reference'), true);
   assert.deepEqual(detail, { intent: 'quote' });
 });
+
+test('a broken crypto fallback never creates a fixed zero conversion reference', () => {
+  const target = new EventTarget();
+  target.CustomEvent = CustomEvent;
+  target.crypto = { getRandomValues(bytes) { bytes.fill(0); return bytes; } };
+  assert.equal(createConversionReference(target), null);
+});

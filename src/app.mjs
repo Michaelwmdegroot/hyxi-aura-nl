@@ -350,6 +350,10 @@ form.addEventListener('submit', async event => {
       body, signal: AbortSignal.timeout(40000) });
     const result = await response.json().catch(() => null);
     if (!response.ok || !result?.ok || typeof result.requestId !== 'string') {
+      if (result?.code === 'REQUEST_CHANGED') {
+        idempotencyKey = null;
+        conversionRef = null;
+      }
       showError(result?.message || 'Je aanvraag is nog niet bevestigd. Probeer het opnieuw of neem rechtstreeks contact op met Thuisbatterij Team.', true);
       if (result?.fields) {
         const first = Object.keys(result.fields).find(name => ['fullName', 'email', 'phone', 'postcode', 'consent'].includes(name));
