@@ -1,5 +1,7 @@
 # HYXI AURA — Google Ads en conversiemeting
 
+> **Opvolging 26 november 2026:** dit historische handoffdocument is vervangen door [FINAL-GTM-ADS-RELEASE-2026-11-26.md](FINAL-GTM-ADS-RELEASE-2026-11-26.md). De eerdere NO-GO wegens ontbrekende GTM-toegang is opgelost met `GTM-52MBZWSL`, GTM-versie 2 is live, de campagne-optimalisaties zijn uitgevoerd en de campagne blijft bewust gepauzeerd. Oude waarden hieronder zijn historische status en geen actuele instructie.
+
 **Status:** technische oplevering met commerciële NO-GO
 
 **Datum:** 25 november 2026
