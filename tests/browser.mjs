@@ -357,12 +357,12 @@ async function contactJourney(page, fixture, label, phase, count) {
     local: localStorage.length,
     localKeys: Object.keys(localStorage),
     consent: localStorage.getItem('hyxi_ads_consent_v1'),
-    session: JSON.parse(sessionStorage.getItem('hyxi_campaign_attribution_v1') || '{}'),
+    sessionAttribution: sessionStorage.getItem('hyxi_campaign_attribution_v1'),
     values: Object.values(localStorage).concat(Object.values(sessionStorage)).join(' '),
   }));
   assert.deepEqual(browserStorage.localKeys, ['hyxi_ads_consent_v1'], 'Only the explicit ads consent choice may be stored in localStorage');
   assert.equal(browserStorage.consent, 'granted', 'The stored local choice must reflect explicit measurement consent');
-  assert.deepEqual(browserStorage.session, { utm_source: 'browser-qa', utm_medium: 'test' }, 'Only allowlisted campaign attribution may persist in sessionStorage');
+  assert.equal(browserStorage.sessionAttribution, null, 'Campaign attribution must not persist in sessionStorage before consent');
   assert.doesNotMatch(browserStorage.values, /Browsercontrole|@example\.test|0612345678|1234AB/, 'Contact data must not enter browser storage');
   assert.ok(!page.url().includes('example.test'), 'Contact data must not appear in the URL');
   await page.screenshot({ path: resolve(resultsDir, `${label}-success.png`) });

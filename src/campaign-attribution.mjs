@@ -2,23 +2,20 @@
  * Small, allowlisted campaign attribution helper.
  *
  * Only the three parameters already accepted by the lead API are retained.
- * Values live in sessionStorage so navigation can keep the source without
- * putting personal data, click IDs or arbitrary query parameters in storage.
+ * Attribution is carried forward only on same-site links in the current page
+ * URL. It is deliberately not written to or read from browser storage before
+ * consent: campaign source is optional measurement context, not a necessary
+ * site function.
  */
 export const ATTRIBUTION_KEYS = Object.freeze(['utm_source', 'utm_medium', 'utm_campaign']);
-export const ATTRIBUTION_STORAGE_KEY = 'hyxi_campaign_attribution_v1';
 const VALUE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._~+ -]{0,79}$/;
-
-function storageFor(scope) {
-  try { return scope?.sessionStorage ?? null; } catch { return null; }
-}
 
 function validValue(value) {
   const normalized = String(value ?? '').trim();
   return VALUE_PATTERN.test(normalized) ? normalized : null;
 }
 
-export function readCampaignAttribution(search = '', storage = null) {
+export function readCampaignAttribution(search = '') {
   const result = {};
   try {
     const params = new URLSearchParams(search);
@@ -27,22 +24,11 @@ export function readCampaignAttribution(search = '', storage = null) {
       if (value) result[key] = value;
     }
   } catch { /* malformed input is ignored, never fatal to the lead form */ }
-  if (Object.keys(result).length) {
-    try { storage?.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(result)); } catch { /* storage is optional */ }
-    return result;
-  }
-  try {
-    const saved = JSON.parse(storage?.getItem(ATTRIBUTION_STORAGE_KEY) || '{}');
-    for (const key of ATTRIBUTION_KEYS) {
-      const value = validValue(saved?.[key]);
-      if (value) result[key] = value;
-    }
-  } catch { /* ignore unavailable or invalid storage */ }
   return result;
 }
 
 export function getCampaignAttribution(scope = globalThis) {
-  return readCampaignAttribution(scope?.location?.search || '', storageFor(scope));
+  return readCampaignAttribution(scope?.location?.search || '');
 }
 
 export function preserveCampaignAttribution(documentRef = globalThis.document, scope = globalThis) {
