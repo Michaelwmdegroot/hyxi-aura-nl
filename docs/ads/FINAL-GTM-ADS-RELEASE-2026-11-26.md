@@ -5,7 +5,7 @@
 **Commerciële status:** NO-GO totdat de opdrachtgever expliciet vrijgeeft  
 **Website:** https://hyxi-aura.nl  
 **Google Ads-account:** `727-613-6831`  
-**Campagne:** `Campaign #1` (`24543992772`)
+**Campagne:** `HYXI AURA - NL - PMax` (`24543992772`)
 
 ## Besluit
 
@@ -25,6 +25,8 @@ Commit `e91d3d3d725e7465e404cf0bc2e3065461531f11` op `main` bevat:
 
 Hostinger heeft deze commit automatisch gebouwd en gepubliceerd in deployment `01a217d4-b81b-7329-924f-4a5d103f3a45` met status `completed` (Node 24, `npm run build`, `server.mjs`). De live homepage en `/offerte/` gaven HTTP 200. De live `navigation-B_FqvPwq.js` bevat `GTM-52MBZWSL` en `hyxi:lead-accepted`; de oude ID is in de gecontroleerde live frontendbundles niet aangetroffen.
 
+De privacyfix staat in commit `87bdbd2dc0ab11df7b30993983ead8e2abf9a707` op `main` en is gepubliceerd in Hostinger-deployment `01a217e9-a954-708e-8234-ea6febbff76b` (`completed`). UTM-waarden worden sindsdien niet meer naar `sessionStorage` geschreven of daaruit gelezen; alleen een allowlist uit de actuele URL wordt via same-site interne links doorgegeven.
+
 ## 2. GTM-rechten, configuratie en publicatie
 
 | Onderdeel | Gecontroleerde eindwaarde |
@@ -34,8 +36,8 @@ Hostinger heeft deze commit automatisch gebouwd en gepubliceerd in deployment `0
 | Container-ID | `GTM-52MBZWSL` |
 | Gebruiker | `thuisbatterijteam@gmail.com` |
 | Recht | `Publish`, status `Has access` |
-| Gepubliceerde versie | Versie 2, `Live`, 26 november 2026 |
-| Publicatienaam | `HYXI lead conversion — GTM-52MBZWSL` |
+| Gepubliceerde versie | Versie 3, `Live`, 26 november 2026 |
+| Publicatienaam | `HYXI lead conversion — Transaction ID` |
 | Oude container | `GTM-KRT2VMF3`, vervangen en niet meer in de websitecode |
 | TBT-container | `GTM-KWTJK9SZ`, ongemoeid gelaten |
 
@@ -45,6 +47,8 @@ Gepubliceerde tags:
 2. `Google Ads AW-18595797698` — Google Ads-destinationtag op `Initialization - All Pages`.
 
 De Ads-tags tonen de ingebouwde consentchecks voor `ad_storage`, `ad_user_data` en `ad_personalization`. Er zijn geen extra consentchecks of PII-velden toegevoegd. De applicatie gebruikt daarnaast `analytics_storage: denied` en bouwt geen remarketing- of GA4-doel in.
+
+Versie 3 bevat de variabele `HYXI conversion ref` (Data Layer Variable v2, naam `hyxi_conversion_ref`). De gepubliceerde leadtag gebruikt `{{HYXI conversion ref}}` als Transaction ID. Conversion Linking staat aan. Daardoor wordt voor zowel advies als offerte dezelfde opaque referentie uit het bevestigde `hyxi_lead_success`-event gebruikt en niet een statische of persoonsherleidbare waarde.
 
 ## 3. Consent Mode v2 en eventflow
 
@@ -59,7 +63,7 @@ De bestaande privacyvriendelijke Basic Mode is behouden:
 | Server bevestigt geen aanvraag | Geen intern accepted-event en dus geen Ads-event |
 | Geaccepteerde advies- of offerteaanvraag | Eén opaque `hxa_...`-referentie naar `dataLayer`, zonder naam, e-mail, telefoon, postcode, vrije tekst, Odoo- of databasegegevens |
 
-`sessionStorage` bevat uitsluitend de begrensde consent-/attributiestatus en de deduplicatiesleutel. De leadflow zelf blijft onafhankelijk van advertentietoestemming functioneren en de bestaande `leads@` → Odoo-mailimport is niet gewijzigd.
+De UTM-implementatie gebruikt geen browseropslag meer: `hyxi_campaign_attribution_v1` wordt niet gelezen of geschreven. Alleen `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` en `utm_term` uit de actuele URL worden allowlisted en naar same-site interne routes doorgegeven. De leadflow zelf blijft onafhankelijk van advertentietoestemming functioneren en de bestaande `leads@` → Odoo-mailimport is niet gewijzigd.
 
 ## 4. Tag Assistant-bewijs
 
@@ -70,7 +74,9 @@ Tag Assistant is verbonden met `https://hyxi-aura.nl/` en rapporteerde:
 - Google Ads-basistag fired één keer op initialization;
 - custom leadtag zichtbaar als `not fired` zolang er geen echte bevestigde lead is aangemaakt.
 
-Dat laatste is bewust: er is geen productie-lead of productie-e-mail verstuurd om alleen een meettag te simuleren. De lokale geïntegreerde browserregressies bewijzen de advies- en offerte-output naar `dataLayer` met toestemming en nul output zonder toestemming. De live GTM-respons gaf HTTP 200 en bevatte de Ads-destination en het nieuwe conversielabel.
+Daarna is de daadwerkelijk gepubliceerde tag gecontroleerd met een gecontroleerde productie-browserprobe: `/api/config` en `/api/leads` waren lokale stubs en alle Google Ads-endpoints werden vóór verzending afgebroken. Voor zowel advies als offerte werd exact één `hyxi_lead_success`-event gezien. De onderschepte request gebruikte `/pagead/conversion/18595797698/`, label `3LhMCJC0tr8dEMK1laNF`, `oid=hxa_...` als dynamische Transaction ID en de gecontroleerde `gclid`/`gclaw` voor klikattributie. Er is daarmee geen kunstmatige Ads-conversie naar Google verzonden.
+
+Bij de afzonderlijke revoke-probe waren de tags al geladen; na intrekken stond consent op `denied` en bleef het aantal Ads-requests gelijk (`adsBefore=2`, `adsAfter=2`). Een synthetisch lead-event veroorzaakte geen nieuwe meetrequest. Dit bewijst de intrekkingsroute binnen de gecontroleerde browsercontext, niet een commerciële conversie.
 
 ## 5. Google Ads-campagne-optimalisatie
 
@@ -78,7 +84,7 @@ De native Google Ads-UI is gecontroleerd in account `727-613-6831`.
 
 | Instelling | Eindstatus |
 |---|---|
-| Campagne | `Campaign #1`, Performance Max |
+| Campagne | `HYXI AURA - NL - PMax`, Performance Max |
 | Status | **PAUSED** |
 | Dagbudget | **€16,12/dag**, niet gewijzigd |
 | Biedstrategie | Maximize conversions |
@@ -86,9 +92,11 @@ De native Google Ads-UI is gecontroleerd in account `727-613-6831`.
 | Locatie | Nederland, **Presence: people in or regularly in included locations** |
 | Text customisation / automatische tekstvarianten | **Uit** |
 | Final URL expansion | **Uit** |
+| Image enhancement | **Uit** |
+| Video enhancement | **Uit** |
 | Nieuwe campagne of conversieactie | Geen |
 
-De asset-optimalisatie-instellingen zijn beoordeeld. Er zijn geen nieuwe advertentiemedia, claims, prijzen, garanties, schaarste- of besparingsclaims toegevoegd. Google’s image- en video-enhancement bleven aan; dit blijft een eigenaarspunt wanneer volledige creatieve pixelcontrole vóór commerciële vrijgave vereist is. De campagne is niet hervat en de bestaande TBT-container/accountscope is niet aangepast.
+De asset-optimalisatie-instellingen zijn beoordeeld. AI Image Enhancement en AI Video Enhancement staan uit voor maximale controle over de officiële productvisuals. Er zijn geen nieuwe advertentiemedia, claims, prijzen, garanties, schaarste- of besparingsclaims toegevoegd. De campagne is niet hervat en de bestaande TBT-container/accountscope is niet aangepast.
 
 ## 6. Lokale QA
 
@@ -103,20 +111,26 @@ Uitgevoerd met de bestaande Node 24-omgeving en lockfile:
 | `git diff --check` | PASS |
 | Live homepage en `/offerte/` | HTTP 200 |
 | Live GTM endpoint | HTTP 200; nieuwe Ads-destination en label aanwezig |
-| Echte productie-lead | Niet uitgevoerd, conform veiligheidsinstructie |
+| Gecontroleerde productieprobe | Advies en offerte met lokale API-stubs; Ads-requests onderschept vóór netwerkverzending |
 
 Er is geen nieuwe backend-, database-, SMTP-, Odoo-, authenticatie- of klantgegevenswijziging gedaan.
 
-## 7. Definitief GO/NO-GO
+## 7. QA-incident en begrenzing van het bewijs
 
-**GO — technisch:** nieuwe GTM-container, eventlistener, Consent Mode, Ads-tagconfiguratie, lokale regressies en Hostinger-uitrol zijn aantoonbaar gecontroleerd.
+De eerste eenmalige live probe is afgebroken door een fout in het Playwright-testharnas: een generieke routehandler stond vóór de bedoelde API-stub. Daardoor kon één synthetische adviespayload de live `/api/leads`-route bereiken voordat de veilige probe werd uitgevoerd. De run gebruikte geen echte klantgegevens en geen echte advertentieklikken, maar het is niet volledig vast te stellen of de live intake/mailbox/Odoo-verwerking deze synthetische aanvraag heeft geaccepteerd. Er zijn daarna geen live formulierinzendingen meer gedaan. Dit incident is als releaseblocker voor commerciële vrijgave vastgelegd; de eigenaar moet de downstream-status controleren of het incident intern afhandelen.
 
-**NO-GO — commercieel:** de campagne blijft gepauzeerd. Open voor eigenaarbesluit zijn uitsluitend:
+De veilige herhaalprobes gebruikten één afvangende routehandler, lokale stubs voor configuratie en leadacceptatie en aborteerden Ads-meetverkeer vóór externe verzending. De campagne bleef gedurende deze controles gepauzeerd.
+
+## 8. Definitief GO/NO-GO
+
+**GO — technisch:** nieuwe GTM-container, eventlistener, Consent Mode, dynamische Transaction ID, klikattributie, revoke-gedrag, privacyvriendelijke UTM-verwerking, lokale regressies en Hostinger-uitrol zijn aantoonbaar gecontroleerd.
+
+**NO-GO — commercieel:** de campagne blijft gepauzeerd. Open voor eigenaarbesluit en operationele opvolging zijn:
 
 - expliciete commerciële vrijgave;
-- eigenaarreview van de campagne-assets en eventueel uitschakelen van image/video enhancement als exacte creatieve controle vereist is;
+- controle/afhandeling van het QA-incident uit §7;
 - echte, vrijgegeven campagneverkeer- en conversiedata na activatie;
 - de bestaande onafhankelijke ownerreview voor premiumscore en echte iPhone Safari.
 
-Er is geen blocker in de leadflow of een reden om Odoo, SMTP, formulieren of de TBT-container opnieuw te bouwen. Een succesvolle technische tagtest is geen bewijs van een gewonnen CRM-lead of commerciële performance.
+Er is geen reden om Odoo, SMTP, formulieren of de TBT-container opnieuw te bouwen. Een succesvolle technische tagtest is geen bewijs van een gewonnen CRM-lead of commerciële performance.
 
