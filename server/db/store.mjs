@@ -3,7 +3,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { keyedHash, openLead, parseEncryptionKey, parseHashKey, sealLead } from './crypto.mjs';
 import { assertMigrationChecksum, assertNotificationBudgetStructure } from './schema-check.mjs';
 
-const PRIVACY_VERSION = '2026-11-16';
+const PRIVACY_VERSION = '2026-11-27';
 const KEY_ID = 'v1';
 const utc = millis => new Date(millis).toISOString().slice(0, 23).replace('T', ' ');
 
@@ -19,7 +19,7 @@ export async function assertNotificationBudgetSchema(pool) {
   await assertMigrationChecksum(pool,'004_notification_budget');
 }
 
-export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Date.now }) {
+export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Date.now, salesNotificationEnabled = false }) {
   if (!pool || typeof pool.getConnection !== 'function') throw new Error('A MySQL connection pool is required.');
   const encKey = parseEncryptionKey(encryptionKey);
   const macKey = parseHashKey(hashSecret);
@@ -41,7 +41,6 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
     const existing = await lookupSubmission(keyHash, bodyHash);
     if (existing) return existing;
     const leadId = randomUUID();
-    const notificationId = randomUUID();
     const requestId = 'AURA-' + randomUUID();
     const timestamp = utc(now());
     const encrypted = sealLead(lead, leadId, encKey, KEY_ID);
@@ -63,10 +62,16 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
         'INSERT INTO aura_lead_events (lead_id, event_type, actor_type, occurred_at) VALUES (?, ?, ?, ?)',
         [leadId, 'lead_received', 'visitor', timestamp],
       );
-      await conn.execute(
-        'INSERT INTO aura_notification_outbox (id, lead_id, event_type, delivery_status, next_attempt_at, mail_message_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [notificationId, leadId, 'lead_received', 'pending', timestamp, '<' + requestId + '@hyxi-aura.nl>', timestamp, timestamp],
-      );
+      const notifications = [
+        ['lead_received', `<${requestId}@hyxi-aura.nl>`],
+        ...(salesNotificationEnabled ? [['sales_lead_received', `<${requestId}.sales@hyxi-aura.nl>`]] : []),
+      ];
+      for (const [eventType, messageId] of notifications) {
+        await conn.execute(
+          'INSERT INTO aura_notification_outbox (id, lead_id, event_type, delivery_status, next_attempt_at, mail_message_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [randomUUID(), leadId, eventType, 'pending', timestamp, messageId, timestamp, timestamp],
+        );
+      }
       await conn.commit();
       return { requestId, duplicate: false };
     } catch (error) {
@@ -111,7 +116,7 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
     throw new Error('MySQL retry limit exhausted.');
   }
 
-  async function claimNextNotification({ dailyLimit = 100 } = {}) {
+  async function claimNextNotification({ dailyLimit = 100, includeSales = true } = {}) {
     if (!Number.isInteger(dailyLimit) || dailyLimit < 1 || dailyLimit > 1000) {
       throw new Error('A valid daily SMTP attempt budget is required.');
     }
@@ -133,8 +138,11 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
         await conn.commit();
         return null; // Keep pending/retry_wait and attempts unchanged until tomorrow.
       }
+      const eventTypes = includeSales ? ['lead_received', 'sales_lead_received'] : ['lead_received'];
+      const placeholders = eventTypes.map(() => '?').join(',');
       const [candidates] = await conn.query(
-        "SELECT id FROM aura_notification_outbox WHERE delivery_status IN ('pending','retry_wait') AND next_attempt_at <= UTC_TIMESTAMP(3) ORDER BY next_attempt_at ASC,id ASC LIMIT 1 FOR UPDATE",
+        `SELECT id FROM aura_notification_outbox WHERE delivery_status IN ('pending','retry_wait') AND event_type IN (${placeholders}) AND next_attempt_at <= UTC_TIMESTAMP(3) ORDER BY next_attempt_at ASC,id ASC LIMIT 1 FOR UPDATE`,
+        eventTypes,
       );
       if (!candidates.length) {
         await conn.commit();
@@ -146,7 +154,7 @@ export function createMysqlLeadStore({ pool, encryptionKey, hashSecret, now = Da
         [id],
       );
       const [rows] = await conn.execute(
-        'SELECT o.id,o.attempt_count,o.mail_message_id,l.id AS lead_id,l.request_id,l.encrypted_payload,l.encryption_key_id,l.contact_requested_at FROM aura_notification_outbox o JOIN aura_leads l ON l.id=o.lead_id WHERE o.id=? LIMIT 1',
+        'SELECT o.id,o.event_type,o.attempt_count,o.mail_message_id,l.id AS lead_id,l.request_id,l.encrypted_payload,l.encryption_key_id,l.contact_requested_at FROM aura_notification_outbox o JOIN aura_leads l ON l.id=o.lead_id WHERE o.id=? LIMIT 1',
         [id],
       );
       if (rows.length !== 1) throw new Error('Claimed notification is missing its lead.');

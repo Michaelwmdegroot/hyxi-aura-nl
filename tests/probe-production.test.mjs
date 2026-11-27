@@ -13,7 +13,7 @@ const good = {
   '/site.webmanifest': [200, JSON.stringify({ name: 'HYXI AURA — Thuisbatterij Team', icons: [{sizes:'192x192'}, {sizes:'512x512'}] })],
   '/api/health': [200, JSON.stringify({ok:true,leadEnabled:true})],
   '/api/config': [200, JSON.stringify({leadEnabled:true,csrfToken:'DO-NOT-LOG'})],
-  '/privacy/': [200, 'Privacyverklaring · versie 16 november 2026; versleuteld op in een beveiligde database; Odoo CRM'],
+  '/privacy/': [200, 'Privacyverklaring · versie 27 november 2026; versleuteld op in een beveiligde database; Odoo CRM'],
   '/bronnen/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/bronnen/"><p>Bronnen gecontroleerd op 16 november 2026</p><a class="secondary-presenter" href="/">Thuisbatterij Team</a><p>De HTA2-datasheet vermeldt onterecht HSA2 en 160000 W</p><a href="/kennis/1-fase-of-3-fasen/">Faseuitleg</a>'],
   '/offerte/': [200, '<link rel="canonical" href="https://hyxi-aura.nl/offerte/"><form id="quoteForm"></form>'],
   '/kennis/bat-q7-vs-bat-q9/': [301, ''],
@@ -145,7 +145,7 @@ test('the source-backed one-/three-phase guide is live and in the sitemap',async
   assert.equal(oldMap.ok,false);
 });
 test('public privacy page must name the actual Odoo CRM email-import processor',async()=>{
-  const stale=await probeProduction(mock({...good,'/privacy/':[200,'Privacyverklaring · versie 15 november 2026; versleuteld op in een beveiligde database']}));
+  const stale=await probeProduction(mock({...good,'/privacy/':[200,'Privacyverklaring · versie 26 november 2026; versleuteld op in een beveiligde database']}));
   assert.equal(stale.checks.privacyDeployed,false);
 });
 

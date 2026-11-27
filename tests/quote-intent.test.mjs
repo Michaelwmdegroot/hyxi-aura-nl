@@ -5,7 +5,7 @@ import {buildLeadMail} from '../server/mail.mjs';
 
 const sample={
   fullName:'Fictieve Offerteklant',
-  email:'test@example.test',phone:'0612345678',postcode:'1234AB',
+  email:'test@example.test',phone:'0612345678',city:'Utrecht',postcode:'1234AB',
   consent:true,website:'',
   profile:{solar:'planned',annualUsage:null,goal:'unsure',phase:'unknown',moduleType:9,moduleCount:2},
 };
@@ -32,12 +32,12 @@ test('quote intent and additional wishes are strictly validated without breaking
 test('mail type and project wishes match the stored quote, advice remains unchanged',()=>{
   const quote=validateLead({...sample,intent:'quote',projectDetails:'Met back-up voor specifieke groepen.'}).data;
   const offerMail=buildLeadMail(mailConfig,quote,id,Date.UTC(2026,10,15));
-  assert.match(offerMail.subject,/Nieuwe offerteaanvraag/);
+  assert.equal(offerMail.subject,'Fictieve Offerteklant | Utrecht');
   assert.match(offerMail.text,/Nieuwe HYXI AURA offerteaanvraag/);
   assert.match(offerMail.text,/Met back-up voor specifieke groepen/);
   assert.equal(offerMail.to,'leads@example.test');
   assert.equal(offerMail.messageId,'<'+id+'@hyxi-aura.nl>');
   const adviceMail=buildLeadMail(mailConfig,sample,id,Date.UTC(2026,10,15));
-  assert.match(adviceMail.subject,/Nieuwe adviesaanvraag/);
+  assert.equal(adviceMail.subject,'Fictieve Offerteklant | Utrecht');
   assert.doesNotMatch(adviceMail.text,/Aanvullende wensen/);
 });

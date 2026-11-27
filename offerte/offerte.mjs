@@ -51,6 +51,7 @@ function payload(){
     fullName:String(data.get('fullName')||'').trim(),
     email:String(data.get('email')||'').trim(),
     phone:String(data.get('phone')||'').trim(),
+    city:String(data.get('city')||'').trim(),
     postcode:String(data.get('postcode')||'').trim(),
     consent:$('consent').checked,
     website:String(data.get('website')||''),

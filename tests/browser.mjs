@@ -299,6 +299,7 @@ async function contactJourney(page, fixture, label, phase, count) {
   const nominal = Math.round(9.04 * count * 100) / 100;
   await expect(page.locator('#form-configuration')).toHaveText((phase === 'single' ? '1 fase' : '3 fasen') + ' · ' + (count * 9) + ' kWh');
   await page.locator('#fullName').fill(`Browsercontrole ${label}`);
+  await page.locator('#city').fill('Leiden');
   await page.locator('#postcode').fill('1234 AB');
   await page.locator('#email').fill(`${label}@example.test`);
   await page.locator('#phone').fill('06 1234 5678');
@@ -346,6 +347,7 @@ async function contactJourney(page, fixture, label, phase, count) {
   const submitted = response.request().postDataJSON();
   assert.deepEqual(submitted.profile, { solar: 'planned', annualUsage: 4200, goal: 'backup', phase, moduleType: 9, moduleCount: count, offerPhase: phase });
   assert.equal(submitted.postcode, '1234AB');
+  assert.equal(submitted.city, 'Leiden');
   assert.equal(submitted.consent, true);
   assert.deepEqual(submitted.attribution, { utm_source: 'browser-qa', utm_medium: 'test' });
   const mail = fixture.calls.at(-1);
@@ -596,6 +598,7 @@ try {
   await quotePage.locator('#moduleCount').selectOption('2');
   await quotePage.locator('#projectDetails').fill('Fictieve behoefte: passende installatie beoordelen.');
   await quotePage.locator('#fullName').fill('Fictieve Browserofferte');
+  await quotePage.locator('#city').fill('Utrecht');
   await quotePage.locator('#email').fill('browserofferte@example.test');
   await quotePage.locator('#phone').fill('0612345678');
   await quotePage.locator('#postcode').fill('1234AB');
@@ -619,7 +622,7 @@ try {
   assert.equal(await quotePage.evaluate(() => window.dataLayer.filter(item => item?.event === 'hyxi_lead_success').length), 1,
     'Retrying the same accepted quote reference must remain deduplicated');
   await expect(quotePage.locator('#quoteReceipt')).toHaveText(/^AURA-[a-f0-9-]{36}$/);
-  const sentQuote=live.calls.find(mail=>/Nieuwe offerteaanvraag/.test(mail.subject));
+  const sentQuote=live.calls.find(mail=>/Nieuwe HYXI AURA offerteaanvraag/.test(mail.text));
   assert.ok(sentQuote,'A quote must be sent via the existing API and injected SMTP transport');
   assert.match(sentQuote.text,/Fictieve behoefte: passende installatie beoordelen/);
   assertNoProductionQuote();

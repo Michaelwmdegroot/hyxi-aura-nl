@@ -47,6 +47,7 @@ Voeg in Hostinger de variabelen uit `.env.example` toe. Gebruik de echte mailbox
 | `SMTP_PASS` | Wachtwoord van die mailbox |
 | `SMTP_FROM` | Geautoriseerd afzenderadres zonder naam of haakjes |
 | `LEAD_TO=leads@thuisbatterijteam.nl` | Ontvangstadres van het team; gebruik het werkelijk beheerde adres |
+| `SALES_NOTIFICATION_TO` | Optioneel afzonderlijk intern salesadres voor één notificatie per geaccepteerde aanvraag; laat leeg voor een veilige uitgeschakelde fallback. Het adres moet geldig zijn en mag niet gelijk zijn aan `LEAD_TO`. Stel de werkelijke waarde uitsluitend in Hostinger in. |
 | `SMTP_DAILY_LIMIT=100` | Maximaal aantal verzendpogingen per UTC-dag; in mailmodus per proces, in databasemodus duurzaam gedeeld tussen workers |
 | `LEAD_RATE_LIMIT=6` | Maximaal zes nieuwe aanvragen/pogingen per IP per 15 minuten |
 | `CSRF_SECRET` | Optioneel: willekeurige geheime waarde van minimaal 32 tekens; bij ontbreken ontstaat er één per serverstart |
@@ -71,7 +72,7 @@ Controleer bij een 503 eerst de **Runtime logs** in de Hostinger-websitebeheerom
 5. Koppel het domein en HTTPS. Open `/robots.txt` en `/sitemap.xml`; meld de sitemap aan in Google Search Console wanneer het domein is geverifieerd.
 6. Verwijder de tijdelijke Hostinger-origin uit `ALLOWED_ORIGINS` zodra die niet meer nodig is.
 
-Het formulier toont alleen succes wanneer de SMTP-server het bericht voor het geconfigureerde teamadres accepteert. Dat is een controleerbare overdracht aan de mailserver; ontvangst in de inbox moet tijdens de live controle apart worden vastgesteld. Onvolledige configuratie, afwijzing of een time-out levert een duidelijke foutmelding en directe contactroute op. Een SMTP-transactie wordt na maximaal 25 seconden afgebroken. Bij een onduidelijke verbindingbreuk kan de mail al geaccepteerd zijn: de app bevestigt dan geen succes en verstuurt dezelfde aanvraag gedurende 24 uur niet automatisch opnieuw. De bezoeker krijgt een directe contactroute. Duidelijke afwijzingen vóór aflevering blijven wel opnieuw te proberen.
+Het formulier toont in database-modus succes na de bestaande databasecommit; de CRM-mail en, wanneer `SALES_NOTIFICATION_TO` actief is, de afzonderlijke salesnotificatie worden daarna via de transactionele outbox verwerkt. De twee outbox-events hebben ieder een eigen stabiele Message-ID en kunnen onafhankelijk op SMTP worden geaccepteerd, herhaald of als onzeker worden gemarkeerd. De CRM-mail behoudt de bestaande `leads@`-route; de salesnotificatie wordt nooit naar die CRM-ontvanger omgeleid. In mail-only modus worden de twee berichten sequentieel aangeboden en wordt na acceptatie van het eerste bericht geen automatische volledige retry uitgevoerd als het tweede bericht onzeker faalt. Een SMTP-acceptatie is een controleerbare overdracht aan de mailserver; ontvangst in de inbox moet apart worden vastgesteld. Onvolledige configuratie, afwijzing of een time-out levert een duidelijke foutmelding en directe contactroute op. Een SMTP-transactie wordt na maximaal 25 seconden afgebroken.
 
 ## API-contract
 
@@ -82,6 +83,7 @@ Het formulier toont alleen succes wanneer de SMTP-server het bericht voor het ge
 ```json
 {
   "fullName": "Voorbeeld Bewoner",
+  "city": "Leiden",
   "email": "bewoner@example.test",
   "phone": "0612345678",
   "postcode": "1234 AB",

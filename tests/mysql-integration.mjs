@@ -20,15 +20,16 @@ if (process.env.DB_NAME !== 'aura_ci' || process.env.NODE_ENV !== 'test' || proc
   throw new Error('Database integration tests require isolated CI MySQL database aura_ci.');
 }
 
-const config = loadConfig(process.env);
+const config = loadConfig({ ...process.env, SALES_NOTIFICATION_TO: process.env.SALES_NOTIFICATION_TO || 'sales@example.test' });
 assert.equal(config.dbConfigured, true, 'Test service config is complete');
 assert.equal(config.storageMode, 'database');
 assert.equal(config.leadEnabled, true);
+assert.equal(config.salesNotificationConfigured, true);
 const pool = createLeadPool(config);
 
 const sample = name => ({
   fullName: name, email: 'aura-test@example.test', phone: '0612345678',
-  postcode: '1234AB', consent: true, website: '',
+  city: 'Leiden', postcode: '1234AB', consent: true, website: '',
   profile: {
     solar: 'planned', annualUsage: 4200, goal: 'backup', phase: 'three',
     moduleType: 9, moduleCount: 2,
@@ -102,7 +103,7 @@ try {
   assert.throws(() => parseHashKey('too-short'), /32 bytes/);
 
   const store = createMysqlLeadStore({
-    pool, encryptionKey: config.encryptionKey, hashSecret: config.hashSecret,
+    pool, encryptionKey: config.encryptionKey, hashSecret: config.hashSecret, salesNotificationEnabled: config.salesNotificationConfigured,
   });
   const initial = await store.receive({ lead: sample('Fictional Alpha'), requestKey: randomUUID() });
   assert.match(initial.requestId, /^AURA-[a-f0-9-]{36}$/);
@@ -110,7 +111,7 @@ try {
   assert.equal(await count('aura_leads'), 1);
   assert.equal(await count('aura_submission_keys'), 1);
   assert.equal(await count('aura_lead_events'), 1);
-  assert.equal(await count('aura_notification_outbox'), 1);
+  assert.equal(await count('aura_notification_outbox'), 2);
 
   const [sealed] = await pool.query('SELECT encrypted_payload FROM aura_leads LIMIT 1');
   assert.ok(!sealed[0].encrypted_payload.includes(Buffer.from('Fictional Alpha')));
@@ -118,7 +119,7 @@ try {
   const persistedKey = randomUUID();
   const secondLead = await store.receive({ lead: sample('Fictional Beta'), requestKey: persistedKey });
   const replay = await createMysqlLeadStore({
-    pool, encryptionKey: config.encryptionKey, hashSecret: config.hashSecret,
+    pool, encryptionKey: config.encryptionKey, hashSecret: config.hashSecret, salesNotificationEnabled: config.salesNotificationConfigured,
   }).receive({ lead: sample('Fictional Beta'), requestKey: persistedKey });
   assert.equal(replay.requestId, secondLead.requestId, 'Retry after simulated process restart must not create a lead');
   assert.equal(replay.duplicate, true);
@@ -140,15 +141,20 @@ try {
   const accepted = [];
   const mockMail = { async sendMail(message) {
     accepted.push(message);
-    return { accepted: [config.smtp.to] };
+    return { accepted: [message.to] };
   } };
   const worker = createNotificationWorker({ store, transport: mockMail, config });
-  assert.equal(await worker.flush(8), 3);
-  assert.equal(accepted.length, 3);
+  assert.equal(await worker.flush(8), 6);
+  assert.equal(accepted.length, 6);
   for (const message of accepted) {
-    assert.equal(message.to, 'leads@example.test');
-    assert.match(message.subject, /HYXI AURA/);
-    assert.match(message.text, /Verkende opstelling: 2 × BAT-Q9/);
+    assert.ok(['leads@example.test', 'sales@example.test'].includes(message.to));
+    if (message.to === 'leads@example.test') {
+      assert.equal(message.subject, 'Fictional Alpha | Leiden');
+      assert.match(message.text, /Verkende opstelling: 2 × BAT-Q9/);
+    } else {
+      assert.equal(message.subject, 'Nieuwe HYXI AURA lead | Fictional Alpha | Leiden');
+      assert.match(message.text, /Gekozen HYXI AURA-pakket: 18 kWh/);
+    }
   }
   assert.equal(await worker.flush(8), 0, 'SMTP acceptance must not resend accepted notifications');
   assert.equal((await status(initial.requestId)).delivery_status, 'accepted');
@@ -159,6 +165,7 @@ try {
   // No SUPER privileges, triggers, or production data are required.
   await pool.query('ALTER TABLE aura_notification_outbox ADD CONSTRAINT ci_reject_outbox CHECK (attempt_count > 0)');
   const beforeRollback = await count('aura_leads');
+  const beforeRollbackOutbox = await count('aura_notification_outbox');
   try {
     await assert.rejects(
       () => store.receive({ lead: sample('Fictional Rollback'), requestKey: randomUUID() }),
@@ -168,13 +175,13 @@ try {
     await pool.query('ALTER TABLE aura_notification_outbox DROP CHECK ci_reject_outbox');
   }
   assert.equal(await count('aura_leads'), beforeRollback, 'Lead insert rolled back');
-  assert.equal(await count('aura_notification_outbox'), beforeRollback, 'Outbox insert rolled back');
+  assert.equal(await count('aura_notification_outbox'), beforeRollbackOutbox, 'Outbox insert rolled back');
 
   const willRetry = await store.receive({ lead: sample('Fictional Retry'), requestKey: randomUUID() });
   const rejectOnce = createNotificationWorker({ store, config, transport: {
     async sendMail() { throw Object.assign(new Error('offline before greeting'), { code: 'ECONNREFUSED' }); },
   } });
-  assert.equal(await rejectOnce.flush(8), 1);
+  assert.equal(await rejectOnce.flush(8), 2);
   assert.equal((await status(willRetry.requestId)).delivery_status, 'retry_wait');
   assert.equal((await status(willRetry.requestId)).attempt_count, 1);
   assert.equal(await rejectOnce.flush(8), 0, 'Not retried before backoff expires');
@@ -183,7 +190,7 @@ try {
   const uncertainWorker = createNotificationWorker({ store, config, transport: {
     async sendMail() { throw Object.assign(new Error('connection lost after DATA'), { code: 'ECONNECTION' }); },
   } });
-  assert.equal(await uncertainWorker.flush(8), 1);
+  assert.equal(await uncertainWorker.flush(8), 2);
   assert.equal((await status(ambiguous.requestId)).delivery_status, 'uncertain');
   assert.equal(await uncertainWorker.flush(8), 0, 'Unknown acceptance must never auto-resend');
 
@@ -227,11 +234,11 @@ try {
   assert.equal(openLead(quoteRows[0].encrypted_payload,quoteRows[0].id,key).projectDetails,'Vraag over bestaande omvormer.');
   assert.ok(!quoteRows[0].encrypted_payload.includes(Buffer.from('Vraag over bestaande omvormer.')));
   const quoteMails=[];
-  const quoteWorker=createNotificationWorker({store,config,transport:{async sendMail(mail){quoteMails.push(mail);return {accepted:[config.smtp.to]};}}});
+  const quoteWorker=createNotificationWorker({store,config,transport:{async sendMail(mail){quoteMails.push(mail);return {accepted:[mail.to]};}}});
   await quoteWorker.flush(8);
   const matchingQuoteMails=quoteMails.filter(mail=>mail.messageId === '<'+quoteLead.requestId+'@hyxi-aura.nl>');
   assert.equal(matchingQuoteMails.length,1,'The quote has one matching notification even if other test leads are pending');
-  assert.match(matchingQuoteMails[0].subject,/offerteaanvraag/);
+  assert.equal(matchingQuoteMails[0].subject,'Fictional Quote | Leiden');
   assert.match(matchingQuoteMails[0].text,/Vraag over bestaande omvormer/);
   assert.equal((await status(quoteLead.requestId)).delivery_status,'accepted');
 

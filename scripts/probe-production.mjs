@@ -139,7 +139,7 @@ export async function probeProduction(fetcher = fetch) {
       observed['/site.webmanifest'].content.includes('"192x192"') &&
       observed['/site.webmanifest'].content.includes('"512x512"'),
     privacyDeployed: observed['/privacy/'].status === 200 &&
-      observed['/privacy/'].content.includes('Privacyverklaring · versie 16 november 2026') &&
+      observed['/privacy/'].content.includes('Privacyverklaring · versie 27 november 2026') &&
       observed['/privacy/'].content.includes('Odoo CRM') &&
       observed['/privacy/'].content.includes('versleuteld op in een beveiligde database'),
     // The manufacturer's Preliminary HTA2 errors must be explained publicly.

@@ -79,13 +79,17 @@ export function createAdminOperations({ pool }) {
       "SELECT COUNT(*) AS total FROM aura_notification_outbox WHERE delivery_status IN ('failed','uncertain')",
     );
     const [rows] = await pool.query(
-      "SELECT o.id,l.request_id,o.delivery_status,o.attempt_count,o.last_error_code,o.updated_at,o.next_attempt_at,o.mail_message_id FROM aura_notification_outbox o JOIN aura_leads l ON l.id=o.lead_id WHERE o.delivery_status IN ('failed','uncertain') ORDER BY o.updated_at ASC,o.id ASC LIMIT ? OFFSET ?",
+      "SELECT o.id,l.request_id,o.event_type,o.delivery_status,o.attempt_count,o.last_error_code,o.updated_at,o.next_attempt_at,o.mail_message_id FROM aura_notification_outbox o JOIN aura_leads l ON l.id=o.lead_id WHERE o.delivery_status IN ('failed','uncertain') ORDER BY o.updated_at ASC,o.id ASC LIMIT ? OFFSET ?",
       [20, (page - 1) * 20],
     );
     return {
       total: Number(counts[0].total), page,
       items: rows.map(row => ({
-        id: row.id, requestId: row.request_id, status: row.delivery_status,
+        id: row.id, requestId: row.request_id, eventType: row.event_type,
+        notificationType: row.event_type === 'sales_lead_received' ? 'sales' : 'crm',
+        notificationLabel: row.event_type === 'sales_lead_received' ? 'Salesnotificatie' : 'CRM-mail',
+        mailboxLabel: row.event_type === 'sales_lead_received' ? 'Interne salesmailbox' : 'leads@thuisbatterijteam.nl',
+        status: row.delivery_status,
         attempts: Number(row.attempt_count), errorCode: row.last_error_code,
         updatedAt: iso(row.updated_at), nextAttemptAt: iso(row.next_attempt_at), mailMessageId: row.mail_message_id,
       })),

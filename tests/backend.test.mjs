@@ -10,7 +10,7 @@ import { createApp } from '../server/app.mjs';
 import { loadConfig } from '../server/config.mjs';
 
 const sample = () => ({
-  fullName: 'Test Bewoner', email: 'bewoner@example.test', phone: '0612345678', postcode: '1234 AB', consent: true,
+  fullName: 'Test Bewoner', email: 'bewoner@example.test', phone: '0612345678', city: 'Leiden', postcode: '1234 AB', consent: true,
   profile: { solar: 'yes', annualUsage: 4200, goal: 'solar', phase: 'three', moduleType: 9, moduleCount: 2 },
   attribution: { utm_source: 'test', utm_medium: 'qa', utm_campaign: 'aura' }, website: '',
 });
@@ -63,10 +63,35 @@ test('valid lead is confirmed only after the configured recipient accepts it', a
   assert.equal(f.calls.length, 1);
   assert.equal(f.calls[0].to, 'leads@example.test');
   assert.equal(f.calls[0].replyTo.address, 'bewoner@example.test');
+  assert.equal(f.calls[0].subject, 'Test Bewoner | Leiden');
   assert.match(f.calls[0].text, /Bron: https:\/\/hyxi-aura.nl/);
   assert.match(f.calls[0].text, /Postcode: 1234AB/);
+  assert.match(f.calls[0].text, /Woonplaats: Leiden/);
   assert.match(f.calls[0].text, /17\.2 kWh/);
   assert.doesNotMatch(JSON.stringify(receipt), /bewoner|1234AB|0612345678/);
+});
+
+test('configured sales notification sends once for advice and quote without duplicating the CRM mail', async t => {
+  const f = await fixture(t, {
+    env: { SALES_NOTIFICATION_TO: 'sales@example.test' },
+    sendMail: async mail => ({ accepted: [mail.to] }),
+  });
+  const advice = await f.post(sample());
+  assert.equal(advice.status, 201);
+  assert.equal(f.calls.length, 2);
+  assert.equal(f.calls[0].to, 'leads@example.test');
+  assert.equal(f.calls[0].subject, 'Test Bewoner | Leiden');
+  assert.equal(f.calls[1].to, 'sales@example.test');
+  assert.equal(f.calls[1].subject, 'Nieuwe HYXI AURA lead | Test Bewoner | Leiden');
+  assert.match(f.calls[1].text, /Telefoonnummer: 0612345678/);
+  assert.match(f.calls[1].text, /Gekozen HYXI AURA-pakket: 18 kWh · 3 fasen · 10 kW omvormer · 2 × BAT-Q9/);
+  assert.match(f.calls[1].text, /Volg de aanvraag op via de bestaande Odoo-leadroute/);
+  const quote = await f.post({ ...sample(), intent: 'quote', city: 'Haarlem' });
+  assert.equal(quote.status, 201);
+  assert.equal(f.calls.length, 4);
+  assert.equal(f.calls[2].subject, 'Test Bewoner | Haarlem');
+  assert.equal(f.calls[3].subject, 'Nieuwe HYXI AURA lead | Test Bewoner | Haarlem');
+  assert.equal(new Set(f.calls.map(mail => mail.messageId)).size, 4);
 });
 
 test('same-key concurrent retries and recent duplicate bodies send a single message', async t => {
@@ -135,7 +160,7 @@ test('field validation blocks invalid consent, header injection, unsafe ranges, 
   const f = await fixture(t, { env: { LEAD_RATE_LIMIT: '60' } });
   const bad = [
     { consent: false }, { email: 'bad\r\nBcc:foo@example.test' }, { fullName: 'Jan\r\nBcc: foo@example.test' },
-    { phone: 'letters only' }, { postcode: '0000 XX' }, { source: 'another-site.example' },
+    { phone: 'letters only' }, { city: 'A\r\nB' }, { postcode: '0000 XX' }, { source: 'another-site.example' },
     { profile: { ...sample().profile, moduleCount: 7 } }, { profile: { ...sample().profile, annualUsage: -1 } },
     { profile: { ...sample().profile, moduleType: '9' } }, { attribution: { utm_source: 'x'.repeat(121) } },
   ];

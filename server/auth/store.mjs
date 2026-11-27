@@ -230,7 +230,7 @@ export function createAdminStore({ pool, sessionSecret, leadEncryptionKey }) {
       source:r.source_domain,createdAt:toIso(r.created_at),
       assignedTo:r.assigned_user_id,
       notification:{status:r.delivery_status||'unknown',attempts:Number(r.attempt_count||0),errorCode:r.last_error_code||null},
-      contact:{fullName:lead.fullName,email:lead.email,phone:lead.phone,postcode:lead.postcode},
+      contact:{fullName:lead.fullName,email:lead.email,phone:lead.phone,postcode:lead.postcode,city:lead.city||''},
       profile:lead.profile,attribution:lead.attribution||{},
       projectDetails:typeof lead.projectDetails==='string'?lead.projectDetails:'',
       followUp:normalizeFollowup(lead.followUp),

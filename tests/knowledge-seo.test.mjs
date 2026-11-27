@@ -103,7 +103,7 @@ test('pre-GSC phase comparison is independently useful and excludes suspect manu
   assert.match(source,/onterecht.*HSA2/);
   assert.match(source,/Bronnen gecontroleerd op 16 november 2026/);
   assert.match(privacy,/Odoo CRM/);
-  assert.match(privacy,/versie 16 november 2026/);
+  assert.match(privacy,/versie 27 november 2026/);
 });
 
 test('all standalone pages identify Thuisbatterij Team as the commercial presenter',async()=>{

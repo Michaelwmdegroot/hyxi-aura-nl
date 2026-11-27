@@ -88,6 +88,6 @@ Inzichtelijk bronlog: [Phase 4 SEO-release](PHASE4-SEO-RELEASE-2026-11-16.md). C
 
 **Aanvullende unieke bezoekersvraag:** `/kennis/1-fase-of-3-fasen/` beschrijft het werkelijke verschil tussen de HSA2- en HTA2-productfamilies, aansluit-/PV-/back-upafwegingen, waar de PDF's fouten bevatten en hoe je de juiste installatievraag voorbereidt. Geen landelijke compatibiliteitsclaim, geen verzonnen leverbare modelcodes/prijzen.
 
-**Nieuwe operationele privacytransparantie:** de zakelijke e-mailimport van `leads@thuisbatterijteam.nl` naar Odoo CRM was door de eigenaar voor advies én offerte bevestigd. De privacyverklaring noemt die **werkelijke downstreamkopie** nu expliciet; versie `2026-11-16` wordt voor nieuwe aanvragen samen met de SQL-aanvraagregistratie en de uitgaande teamnotificatie vastgelegd. Geen verandering aan Odoo of SMTP.
+**Nieuwe operationele privacytransparantie:** de zakelijke e-mailimport van `leads@thuisbatterijteam.nl` naar Odoo CRM was door de eigenaar voor advies én offerte bevestigd. De privacyverklaring noemt die **werkelijke downstreamkopie** nu expliciet; versie `2026-11-27` wordt voor nieuwe aanvragen samen met de SQL-aanvraagregistratie en de uitgaande CRM- en salesnotificatie vastgelegd. Geen verandering aan Odoo of SMTP.
 
 Zie [de volledige 8-pagina audit en bronbeoordeling](PRE-GSC-CONTENT-FACT-AUDIT-2026-11-16.md).

@@ -311,7 +311,7 @@ async function loadNotifications(version=refreshVersion){
   for(const item of data.items){
     const card=document.createElement('article');card.className='outbox-item';
     const text=document.createElement('div'),heading=document.createElement('h3');
-    heading.textContent=item.requestId;
+    heading.textContent=item.requestId+' · '+(item.notificationLabel||'CRM-mail');
     const state=document.createElement('div');state.className='outbox-state';
     const attempts=document.createElement('small');attempts.textContent=String(item.attempts)+' verzendpoging(en)';
     state.append(makeBadge(item.status),attempts);
@@ -333,7 +333,7 @@ function openMailReview(item){
   $('resolveConfirmationText').textContent='Ik heb de ontvangende mailbox gecontroleerd.';
   setLoading($('resolveButton'),false);
   fillDetails('mailReviewFields',[
-    ['Aanvraag',item.requestId],['Status',labels[item.status]],['Bericht-ID',item.mailMessageId],
+    ['Aanvraag',item.requestId],['Melding',item.notificationLabel||'CRM-mail'],['Mailbox',item.mailboxLabel||'leads@thuisbatterijteam.nl'],['Status',labels[item.status]],['Bericht-ID',item.mailMessageId],
   ]);
   $('mailDialog').showModal();$('closeMailDialog').focus();
 }
@@ -415,7 +415,7 @@ async function openDetail(requestId){
     currentLead=data.lead;
     const r=currentLead,p=r.profile||{},c=r.contact||{},n=r.notification||{};
     fillDetails('contactFields',[
-      ['Naam',c.fullName],['E-mail',c.email],['Telefoon',c.phone],['Postcode',c.postcode],
+      ['Naam',c.fullName],['E-mail',c.email],['Telefoon',c.phone],['Postcode',c.postcode],['Woonplaats',c.city],
     ]);
     fillDetails('profileFields',[
       ['Zonnepanelen',({yes:'Aanwezig',planned:'Gepland',no:'Niet aanwezig'})[p.solar]],

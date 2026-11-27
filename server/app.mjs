@@ -4,7 +4,7 @@ import { createHmac, randomBytes, randomUUID, timingSafeEqual, createHash } from
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { CONTACT } from './config.mjs';
-import { buildLeadMail, recipientAccepted, definitelyNotDelivered } from './mail.mjs';
+import { buildNotificationMail, notificationRecipient, recipientAccepted, definitelyNotDelivered } from './mail.mjs';
 import { validateLead } from './validation.mjs';
 import { mountAdminRoutes } from './auth/routes.mjs';
 
@@ -259,18 +259,25 @@ export function createApp({ config, transport = null, leadStore = null, notifica
     const entry = { fingerprint, requestId, expires: time + 24 * HOUR, receipt: null, promise: null, uncertain: false };
     // Persist only a hash + receipt in memory; personal data is not logged or saved to disk.
     entry.promise = (async () => {
+      let acceptedCount = 0;
       try {
-        const result = await transport.sendMail({
-          ...buildLeadMail(config, lead, requestId, time),
-          signal: AbortSignal.timeout(sendTimeoutMs),
-        });
-        if (!recipientAccepted(result, config.smtp.to)) throw Object.assign(new Error('SMTP recipient not accepted'), { code: 'EENVELOPE' });
+        const eventTypes = ['lead_received', ...(config.salesNotificationConfigured ? ['sales_lead_received'] : [])];
+        for (const eventType of eventTypes) {
+          const mail = buildNotificationMail(config, lead, requestId, time, eventType);
+          const result = await transport.sendMail({ ...mail, signal: AbortSignal.timeout(sendTimeoutMs) });
+          if (!recipientAccepted(result, notificationRecipient(config, eventType))) {
+            throw Object.assign(new Error('SMTP recipient not accepted'), { code: 'EENVELOPE' });
+          }
+          acceptedCount++;
+        }
         entry.receipt = { ok: true, requestId };
         recentDeliveries.set(fingerprint, { receipt: entry.receipt, expires: now() + 10 * 60 * 1000 });
         return entry.receipt;
       } catch (error) {
         // Intentionally omit SMTP error messages and all applicant data from application logs.
-        entry.uncertain = !definitelyNotDelivered(error);
+        // Once one message in the sequence has been accepted, never retry the
+        // whole sequence automatically: doing so could duplicate the CRM mail.
+        entry.uncertain = acceptedCount > 0 || !definitelyNotDelivered(error);
         if (entry.uncertain) recentDeliveries.set(fingerprint, { receipt: null, uncertain: true, expires: now() + 24 * HOUR });
         return null;
       }

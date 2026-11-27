@@ -35,6 +35,7 @@ if (!existsSync(resolve(distDir, 'index.html'))) {
             pool: leadPool,
             encryptionKey: config.encryptionKey,
             hashSecret: config.hashSecret,
+            salesNotificationEnabled: config.salesNotificationConfigured,
           });
         } catch {
           // A database failure disables the form but NOT the public homepage.

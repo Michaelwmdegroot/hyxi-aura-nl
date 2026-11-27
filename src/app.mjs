@@ -303,6 +303,7 @@ function payload() {
   return {
     fullName: String(data.get('fullName') || '').trim(), email: String(data.get('email') || '').trim(),
     phone: String(data.get('phone') || '').trim(), postcode: String(data.get('postcode') || '').replace(/\s/g, '').toUpperCase(),
+    city: String(data.get('city') || '').trim(),
     consent: data.get('consent') === 'on', website: String(data.get('website') || ''),
     profile: { solar: data.get('solar'), annualUsage: data.get('annualUsage') ? Number(data.get('annualUsage')) : null,
       goal: data.get('goal'), phase: data.get('phase'), moduleType: 9, moduleCount: chosen.count, offerPhase: chosen.phase }, attribution,
@@ -356,7 +357,7 @@ form.addEventListener('submit', async event => {
       }
       showError(result?.message || 'Je aanvraag is nog niet bevestigd. Probeer het opnieuw of neem rechtstreeks contact op met Thuisbatterij Team.', true);
       if (result?.fields) {
-        const first = Object.keys(result.fields).find(name => ['fullName', 'email', 'phone', 'postcode', 'consent'].includes(name));
+      const first = Object.keys(result.fields).find(name => ['fullName', 'city', 'email', 'phone', 'postcode', 'consent'].includes(name));
         if (first) { const field = $(`#${first}`); field.setAttribute('aria-invalid', 'true'); field.setAttribute('aria-describedby', 'form-error'); field.focus(); }
       }
       return;

@@ -41,6 +41,10 @@ export function loadConfig(env = process.env) {
     to: String(env.LEAD_TO || 'leads@thuisbatterijteam.nl').trim(),
   };
   const email = /^[^\s<>@\r\n]+@[^\s<>@\r\n]+\.[^\s<>@\r\n]+$/;
+  const salesNotificationTo = String(env.SALES_NOTIFICATION_TO || '').trim();
+  if (salesNotificationTo && (!email.test(salesNotificationTo) || salesNotificationTo.toLowerCase() === smtp.to.toLowerCase())) {
+    throw new Error('SALES_NOTIFICATION_TO must be a separate valid recipient from LEAD_TO.');
+  }
   const smtpConfigured = Boolean(smtp.host && smtp.user && smtp.pass && email.test(smtp.from) && email.test(smtp.to));
   const storageMode = String(env.LEAD_STORAGE_MODE || 'mail').trim();
   if (!['mail', 'database'].includes(storageMode)) {
@@ -75,6 +79,8 @@ export function loadConfig(env = process.env) {
     allowedOrigins,
     smtp,
     smtpConfigured,
+    salesNotificationTo,
+    salesNotificationConfigured: Boolean(salesNotificationTo),
     storageMode,
     db,
     dbConfigured,

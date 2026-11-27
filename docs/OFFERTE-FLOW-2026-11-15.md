@@ -4,11 +4,11 @@
 
 Publieke route **/offerte/** met eigen SEO-zoekintentie en canonical, toegankelijk formulier, responsieve premium vormgeving en links vanaf de bestaande productervaring. Geen account, geen 2FA, geen voorgerekende prijs of verzonnen opbrengst.
 
-De pagina vraagt alleen relevante informatie: woning- en zonnepanelensituatie, globale verbruikswaarde (optioneel), doel, gewenste modules, projecttoelichting (optioneel), naam, contactgegevens, postcode en **expliciete contacttoestemming**. Er zijn geen analytics-/advertentiecookies, browseropslag, automatische foto-upload of externe formulieren.
+De pagina vraagt alleen relevante informatie: woning- en zonnepanelensituatie, globale verbruikswaarde (optioneel), doel, gewenste modules, projecttoelichting (optioneel), naam, woonplaats, contactgegevens, postcode en **expliciete contacttoestemming**. Er zijn geen analytics-/advertentiecookies, browseropslag, automatische foto-upload of externe formulieren.
 
 Een succesvolle offerte gaat via **exact dezelfde productie-API /api/leads** als advies: CSRF-cookie, Origin, rate limit, honeypot, servervalidatie, idempotency-key, AES-256-GCM-opslag en transactionele outbox. De optionele intentie `quote` verandert de bestaande adviesroute niet: ontbreken van deze intentie blijft `advice`. Geen migratie, nieuwe credentials of aparte mailverbinding.
 
-Het SQL-dossier heeft `request_type='quote'`. De interne melding krijgt onderwerp `[HYXI AURA] Nieuwe offerteaanvraag AURA-...` en bevat de optionele projectwensen. In Beheer verschijnt de markering 'Offerte'; geautoriseerde medewerkers zien de toelichting in het versleutelde dossier. Het formulier toont het unieke ID pas **na** geldige API-ontvangst. Bij een fout blijft de invoer beschikbaar met een telefoon/e-mailfallback; er volgt geen valse bevestiging.
+Het SQL-dossier heeft `request_type='quote'`. De CRM-mail gebruikt voor nieuwe aanvragen exact `Klantnaam | Woonplaats` als onderwerp en bevat de optionele projectwensen. Een afzonderlijke interne salesnotificatie vermeldt daarnaast de gekozen pakketkeuze en aanvraagreferentie. In Beheer verschijnt de markering 'Offerte'; geautoriseerde medewerkers zien de toelichting in het versleutelde dossier. Het formulier toont het unieke ID pas **na** geldige API-ontvangst. Bij een fout blijft de invoer beschikbaar met een telefoon/e-mailfallback; er volgt geen valse bevestiging.
 
 ## Productbeleid
 

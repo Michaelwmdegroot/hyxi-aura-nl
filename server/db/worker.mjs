@@ -1,4 +1,4 @@
-import { buildLeadMail, definitelyNotDelivered, recipientAccepted } from '../mail.mjs';
+import { buildNotificationMail, definitelyNotDelivered, notificationRecipient, recipientAccepted } from '../mail.mjs';
 
 const DELAY_SECONDS = [30, 120, 600, 1800];
 
@@ -14,19 +14,25 @@ export function createNotificationWorker({ store, transport, config, sendTimeout
     const recovered = await store.recoverStaleClaims();
     if (recovered) console.warn('HYXI AURA outbox has interrupted deliveries requiring review:', recovered);
     while (handled < maxItems) {
-      const row = await store.claimNextNotification({ dailyLimit: config.dailyLimit });
+      const row = await store.claimNextNotification({ dailyLimit: config.dailyLimit, includeSales: config.salesNotificationConfigured });
       if (!row) break;
       handled++;
       try {
         const lead = store.decodeNotification(row);
         const occurred = new Date(row.contact_requested_at).getTime();
-        const mail = buildLeadMail(config, lead, row.request_id, Number.isFinite(occurred) ? occurred : Date.now());
+        const mail = buildNotificationMail(config, lead, row.request_id, Number.isFinite(occurred) ? occurred : Date.now(), row.event_type);
         mail.messageId = row.mail_message_id;
+        const recipient = notificationRecipient(config, row.event_type);
+        if (!recipient || (row.event_type === 'sales_lead_received' && !config.salesNotificationConfigured)) {
+          const error = new Error('Notification recipient is not configured.');
+          error.code = row.event_type === 'sales_lead_received' ? 'SALES_DISABLED' : 'EENVELOPE';
+          throw error;
+        }
         const result = await transport.sendMail({
           ...mail,
           signal: AbortSignal.timeout(sendTimeoutMs),
         });
-        if (!recipientAccepted(result, config.smtp.to)) {
+        if (!recipientAccepted(result, recipient)) {
           const error = new Error('Recipient was rejected.');
           error.code = 'EENVELOPE';
           throw error;
